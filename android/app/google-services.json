@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "235827840040",
+    "project_id": "mathscool-73be7",
+    "storage_bucket": "mathscool-73be7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:235827840040:android:9d65b4cd432a7cd335a11d",
+        "android_client_info": {
+          "package_name": "com.example.mathscool"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBG8v_DqPgkO9BiOylLm4NIFw1lzz35poI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

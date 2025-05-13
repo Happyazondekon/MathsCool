@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/screens/level_selection.dart';
 import 'package:mathscool/screens/profile_screen.dart';
 import 'package:mathscool/utils/colors.dart';
@@ -12,7 +11,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<AppUser?>(context);
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -54,6 +52,7 @@ class HomeScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
+                // Première section avec le logo et le bouton profil
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -81,7 +80,8 @@ class HomeScreen extends StatelessWidget {
                       InkWell(
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) =>  ProfileScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const ProfileScreen()),
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(8),
@@ -106,6 +106,24 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
+                // Message de bienvenue juste en dessous de la première section
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(top: 16, bottom: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  color: Colors.transparent,
+                  child: Center(
+                    child: Text(
+                      'Bonjour CoolKid 👋',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+
                 Expanded(
                   child: Center(
                     child: SingleChildScrollView(
@@ -119,38 +137,15 @@ class HomeScreen extends StatelessWidget {
                             margin: const EdgeInsets.only(bottom: 30),
                             decoration: BoxDecoration(
                               image: const DecorationImage(
-                                image: AssetImage('assets/images/math_kids.png'),
+                                image: AssetImage(
+                                    'assets/images/math_kids.png'),
                                 fit: BoxFit.contain,
                               ),
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
 
-                          if (user != null)
-                            Container(
-                              margin: const EdgeInsets.only(bottom: 30),
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              child: Text(
-                                'Bonjour ${user.displayName ?? user.email} ! 👋',
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            ),
-
+                          // Bouton "Commencer à apprendre"
                           Container(
                             width: size.width * 0.7,
                             height: 60,
@@ -174,7 +169,9 @@ class HomeScreen extends StatelessWidget {
                                 onTap: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const LevelSelectionScreen()),
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                        const LevelSelectionScreen()),
                                   );
                                 },
                                 child: Center(
@@ -190,12 +187,27 @@ class HomeScreen extends StatelessWidget {
                                         ),
                                       ),
                                       SizedBox(width: 8),
-                                      Icon(Icons.play_circle_fill, color: Colors.white),
+                                      Icon(Icons.play_circle_fill,
+                                          color: Colors.white),
                                     ],
                                   ),
                                 ),
                               ),
                             ),
+                          ),
+
+                          // Cartes pour différents écrans
+                          _buildNavigationCard(
+                            context,
+                            'Choisir un Niveau',
+                            Icons.school,
+                            const LevelSelectionScreen(),
+                          ),
+                          _buildNavigationCard(
+                            context,
+                            'Voir le Profil',
+                            Icons.person,
+                            const ProfileScreen(),
                           ),
                         ],
                       ),
@@ -206,6 +218,48 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Carte pour navigation
+  Widget _buildNavigationCard(
+      BuildContext context, String title, IconData icon, Widget screen) {
+    return InkWell(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => screen),
+      ),
+      child: Container(
+        width: double.infinity,
+        height: 80,
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.secondary,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 40, color: Colors.white),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

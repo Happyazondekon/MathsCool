@@ -81,7 +81,7 @@ class HomeScreen extends StatelessWidget {
                       InkWell(
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                          MaterialPageRoute(builder: (context) =>  ProfileScreen()),
                         ),
                         child: Container(
                           padding: const EdgeInsets.all(8),

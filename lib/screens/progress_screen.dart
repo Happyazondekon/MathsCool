@@ -17,33 +17,76 @@ class ProgressScreen extends StatelessWidget {
     };
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ma Progression'),
-        backgroundColor: AppColors.primary,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              ProgressChart(progressData: staticProgressData),
-              const SizedBox(height: 30),
-              const Text(
-                'Mes Badges',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      body: Stack(
+        children: [
+          // Fond dégradé
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [AppColors.primary, Colors.white],
               ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: staticProgressData.entries.map((entry) {
-                  final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
-                  return _buildBadge(entry.key, _getBadgeIcon(entry.key), earned);
-                }).toList(),
-              ),
-            ],
+            ),
           ),
-        ),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        ProgressChart(progressData: staticProgressData),
+                        const SizedBox(height: 30),
+                        const Text(
+                          'Mes Badges',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: staticProgressData.entries.map((entry) {
+                            final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
+                            return _buildBadge(entry.key, _getBadgeIcon(entry.key), earned);
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+          const Expanded(
+            child: Text(
+              'Ma Progression',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(width: 48), // Placeholder for alignment
+        ],
       ),
     );
   }

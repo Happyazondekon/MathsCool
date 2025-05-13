@@ -78,17 +78,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Logo or Illustration
-                      Container(
-                        height: size.height * 0.25,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/login_illustration.png'),
-                            fit: BoxFit.contain,
-                          ),
+                      // Logo de l'application
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.white,
+                        child: CircleAvatar(
+                          radius: 55,
+                          backgroundImage: const AssetImage('assets/images/logo.png'),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 16),
+                      // Phrase de bienvenue
+                      const Text(
+                        'Bienvenue sur MathsCool !',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Connectez-vous pour accéder à votre espace d’apprentissage.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
                       // Email Input
                       TextFormField(
                         controller: _emailController,

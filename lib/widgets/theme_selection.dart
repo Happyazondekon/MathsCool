@@ -40,9 +40,9 @@ class ThemeSelectionScreen extends StatelessWidget {
                 // Illustration globale bien visible
                 Center(
                   child: Container(
-                    height: size.height * 0.25, // Agrandi l'image pour qu'elle soit bien visible
-                    decoration: BoxDecoration(
-                      image: const DecorationImage(
+                    height: size.height * 0.25,
+                    decoration: const BoxDecoration(
+                      image: DecorationImage(
                         image: AssetImage('assets/images/maths.png'),
                         fit: BoxFit.contain,
                       ),
@@ -108,8 +108,16 @@ class ThemeSelectionScreen extends StatelessWidget {
   }
 
   Widget _buildThemeCard(BuildContext context, Map<String, dynamic> theme) {
+    // Liste des thèmes désactivés pour le niveau CI
+    final disabledThemes = ['Multiplication', 'Division', 'Géométrie'];
+
+    // Vérifie si le thème est désactivé pour le niveau CI
+    final isDisabled = level == 'CI' && disabledThemes.contains(theme['name']);
+
     return GestureDetector(
-      onTap: () {
+      onTap: isDisabled
+          ? null // Désactiver l'interaction si le thème est désactivé
+          : () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -122,11 +130,13 @@ class ThemeSelectionScreen extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: theme['color'].withOpacity(0.9),
+          color: isDisabled
+              ? Colors.grey[400] // Couleur grisée pour les thèmes désactivés
+              : theme['color'].withOpacity(0.9),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: theme['color'].withOpacity(0.5),
+              color: theme['color'].withOpacity(isDisabled ? 0.3 : 0.5),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -138,15 +148,15 @@ class ThemeSelectionScreen extends StatelessWidget {
             Icon(
               theme['icon'],
               size: 50,
-              color: Colors.white,
+              color: isDisabled ? Colors.white54 : Colors.white,
             ),
             const SizedBox(height: 10),
             Text(
               theme['name'],
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDisabled ? Colors.white54 : Colors.white,
               ),
               textAlign: TextAlign.center,
             ),

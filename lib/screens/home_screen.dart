@@ -2,9 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/screens/level_selection.dart';
 import 'package:mathscool/screens/profile_screen.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String selectedAvatar = 'assets/avatars/avatar1.png'; // Default avatar
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedAvatar(); // Charger l'avatar sélectionné
+  }
+
+  Future<void> _loadSelectedAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final avatarPath = prefs.getString('selectedAvatar') ?? 'assets/avatars/avatar1.png';
+    setState(() {
+      selectedAvatar = avatarPath;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +101,7 @@ class HomeScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                               builder: (context) => const ProfileScreen()),
-                        ),
+                        ).then((_) => _loadSelectedAvatar()), // Recharger l'avatar après retour du profil
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -93,9 +115,9 @@ class HomeScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.person,
-                            color: AppColors.primary,
+                          child: CircleAvatar(
+                            radius: 20,
+                            backgroundImage: AssetImage(selectedAvatar),
                           ),
                         ),
                       ),

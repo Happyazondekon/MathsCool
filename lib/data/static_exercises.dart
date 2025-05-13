@@ -3,15 +3,15 @@ import '../models/exercise_model.dart';
 final Map<String, Map<String, List<Exercise>>> staticExercises = {
   'CI': {
     'Addition': [
-      Exercise(question: '1 + 1 = ?', options: ['1', '2', '3'], correctAnswer: 1),
+      Exercise(question: '1 + 1 = ?', options: ['2', '1', '3'], correctAnswer: 0),
       Exercise(question: '2 + 3 = ?', options: ['4', '5', '6'], correctAnswer: 1),
       Exercise(question: '4 + 0 = ?', options: ['3', '4', '5'], correctAnswer: 1),
-      Exercise(question: '5 + 1 = ?', options: ['5', '6', '7'], correctAnswer: 2),
-      Exercise(question: '3 + 2 = ?', options: ['4', '5', '6'], correctAnswer: 2),
+      Exercise(question: '5 + 1 = ?', options: ['5', '6', '7'], correctAnswer: 1),
+      Exercise(question: '3 + 2 = ?', options: ['4', '5', '6'], correctAnswer: 1),
     ],
     'Soustraction': [
       Exercise(question: '2 - 1 = ?', options: ['1', '2', '3'], correctAnswer: 0),
-      Exercise(question: '5 - 3 = ?', options: ['1', '2', '3'], correctAnswer: 1),
+      Exercise(question: '5 - 3 = ?', options: ['2', '1', '3'], correctAnswer: 0),
       Exercise(question: '4 - 2 = ?', options: ['1', '2', '3'], correctAnswer: 1),
       Exercise(question: '6 - 1 = ?', options: ['4', '5', '6'], correctAnswer: 1),
       Exercise(question: '3 - 1 = ?', options: ['1', '2', '3'], correctAnswer: 1),
@@ -200,9 +200,9 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '63 x 14 = ?', options: ['881', '882', '883'], correctAnswer: 1),
     ],
     'Division': [
-      Exercise(question: '1440 litres répartis en 12 barils. Combien de litres par baril ?', options: ['119', '120', '121'], correctAnswer: 1),
+      Exercise(question: '1440 litres répartis en 12 barils. Combien de litres par baril ?', options: ['120', '119', '121'], correctAnswer: 0),
       Exercise(question: '256 pages à lire en 8 jours. Combien de pages par jour ?', options: ['31', '32', '33'], correctAnswer: 1),
-      Exercise(question: '735 élèves répartis en 15 classes. Combien par classe ?', options: ['48', '49', '50'], correctAnswer: 1),
+      Exercise(question: '735 élèves répartis en 15 classes. Combien par classe ?', options: ['48', '46', '49'], correctAnswer: 2),
       Exercise(question: '1020 pommes pour 12 paniers. Combien par panier ?', options: ['84', '85', '86'], correctAnswer: 1),
       Exercise(question: '560 stylos pour 10 boîtes. Combien dans chaque boîte ?', options: ['55', '56', '57'], correctAnswer: 1),
     ],

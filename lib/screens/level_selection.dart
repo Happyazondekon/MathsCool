@@ -22,17 +22,17 @@ class LevelSelectionScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Fond avec motif
+          // Fond avec motif mathématique
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.primary,
               image: DecorationImage(
                 image: const AssetImage('assets/images/math_pattern.png'),
                 fit: BoxFit.cover,
-                opacity: 0.05,
+                opacity: 0.5,
                 colorFilter: ColorFilter.mode(
                   AppColors.primary.withOpacity(0.3),
-                  BlendMode.dstIn,
+                  BlendMode.dstATop,
                 ),
               ),
             ),
@@ -139,12 +139,12 @@ class LevelSelectionScreen extends StatelessWidget {
 
   Widget _buildLevelCard(BuildContext context, int index) {
     final List<Color> cardColors = [
-      const Color(0xFFFFE0B2), // Amber light
-      const Color(0xFFBBDEFB), // Blue light
-      const Color(0xFFC8E6C9), // Green light
-      const Color(0xFFF8BBD0), // Pink light
-      const Color(0xFFD1C4E9), // Purple light
-      const Color(0xFFFFCDD2), // Red light
+      const Color(0xFFFFF3E0), // Amber very light
+      const Color(0xFFE3F2FD), // Blue very light
+      const Color(0xFFE8F5E9), // Green very light
+      const Color(0xFFFCE4EC), // Pink very light
+      const Color(0xFFEDE7F6), // Purple very light
+      const Color(0xFFFFEBEE), // Red very light
     ];
 
     final List<Color> textColors = [
@@ -201,7 +201,7 @@ class LevelSelectionScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(icons[index], size: 40, color: textColors[index]),
+              child: Icon(icons[index], size: 50, color: textColors[index]),
             ),
             const SizedBox(height: 16),
             Text(
@@ -219,7 +219,7 @@ class LevelSelectionScreen extends StatelessWidget {
                 descriptions[index],
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   color: textColors[index].withOpacity(0.8),
                 ),
               ),

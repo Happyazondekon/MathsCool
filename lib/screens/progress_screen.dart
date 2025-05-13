@@ -7,6 +7,15 @@ class ProgressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Données statiques pour la progression
+    final Map<String, double> staticProgressData = {
+      'Addition': 0.8,
+      'Soustraction': 0.6,
+      'Multiplication': 0.3,
+      'Division': 0.2,
+      'Géométrie': 0.5,
+    };
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ma Progression'),
@@ -17,7 +26,7 @@ class ProgressScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const ProgressChart(),
+              ProgressChart(progressData: staticProgressData),
               const SizedBox(height: 30),
               const Text(
                 'Mes Badges',
@@ -27,14 +36,10 @@ class ProgressScreen extends StatelessWidget {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: [
-                  _buildBadge('Addition', Icons.add, true),
-                  _buildBadge('Soustraction', Icons.remove, true),
-                  _buildBadge('Multiplication', Icons.close, false),
-                  _buildBadge('Division', Icons.percent, false),
-                  _buildBadge('Géométrie', Icons.shape_line, true),
-                  _buildBadge('Champion', Icons.star, false),
-                ],
+                children: staticProgressData.entries.map((entry) {
+                  final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
+                  return _buildBadge(entry.key, _getBadgeIcon(entry.key), earned);
+                }).toList(),
               ),
             ],
           ),
@@ -65,5 +70,22 @@ class ProgressScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  IconData _getBadgeIcon(String theme) {
+    switch (theme.toLowerCase()) {
+      case 'addition':
+        return Icons.add;
+      case 'soustraction':
+        return Icons.remove;
+      case 'multiplication':
+        return Icons.close;
+      case 'division':
+        return Icons.percent;
+      case 'géométrie':
+        return Icons.square_foot;
+      default:
+        return Icons.star;
+    }
   }
 }

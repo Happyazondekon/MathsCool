@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mathscool/models/exercise_model.dart';
-import 'package:mathscool/services/exercise_service.dart';
-import 'package:mathscool/services/user_service.dart';
-import 'package:provider/provider.dart';
+import 'package:mathscool/data/static_exercises.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -19,80 +17,47 @@ class ExerciseScreen extends StatefulWidget {
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
-  late final Stream<List<Exercise>> _exercisesStream;
+  late final List<Exercise> _exercises;
   int _currentIndex = 0;
   int _score = 0;
 
   @override
   void initState() {
     super.initState();
-    final exerciseService = Provider.of<ExerciseService>(context, listen: false);
-    _exercisesStream = exerciseService.getExercisesByLevel(widget.level);
+    _exercises = staticExercises[widget.level]?[widget.theme] ?? [];
   }
 
-  void _answerQuestion(int selectedIndex, Exercise currentExercise) async {
-    final userService = Provider.of<UserService>(context, listen: false);
-    final isCorrect = selectedIndex == currentExercise.correctAnswer;
+  void _answerQuestion(int selectedIndex) {
+    final isCorrect = selectedIndex == _exercises[_currentIndex].correctAnswer;
 
-    // Mettre à jour la progression
-    await userService.recordExerciseAttempt(
-      level: widget.level,
-      theme: widget.theme,
-      isCorrect: isCorrect,
-    );
-
-    if (mounted) {
-      setState(() {
-        if (isCorrect) _score++;
-      });
-    }
-
-    // Passer à la question suivante
-    if (mounted) {
-      setState(() => _currentIndex++);
-    }
+    setState(() {
+      if (isCorrect) _score++;
+      _currentIndex++;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('${widget.level} - ${widget.theme}')),
-      body: StreamBuilder<List<Exercise>>(
-        stream: _exercisesStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError || !snapshot.hasData) {
-            return const Center(child: Text('Erreur de chargement'));
-          }
-
-          final exercises = snapshot.data!
-              .where((ex) => ex.theme == widget.theme)
-              .toList();
-
-          if (_currentIndex >= exercises.length) {
-            return _buildResultsScreen(exercises.length);
-          }
-
-          return _buildExerciseScreen(exercises[_currentIndex], exercises.length);
-        },
-      ),
+      body: _currentIndex < _exercises.length
+          ? _buildExerciseScreen()
+          : _buildResultsScreen(),
     );
   }
 
-  Widget _buildExerciseScreen(Exercise exercise, int totalExercises) {
+  Widget _buildExerciseScreen() {
+    final exercise = _exercises[_currentIndex];
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
           LinearProgressIndicator(
-            value: (_currentIndex + 1) / totalExercises,
+            value: (_currentIndex + 1) / _exercises.length,
           ),
           const SizedBox(height: 20),
           Text(
-            'Question ${_currentIndex + 1}/$totalExercises',
+            'Question ${_currentIndex + 1}/${_exercises.length}',
             style: const TextStyle(fontSize: 18),
           ),
           const SizedBox(height: 30),
@@ -100,8 +65,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             exercise.question,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          if (exercise.imageUrl != null)
-            Image.network(exercise.imageUrl!),
           const SizedBox(height: 40),
           Expanded(
             child: ListView.builder(
@@ -110,7 +73,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 return Card(
                   child: ListTile(
                     title: Text(exercise.options[index]),
-                    onTap: () => _answerQuestion(index, exercise),
+                    onTap: () => _answerQuestion(index),
                   ),
                 );
               },
@@ -121,7 +84,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  Widget _buildResultsScreen(int totalExercises) {
+  Widget _buildResultsScreen() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -134,7 +97,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Score: $_score / $totalExercises',
+            'Score: $_score / ${_exercises.length}',
             style: const TextStyle(fontSize: 24),
           ),
           const SizedBox(height: 40),

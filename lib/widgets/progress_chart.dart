@@ -2,17 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/utils/colors.dart';
 
 class ProgressChart extends StatelessWidget {
-  const ProgressChart({super.key});
+  final Map<String, double> progressData;
 
-  // Données factices pour l'exemple
-  // En réalité, vous devriez récupérer ces données depuis une base de données
-  final Map<String, double> progressData = const {
-    'Additions': 0.8,
-    'Soustractions': 0.6,
-    'Multiplications': 0.3,
-    'Divisions': 0.2,
-    'Géométrie': 0.5,
-  };
+  const ProgressChart({required this.progressData, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +27,6 @@ class ProgressChart extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Voici comment tu progresses dans les différents thèmes :',
-              style: TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 20),
             ...progressData.entries.map((entry) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -70,48 +57,14 @@ class ProgressChart extends StatelessWidget {
                         _getProgressColor(entry.value),
                       ),
                       minHeight: 12,
-                      borderRadius: BorderRadius.circular(10),
                     ),
                   ],
                 ),
               );
             }).toList(),
-            const SizedBox(height: 10),
-            _buildLegend(),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildLegend() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildLegendItem('0-40%', Colors.red),
-        _buildLegendItem('40-70%', Colors.orange),
-        _buildLegendItem('70-100%', Colors.green),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(String text, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          text,
-          style: const TextStyle(fontSize: 12),
-        ),
-      ],
     );
   }
 

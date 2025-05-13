@@ -7,7 +7,6 @@ import 'package:mathscool/screens/home_screen.dart';
 import 'package:mathscool/auth/screens/login_screen.dart';
 import 'package:mathscool/auth/screens/register_screen.dart';
 import 'package:mathscool/auth/screens/forgot_password_screen.dart';
-import 'package:mathscool/services/exercise_service.dart';
 import 'package:mathscool/services/user_service.dart';
 
 void main() async {
@@ -22,7 +21,6 @@ void main() async {
           initialData: null,
         ),
         Provider(create: (_) => AuthService()),
-        Provider(create: (_) => ExerciseService()),
         Provider(create: (_) => UserService()),
       ],
       child: const MathsCoolApp(),

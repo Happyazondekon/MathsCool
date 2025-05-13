@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
 import 'package:mathscool/auth/screens/login_screen.dart';
+import 'package:mathscool/screens/progress_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -26,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
               await authService.signOut();
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => LoginScreen(onRegisterClicked: () {  }, onForgotPasswordClicked: () {  },)),
+                MaterialPageRoute(builder: (_) => LoginScreen(onRegisterClicked: () {}, onForgotPasswordClicked: () {})),
               );
             },
           ),
@@ -39,7 +40,7 @@ class ProfileScreen extends StatelessWidget {
           children: [
             _buildUserInfo(user),
             const SizedBox(height: 20),
-            _buildProgressSection(),
+            _buildProgressSection(context),
             const SizedBox(height: 20),
             _buildAccountActions(context),
           ],
@@ -85,30 +86,31 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Ma Progression',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ProgressScreen()),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Ma Progression',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            LinearProgressIndicator(
-              value: 0.65, // À remplacer par des données réelles
-              backgroundColor: Colors.grey[200],
-              minHeight: 10,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            const SizedBox(height: 10),
-            const Text('65% des exercices complétés'),
-          ],
+              const SizedBox(height: 10),
+              const Text('Cliquez pour voir votre progression.'),
+            ],
+          ),
         ),
       ),
     );

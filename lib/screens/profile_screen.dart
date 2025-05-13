@@ -65,6 +65,13 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          // Icone de retour
+          IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pop(context); // Retour à l'écran précédent
+            },
+          ),
           const Text(
             'Mon Profil',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),

@@ -7,7 +7,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '2 + 3 = ?', options: ['4', '5', '6'], correctAnswer: 1),
       Exercise(question: '4 + 0 = ?', options: ['3', '4', '5'], correctAnswer: 1),
       Exercise(question: '5 + 1 = ?', options: ['5', '6', '7'], correctAnswer: 2),
-      Exercise(question: '3 + 2 = ?', options: ['4', '5', '6'], correctAnswer: 1),
+      Exercise(question: '3 + 2 = ?', options: ['4', '5', '6'], correctAnswer: 2),
     ],
     'Soustraction': [
       Exercise(question: '2 - 1 = ?', options: ['1', '2', '3'], correctAnswer: 0),

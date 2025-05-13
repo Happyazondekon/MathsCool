@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/screens/level_selection.dart';
 import 'package:mathscool/screens/profile_screen.dart';
 import 'package:mathscool/utils/colors.dart';
-import 'package:provider/provider.dart';
-
-import '../models/user_model.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -114,7 +111,7 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.transparent,
                   child: Center(
                     child: Text(
-                      'Bonjour CoolKid 👋',
+                      'Bonjour MathKid 👋',
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -126,91 +123,73 @@ class HomeScreen extends StatelessWidget {
 
                 Expanded(
                   child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Placeholder pour l'illustration principale
-                          Container(
-                            height: size.height * 0.3,
-                            width: size.width * 0.7,
-                            margin: const EdgeInsets.only(bottom: 30),
-                            decoration: BoxDecoration(
-                              image: const DecorationImage(
-                                image: AssetImage(
-                                    'assets/images/math_kids.png'),
-                                fit: BoxFit.contain,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Image centrée
+                        Image.asset(
+                          'assets/images/home.png',
+                          width: size.width * 0.8,
+                          height: size.height * 0.4,
+                          fit: BoxFit.contain,
+                        ),
 
-                          // Bouton "Commencer à apprendre"
-                          Container(
-                            width: size.width * 0.7,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppColors.secondary, AppColors.primary],
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.secondary.withOpacity(0.5),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
+                        const SizedBox(height: 20), // Espacement entre l'image et le bouton
+
+                        // Bouton "Commencer à apprendre"
+                        Container(
+                          width: size.width * 0.7,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.secondary,
+                                AppColors.primary
                               ],
                             ),
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(30),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                        const LevelSelectionScreen()),
-                                  );
-                                },
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: const [
-                                      Text(
-                                        'Commencer à apprendre',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.secondary.withOpacity(0.5),
+                                blurRadius: 10,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(30),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                      const LevelSelectionScreen()),
+                                );
+                              },
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Text(
+                                      'Commencer à apprendre',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      SizedBox(width: 8),
-                                      Icon(Icons.play_circle_fill,
-                                          color: Colors.white),
-                                    ],
-                                  ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.play_circle_fill,
+                                        color: Colors.white),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-
-                          // Cartes pour différents écrans
-                          _buildNavigationCard(
-                            context,
-                            'Choisir un Niveau',
-                            Icons.school,
-                            const LevelSelectionScreen(),
-                          ),
-                          _buildNavigationCard(
-                            context,
-                            'Voir le Profil',
-                            Icons.person,
-                            const ProfileScreen(),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -218,48 +197,6 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  // Carte pour navigation
-  Widget _buildNavigationCard(
-      BuildContext context, String title, IconData icon, Widget screen) {
-    return InkWell(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => screen),
-      ),
-      child: Container(
-        width: double.infinity,
-        height: 80,
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.secondary,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, size: 40, color: Colors.white),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

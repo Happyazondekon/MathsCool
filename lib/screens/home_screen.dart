@@ -3,6 +3,7 @@ import 'package:mathscool/screens/level_selection.dart';
 import 'package:mathscool/screens/profile_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lottie/lottie.dart';
 import 'dart:math';
 
 class HomeScreen extends StatefulWidget {
@@ -216,10 +217,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
+                      // Lottie Animation
                       Positioned(
                         top: size.height * 0.05,
-                        child: Image.asset(
-                          'assets/images/home.png',
+                        child: Lottie.asset(
+                          'assets/animations/home.json',
                           width: size.width * 0.8,
                           height: size.height * 0.4,
                           fit: BoxFit.contain,

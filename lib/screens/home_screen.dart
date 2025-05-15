@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/screens/level_selection.dart';
 import 'package:mathscool/screens/profile_screen.dart';
 import 'package:mathscool/utils/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:math';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,15 +16,15 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
-  String selectedAvatar = 'assets/avatars/avatar1.png';
   bool _isPressed = false;
   late AnimationController _backgroundAnimationController;
   late Animation<double> _backgroundAnimation;
+  String? _avatarPath;
+  static const String _avatarPrefsKey = 'user_avatar_path';
 
   @override
   void initState() {
     super.initState();
-    _loadSelectedAvatar();
 
     // Animation pour un effet subtil sur le fond
     _backgroundAnimationController = AnimationController(
@@ -36,6 +38,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         curve: Curves.easeInOut,
       ),
     );
+
+    // Chargement de l'avatar depuis les SharedPreferences
+    _loadSavedAvatar();
+  }
+
+  Future<void> _loadSavedAvatar() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAvatar = prefs.getString(_avatarPrefsKey);
+
+    if (savedAvatar != null && mounted) {
+      setState(() {
+        _avatarPath = savedAvatar;
+      });
+    }
   }
 
   @override
@@ -44,16 +60,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Future<void> _loadSelectedAvatar() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      selectedAvatar = prefs.getString('selectedAvatar') ?? 'assets/avatars/avatar1.png';
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final authService = Provider.of<AuthService>(context);
+    final currentUser = authService.currentUser;
+
+    // Récupération du nom d'utilisateur
+    final displayName = currentUser?.displayName ?? 'MathKid';
+    // Récupération de l'URL de la photo utilisateur
+    final photoURL = currentUser?.photoURL;
 
     return Scaffold(
       body: Stack(
@@ -149,12 +165,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                       ),
 
-                      // Avatar
+                      // Avatar avec gestion de l'image
                       GestureDetector(
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                        ).then((_) => _loadSelectedAvatar()),
+                        ).then((_) => _loadSavedAvatar()), // Recharger l'avatar au retour
                         child: AnimatedScale(
                           scale: _isPressed ? 0.9 : 1.0,
                           duration: const Duration(milliseconds: 200),
@@ -177,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 AppColors.primary.withOpacity(0.1),
                                 Colors.white,
                               ),
-                              child: Image.asset(selectedAvatar),
+                              backgroundImage: _getProfileImage(photoURL),
                             ),
                           ),
                         ),
@@ -186,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ),
                 ),
 
-                // Message de bienvenue
+                // Message de bienvenue avec le nom d'utilisateur
                 AnimatedSlide(
                   offset: const Offset(0, -0.2),
                   duration: const Duration(milliseconds: 800),
@@ -194,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   child: Container(
                     margin: const EdgeInsets.only(top: 10, bottom: 20),
                     child: Text(
-                      'Bonjour MathKid 👋',
+                      'Bonjour $displayName 👋',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -291,6 +307,30 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ],
       ),
     );
+  }
+
+  // Fonction pour déterminer quelle image de profil afficher
+  ImageProvider _getProfileImage(String? photoURL) {
+    // Vérifier d'abord si un avatar a été chargé depuis SharedPreferences
+    if (_avatarPath != null) {
+      // Si c'est un chemin d'asset
+      if (_avatarPath!.startsWith('assets/')) {
+        return AssetImage(_avatarPath!);
+      }
+      // Si c'est une URL (photo uploadée)
+      return NetworkImage(_avatarPath!);
+    }
+    // Si aucun avatar n'est dans les préférences mais que photoURL existe dans le profil Firebase
+    else if (photoURL != null) {
+      // Si c'est un chemin d'asset
+      if (photoURL.startsWith('assets/')) {
+        return AssetImage(photoURL);
+      }
+      // Si c'est une URL
+      return NetworkImage(photoURL);
+    }
+    // Avatar par défaut si rien n'est défini
+    return const AssetImage('assets/avatars/avatar1.png');
   }
 
   Widget _buildFloatingShape(IconData icon, double size) {

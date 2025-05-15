@@ -53,14 +53,23 @@ class AuthService {
   // Inscription avec email/mot de passe
   Future<User?> createUserWithEmailAndPassword({
     required String email,
-    required String password
+    required String password,
+    String? displayName,
   }) async {
     try {
       UserCredential result = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      return result.user;
+
+      // Si un displayName est fourni, on le définit immédiatement
+      if (displayName != null && result.user != null) {
+        await result.user!.updateDisplayName(displayName);
+        // Recharger l'utilisateur pour que les changements soient pris en compte
+        await result.user!.reload();
+      }
+
+      return _auth.currentUser; // Pour obtenir les informations mises à jour
     } on FirebaseAuthException catch (e) {
       throw _authErrorMapper(e);
     } on SocketException catch (e) {
@@ -95,6 +104,36 @@ class AuthService {
     }
   }
 
+  // Mise à jour du profil utilisateur
+  Future<void> updateUserProfile({String? displayName, String? photoURL}) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'Aucun utilisateur connecté';
+      }
+
+      // Préparer les mises à jour
+      if (displayName != null) {
+        await user.updateDisplayName(displayName);
+      }
+
+      if (photoURL != null) {
+        await user.updatePhotoURL(photoURL);
+      }
+
+      // Recharger l'utilisateur pour que les changements soient pris en compte
+      await user.reload();
+
+    } on FirebaseAuthException catch (e) {
+      throw _authErrorMapper(e);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error updating profile: $e');
+      }
+      throw 'Erreur lors de la mise à jour du profil';
+    }
+  }
+
   // Gestion des erreurs
   String _authErrorMapper(FirebaseAuthException e) {
     switch (e.code) {
@@ -114,6 +153,8 @@ class AuthService {
         return 'Mot de passe trop faible';
       case 'network-request-failed':
         return 'Erreur de réseau. Vérifiez votre connexion.';
+      case 'requires-recent-login':
+        return 'Cette opération nécessite une authentification récente. Veuillez vous reconnecter.';
       default:
         return 'Une erreur est survenue : ${e.code}';
     }

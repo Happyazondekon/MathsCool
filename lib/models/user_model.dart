@@ -2,25 +2,44 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class AppUser {
   final String uid;
-  final String email;
+  final String? email;
   final String? displayName;
-  final String userType; // 'child' or 'parent'
-  final DateTime? createdAt;
+  final String? photoURL;
 
   AppUser({
     required this.uid,
-    required this.email,
+    this.email,
     this.displayName,
-    this.userType = 'child',
-    this.createdAt,
+    this.photoURL,
   });
 
-  factory AppUser.fromFirebase(User user) {
+  /// Factory method pour créer un AppUser à partir d'un User Firebase
+  factory AppUser.fromFirebase(User firebaseUser) {
     return AppUser(
-      uid: user.uid,
-      email: user.email ?? '',
-      displayName: user.displayName,
-      createdAt: user.metadata.creationTime,
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+      displayName: firebaseUser.displayName,
+      photoURL: firebaseUser.photoURL,
     );
+  }
+
+  /// Méthode pour copier l'objet avec des modifications
+  AppUser copyWith({
+    String? uid,
+    String? email,
+    String? displayName,
+    String? photoURL,
+  }) {
+    return AppUser(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+      photoURL: photoURL ?? this.photoURL,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'AppUser(uid: $uid, email: $email, displayName: $displayName, photoURL: $photoURL)';
   }
 }

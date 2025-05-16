@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'home_screen.dart';
 
@@ -495,7 +496,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onPressed: () {
                           Navigator.of(context).pop(); // Fermer le popup
                         },
-                        child: const Text('OK'),
+                        child: const Text('Annuler'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          const url = 'https://www.alloprof.qc.ca/fr/eleves/bv/mathematiques';
+                          if (await canLaunch(url)) {
+                            await launch(url); // Ouvrir le lien
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Le lien n\'a pas pu être ouvert !'),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text('Visiter'),
                       ),
                     ],
                   );

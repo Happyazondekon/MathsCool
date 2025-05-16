@@ -3,6 +3,7 @@ import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/widgets/progress_chart.dart';
 import 'package:mathscool/data/static_exercises.dart';
 import 'package:mathscool/data/user_results.dart';
+import 'package:confetti/confetti.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -11,16 +12,32 @@ class ProgressScreen extends StatefulWidget {
   State<ProgressScreen> createState() => _ProgressScreenState();
 }
 
-class _ProgressScreenState extends State<ProgressScreen> {
+class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProviderStateMixin {
   final UserResults _userResults = UserResults();
   Map<String, double> userProgressByCategory = {};
   Map<String, double> userProgressByGrade = {};
   bool showGradeProgress = false; // Pour basculer entre les vues
+  late AnimationController _badgeAnimationController;
+  late ConfettiController _confettiController;
+  double overallProgress = 0.0;
+  bool hasMathKidBadge = false;
 
   @override
   void initState() {
     super.initState();
+    _badgeAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _initializeProgressData();
+  }
+
+  @override
+  void dispose() {
+    _badgeAnimationController.dispose();
+    _confettiController.dispose();
+    super.dispose();
   }
 
   Future<void> _initializeProgressData() async {
@@ -28,7 +45,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
     setState(() {
       userProgressByCategory = _calculateProgressByCategory();
       userProgressByGrade = _calculateProgressByGrade();
+      overallProgress = _calculateOverallProgress();
+      hasMathKidBadge = overallProgress >= 0.8;
+
+      if (hasMathKidBadge) {
+        _badgeAnimationController.forward();
+        _confettiController.play();
+      }
     });
+  }
+
+  double _calculateOverallProgress() {
+    if (userProgressByCategory.isEmpty) return 0.0;
+
+    double totalProgress = userProgressByCategory.values.fold(0.0, (sum, value) => sum + value);
+    return totalProgress / userProgressByCategory.length;
   }
 
   Map<String, double> _calculateProgressByCategory() {
@@ -136,17 +167,27 @@ class _ProgressScreenState extends State<ProgressScreen> {
                               : 'Progression par catégorie',
                         ),
                         const SizedBox(height: 30),
+
+                        // Badge MathKid spécial
+                        if (hasMathKidBadge)
+                          _buildMathKidBadge(),
+
+                        const SizedBox(height: 30),
                         const Text(
                           'Mes Badges',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Comic Sans MS',
+                          ),
                         ),
                         const SizedBox(height: 20),
                         Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
+                          spacing: 15,
+                          runSpacing: 15,
                           children: userProgressByCategory.entries.map((entry) {
                             final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
-                            return _buildBadge(entry.key, _getBadgeIcon(entry.key), earned);
+                            return _buildFancyBadge(entry.key, earned, entry.value);
                           }).toList(),
                         ),
                       ],
@@ -156,58 +197,211 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ],
             ),
           ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              particleDrag: 0.05,
+              emissionFrequency: 0.05,
+              numberOfParticles: 20,
+              gravity: 0.1,
+              shouldLoop: false,
+              colors: const [
+                Colors.green,
+                Colors.blue,
+                Colors.pink,
+                Colors.orange,
+                Colors.purple,
+                Colors.yellow,
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMathKidBadge() {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 0.5, end: 1.0).animate(
+        CurvedAnimation(
+          parent: _badgeAnimationController,
+          curve: Curves.elasticOut,
+        ),
+      ),
+      child: Container(
+        width: 200,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.purple.shade100,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.purple.withOpacity(0.3),
+              blurRadius: 15,
+              spreadRadius: 5,
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Colors.purple.shade300, Colors.purple.shade700],
+                  center: Alignment.topLeft,
+                  radius: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withOpacity(0.5),
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.school,
+                      size: 70,
+                      color: Colors.yellow[400],
+                    ),
+                    const Text(
+                      "80%",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'MATHKID',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple,
+                fontFamily: 'Comic Sans MS',
+                letterSpacing: 1.5,
+              ),
+            ),
+            const SizedBox(height: 5),
+            const Text(
+              'Super Champion!',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.purple,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildToggleButtons() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  showGradeProgress = false;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: !showGradeProgress ? AppColors.primary : Colors.grey[300],
-                foregroundColor: !showGradeProgress ? Colors.white : Colors.black,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    bottomLeft: Radius.circular(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    showGradeProgress = false;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: !showGradeProgress ? AppColors.primary : Colors.white,
+                  foregroundColor: !showGradeProgress ? Colors.white : Colors.grey[700],
+                  elevation: !showGradeProgress ? 2 : 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(25),
+                      bottomLeft: Radius.circular(25),
+                    ),
                   ),
                 ),
-              ),
-              child: const Text('Par catégorie'),
-            ),
-          ),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  showGradeProgress = true;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: showGradeProgress ? AppColors.primary : Colors.grey[300],
-                foregroundColor: showGradeProgress ? Colors.white : Colors.black,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.category,
+                      size: 18,
+                      color: !showGradeProgress ? Colors.white : Colors.grey[700],
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Par catégorie',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
-              child: const Text('Par niveau'),
             ),
-          ),
-        ],
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    showGradeProgress = true;
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: showGradeProgress ? AppColors.primary : Colors.white,
+                  foregroundColor: showGradeProgress ? Colors.white : Colors.grey[700],
+                  elevation: showGradeProgress ? 2 : 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(25),
+                      bottomRight: Radius.circular(25),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.school,
+                      size: 18,
+                      color: showGradeProgress ? Colors.white : Colors.grey[700],
+                    ),
+                    const SizedBox(width: 6),
+                    const Text(
+                      'Par niveau',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -218,6 +412,13 @@ class _ProgressScreenState extends State<ProgressScreen> {
       decoration: BoxDecoration(
         color: AppColors.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -228,7 +429,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
           const Expanded(
             child: Text(
               'Ma Progression',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Comic Sans MS',
+              ),
               textAlign: TextAlign.center,
             ),
           ),
@@ -238,44 +444,163 @@ class _ProgressScreenState extends State<ProgressScreen> {
     );
   }
 
-  Widget _buildBadge(String title, IconData icon, bool earned) {
+  Widget _buildFancyBadge(String title, bool earned, double progress) {
+    final themeColors = _getBadgeThemeColors(title);
+
     return Column(
       children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // Badge extérieur
+            Container(
+              width: 85,
+              height: 85,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: earned
+                    ? RadialGradient(
+                  colors: [themeColors['light']!, themeColors['dark']!],
+                  center: Alignment.topLeft,
+                  radius: 1.5,
+                )
+                    : null,
+                color: earned ? null : Colors.grey[300],
+                boxShadow: earned ? [
+                  BoxShadow(
+                    color: themeColors['dark']!.withOpacity(0.4),
+                    blurRadius: 6,
+                    spreadRadius: 2,
+                  ),
+                ] : null,
+              ),
+            ),
+
+            // Icône du badge
+            Positioned(
+              child: Container(
+                width: 65,
+                height: 65,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: earned ? Colors.white.withOpacity(0.85) : Colors.grey[200],
+                ),
+                child: Center(
+                  child: Icon(
+                    _getBadgeIcon(title),
+                    size: 35,
+                    color: earned ? themeColors['dark'] : Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+
+            // Indicateur de progrès
+            if (progress > 0 && !earned)
+              Positioned(
+                bottom: 5,
+                child: Container(
+                  width: 50,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    color: Colors.white,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      backgroundColor: Colors.transparent,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        _getProgressColor(progress),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // Animation d'étoiles pour badges gagnés
+            if (earned)
+              ...List.generate(3, (index) {
+                return Positioned(
+                  top: index * 25.0,
+                  right: index * 10.0 - 15.0,
+                  child: Icon(
+                    Icons.star,
+                    size: 15,
+                    color: Colors.yellow[700],
+                  ),
+                );
+              }),
+          ],
+        ),
+        const SizedBox(height: 8),
         Container(
-          width: 70,
-          height: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           decoration: BoxDecoration(
-            color: earned ? AppColors.primary : Colors.grey[300],
-            shape: BoxShape.circle,
+            color: earned ? themeColors['light'] : Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, size: 30, color: earned ? Colors.white : Colors.grey),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          title,
-          style: TextStyle(
-            color: earned ? Colors.black : Colors.grey,
-            fontSize: 12,
+          child: Text(
+            title,
+            style: TextStyle(
+              color: earned ? themeColors['dark'] : Colors.grey[700],
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Comic Sans MS',
+            ),
           ),
         ),
+        if (earned)
+          Text(
+            '${(progress * 100).toInt()}%',
+            style: TextStyle(
+              color: themeColors['dark'],
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
       ],
     );
+  }
+
+  Map<String, Color> _getBadgeThemeColors(String theme) {
+    switch (theme.toLowerCase()) {
+      case 'addition':
+        return {'light': Colors.green[300]!, 'dark': Colors.green[700]!};
+      case 'soustraction':
+        return {'light': Colors.red[300]!, 'dark': Colors.red[700]!};
+      case 'multiplication':
+        return {'light': Colors.blue[300]!, 'dark': Colors.blue[700]!};
+      case 'division':
+        return {'light': Colors.orange[300]!, 'dark': Colors.orange[700]!};
+      case 'géométrie':
+        return {'light': Colors.purple[300]!, 'dark': Colors.purple[700]!};
+      default:
+        return {'light': Colors.teal[300]!, 'dark': Colors.teal[700]!};
+    }
   }
 
   IconData _getBadgeIcon(String theme) {
     switch (theme.toLowerCase()) {
       case 'addition':
-        return Icons.add;
+        return Icons.exposure_plus_1;
       case 'soustraction':
-        return Icons.remove;
+        return Icons.exposure_minus_1;
       case 'multiplication':
         return Icons.close;
       case 'division':
-        return Icons.percent;
+        return Icons.functions;
       case 'géométrie':
-        return Icons.square_foot;
+        return Icons.category;
       default:
         return Icons.star;
     }
+  }
+
+  Color _getProgressColor(double value) {
+    if (value < 0.4) return Colors.red[400]!;
+    if (value < 0.7) return Colors.orange[400]!;
+    return Colors.green[400]!;
   }
 }

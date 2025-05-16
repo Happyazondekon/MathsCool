@@ -10,6 +10,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'home_screen.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -476,20 +478,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(Icons.settings, color: AppColors.primary),
-            title: const Text('Paramètres'),
-            onTap: () {},
-          ),
+          // Aide
           ListTile(
             leading: const Icon(Icons.help, color: AppColors.primary),
             title: const Text('Aide'),
-            onTap: () {},
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('Aide'),
+                    content: const Text(
+                        'Vous pouvez réviser vos mathématiques sur le site suivant :\n\nhttps://www.alloprof.qc.ca/fr/eleves/bv/mathematiques'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // Fermer le popup
+                        },
+                        child: const Text('OK'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
+          // Mes Badges
           ListTile(
             leading: const Icon(Icons.star, color: AppColors.primary),
             title: const Text('Mes Badges'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProgressScreen(),
+                ),
+              );
+            },
+          ),
+          // Retourner à l'accueil
+          ListTile(
+            leading: const Icon(Icons.home, color: AppColors.primary),
+            title: const Text('Retourner à l\'accueil'),
+            onTap: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HomeScreen(),
+                ),
+                    (route) => false, // Supprime toutes les routes précédentes
+              );
+            },
           ),
         ],
       ),

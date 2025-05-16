@@ -5,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:mathscool/models/exercise_model.dart';
 import 'package:mathscool/data/static_exercises.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/data/user_results.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -29,10 +30,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   bool _showFeedback = false;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  late final UserResults _userResults;
 
   @override
   void initState() {
     super.initState();
+    _userResults = UserResults();
+    _userResults.loadResults();
     _exercises = staticExercises[widget.level]?[widget.theme] ?? [];
 
     _animationController = AnimationController(
@@ -59,6 +63,10 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   void _answerQuestion(int selectedIndex) {
     final isCorrect = selectedIndex == _exercises[_currentIndex].correctAnswer;
+    _userResults.updateResult(
+        _exercises[_currentIndex].question,
+        selectedIndex
+    );
 
     setState(() {
       if (isCorrect) {

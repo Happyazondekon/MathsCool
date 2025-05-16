@@ -3,8 +3,13 @@ import 'package:mathscool/utils/colors.dart';
 
 class ProgressChart extends StatelessWidget {
   final Map<String, double> progressData;
+  final String title;
 
-  const ProgressChart({required this.progressData, super.key});
+  const ProgressChart({
+    required this.progressData,
+    this.title = 'Ma progression',
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +23,9 @@ class ProgressChart extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Ma progression',
-              style: TextStyle(
+            Text(
+              title,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,

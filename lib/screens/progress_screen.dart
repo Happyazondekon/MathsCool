@@ -1,21 +1,109 @@
 import 'package:flutter/material.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/widgets/progress_chart.dart';
+import 'package:mathscool/data/static_exercises.dart';
+import 'package:mathscool/data/user_results.dart';
 
-class ProgressScreen extends StatelessWidget {
+class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Données statiques pour la progression
-    final Map<String, double> staticProgressData = {
-      'Addition': 0.8,
-      'Soustraction': 0.6,
-      'Multiplication': 0.3,
-      'Division': 0.2,
-      'Géométrie': 0.5,
-    };
+  State<ProgressScreen> createState() => _ProgressScreenState();
+}
 
+class _ProgressScreenState extends State<ProgressScreen> {
+  final UserResults _userResults = UserResults();
+  Map<String, double> userProgressByCategory = {};
+  Map<String, double> userProgressByGrade = {};
+  bool showGradeProgress = false; // Pour basculer entre les vues
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeProgressData();
+  }
+
+  Future<void> _initializeProgressData() async {
+    await _userResults.loadResults(); // Charger les résultats de l'utilisateur
+    setState(() {
+      userProgressByCategory = _calculateProgressByCategory();
+      userProgressByGrade = _calculateProgressByGrade();
+    });
+  }
+
+  Map<String, double> _calculateProgressByCategory() {
+    Map<String, double> progress = {};
+    Map<String, int> totalExercisesByCategory = {};
+    Map<String, int> correctExercisesByCategory = {};
+
+    // Initialiser les compteurs
+    staticExercises.forEach((grade, categories) {
+      categories.forEach((category, exercises) {
+        if (!totalExercisesByCategory.containsKey(category)) {
+          totalExercisesByCategory[category] = 0;
+          correctExercisesByCategory[category] = 0;
+        }
+        totalExercisesByCategory[category] = totalExercisesByCategory[category]! + exercises.length;
+      });
+    });
+
+    // Calculer les réponses correctes
+    staticExercises.forEach((grade, categories) {
+      categories.forEach((category, exercises) {
+        exercises.forEach((exercise) {
+          int? userAnswerIndex = _userResults.getAnswer(exercise.question);
+          if (userAnswerIndex != null && userAnswerIndex == exercise.correctAnswer) {
+            correctExercisesByCategory[category] = correctExercisesByCategory[category]! + 1;
+          }
+        });
+      });
+    });
+
+    // Calculer le pourcentage de progression
+    totalExercisesByCategory.forEach((category, total) {
+      progress[category] = total > 0 ? correctExercisesByCategory[category]! / total : 0.0;
+    });
+
+    return progress;
+  }
+
+  Map<String, double> _calculateProgressByGrade() {
+    Map<String, double> progress = {};
+    Map<String, int> totalExercisesByGrade = {};
+    Map<String, int> correctExercisesByGrade = {};
+
+    // Initialiser les compteurs
+    staticExercises.forEach((grade, categories) {
+      totalExercisesByGrade[grade] = 0;
+      correctExercisesByGrade[grade] = 0;
+
+      categories.forEach((category, exercises) {
+        totalExercisesByGrade[grade] = totalExercisesByGrade[grade]! + exercises.length;
+      });
+    });
+
+    // Calculer les réponses correctes
+    staticExercises.forEach((grade, categories) {
+      categories.forEach((category, exercises) {
+        exercises.forEach((exercise) {
+          int? userAnswerIndex = _userResults.getAnswer(exercise.question);
+          if (userAnswerIndex != null && userAnswerIndex == exercise.correctAnswer) {
+            correctExercisesByGrade[grade] = correctExercisesByGrade[grade]! + 1;
+          }
+        });
+      });
+    });
+
+    // Calculer le pourcentage de progression
+    totalExercisesByGrade.forEach((grade, total) {
+      progress[grade] = total > 0 ? correctExercisesByGrade[grade]! / total : 0.0;
+    });
+
+    return progress;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
@@ -33,12 +121,20 @@ class ProgressScreen extends StatelessWidget {
             child: Column(
               children: [
                 _buildHeader(context),
+                _buildToggleButtons(),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        ProgressChart(progressData: staticProgressData),
+                        ProgressChart(
+                          progressData: showGradeProgress
+                              ? userProgressByGrade
+                              : userProgressByCategory,
+                          title: showGradeProgress
+                              ? 'Progression par niveau'
+                              : 'Progression par catégorie',
+                        ),
                         const SizedBox(height: 30),
                         const Text(
                           'Mes Badges',
@@ -48,7 +144,7 @@ class ProgressScreen extends StatelessWidget {
                         Wrap(
                           spacing: 10,
                           runSpacing: 10,
-                          children: staticProgressData.entries.map((entry) {
+                          children: userProgressByCategory.entries.map((entry) {
                             final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
                             return _buildBadge(entry.key, _getBadgeIcon(entry.key), earned);
                           }).toList(),
@@ -58,6 +154,57 @@ class ProgressScreen extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showGradeProgress = false;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: !showGradeProgress ? AppColors.primary : Colors.grey[300],
+                foregroundColor: !showGradeProgress ? Colors.white : Colors.black,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(20),
+                  ),
+                ),
+              ),
+              child: const Text('Par catégorie'),
+            ),
+          ),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showGradeProgress = true;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: showGradeProgress ? AppColors.primary : Colors.grey[300],
+                foregroundColor: showGradeProgress ? Colors.white : Colors.black,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+              ),
+              child: const Text('Par niveau'),
             ),
           ),
         ],

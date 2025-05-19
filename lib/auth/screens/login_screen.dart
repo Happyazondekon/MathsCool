@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   String? _errorMessage;
 
   Future<void> _login() async {
@@ -42,6 +43,22 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _errorMessage = e.toString());
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authService = context.read<AuthService>();
+      await authService.signInWithGoogle();
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
 
@@ -99,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       const Text(
-                        'Connectez-vous pour accéder à votre espace d’apprentissage.',
+                        'Connectez-vous pour accéder à votre espace d\'apprentissage.',
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white70,
@@ -184,6 +201,57 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text(
                           'Mot de passe oublié ?',
                           style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                child:
+                                Divider(color: Colors.white70, thickness: 1)),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                'OU',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                                child:
+                                Divider(color: Colors.white70, thickness: 1)),
+                          ],
+                        ),
+                      ),
+                      // Google Sign-in Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: _isGoogleLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElevatedButton.icon(
+                          icon: Image.asset(
+                            'assets/images/google_logo.png',
+                            height: 24,
+                          ),
+                          label: const Text(
+                            'Continuer avec Google',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: _signInWithGoogle,
                         ),
                       ),
                       const Divider(height: 40, color: Colors.white),

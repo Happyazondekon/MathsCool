@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:io' show SocketException;
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Stream d'utilisateur transformé en AppUser
   Stream<AppUser?> get userStream {
@@ -21,7 +23,47 @@ class AuthService {
   }
 
   Future<void> signOut() async {
+    // Déconnexion de Google si connecté
+    if (await _googleSignIn.isSignedIn()) {
+      await _googleSignIn.signOut();
+    }
+
+    // Déconnexion Firebase
     await _auth.signOut();
+  }
+
+  // Connexion avec Google
+  Future<User?> signInWithGoogle() async {
+    try {
+      // Déclencher le flux d'authentification
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return null; // L'utilisateur a annulé
+
+      // Obtenir les détails d'authentification
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Créer un credential pour Firebase
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Connexion à Firebase avec le credential
+      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      throw _authErrorMapper(e);
+    } on SocketException catch (e) {
+      if (kDebugMode) {
+        print('Network error: ${e.message}');
+      }
+      throw 'Vérifiez votre connexion internet';
+    } catch (e) {
+      if (kDebugMode) {
+        print('Google sign in error: $e');
+      }
+      throw 'Une erreur est survenue lors de la connexion avec Google';
+    }
   }
 
   // Connexion avec email/mot de passe
@@ -155,6 +197,8 @@ class AuthService {
         return 'Erreur de réseau. Vérifiez votre connexion.';
       case 'requires-recent-login':
         return 'Cette opération nécessite une authentification récente. Veuillez vous reconnecter.';
+      case 'account-exists-with-different-credential':
+        return 'Un compte existe déjà avec cette adresse email mais avec une méthode de connexion différente.';
       default:
         return 'Une erreur est survenue : ${e.code}';
     }

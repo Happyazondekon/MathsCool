@@ -19,6 +19,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   String? _errorMessage;
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
@@ -49,6 +50,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final authService = context.read<AuthService>();
+      await authService.signInWithGoogle();
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -60,8 +77,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       body: Stack(
         children: [
@@ -112,7 +127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
-                      // Username Input (nouveau champ)
+                      // Username Input
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
@@ -229,6 +244,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               color: Colors.white,
                             ),
                           ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                                child:
+                                Divider(color: Colors.white70, thickness: 1)),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                'OU',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                                child:
+                                Divider(color: Colors.white70, thickness: 1)),
+                          ],
+                        ),
+                      ),
+                      // Google Sign-in Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: _isGoogleLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElevatedButton.icon(
+                          icon: Image.asset(
+                            'assets/images/google_logo.png',
+                            height: 24,
+                          ),
+                          label: const Text(
+                            'Continuer avec Google',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                          ),
+                          onPressed: _signInWithGoogle,
                         ),
                       ),
                       const SizedBox(height: 16),

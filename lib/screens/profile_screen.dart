@@ -42,11 +42,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (savedAvatar != null && mounted) {
       setState(() {
-        // Vérifier si c'est un avatar prédéfini ou une URL
         if (savedAvatar.startsWith('assets/')) {
           _selectedAvatar = savedAvatar;
         } else if (savedAvatar.isNotEmpty) {
-          // C'est une URL d'image stockée sur Firebase
           _selectedAvatar = savedAvatar;
         }
       });
@@ -70,48 +68,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       String? photoURL;
 
-      // Traitement de l'image s'il y en a une
       if (_imageFile != null) {
-        // Upload de l'image vers Firebase Storage
         photoURL = await _uploadImage(_imageFile!);
-        // Sauvegarde de l'URL dans les SharedPreferences
         await prefs.setString(_avatarPrefsKey, photoURL);
       } else if (_selectedAvatar != null) {
         photoURL = _selectedAvatar;
         await prefs.setString(_avatarPrefsKey, _selectedAvatar!);
       }
 
-      // Mises à jour séparées pour éviter les problèmes de casting
-      // 1. Mise à jour du displayName si nécessaire
       if (_displayNameController.text.trim().isNotEmpty) {
         try {
           await authService.updateUserProfile(
             displayName: _displayNameController.text.trim(),
-            photoURL: null,  // Important: ne pas mélanger les mises à jour
+            photoURL: null,
           );
         } catch (e) {
           if (kDebugMode) {
             print('Error updating display name: $e');
           }
-          // Continue malgré l'erreur pour essayer d'au moins mettre à jour la photo
         }
       }
 
-      // 2. Mise à jour de la photo si nécessaire
       if (photoURL != null) {
         try {
           await authService.updateUserProfile(
-            displayName: null,  // Important: ne pas mélanger les mises à jour
+            displayName: null,
             photoURL: photoURL,
           );
         } catch (e) {
           if (kDebugMode) {
             print('Error updating photo URL: $e');
           }
-          // Continue même si la mise à jour de la photo échoue
         }
       }
-
 
       setState(() {
         _isEditing = false;
@@ -121,11 +110,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text('Profil mis à jour avec succès')),
       );
 
-      // Retour à l'écran d'accueil après l'enregistrement
       if (Navigator.canPop(context)) {
         Navigator.pop(context);
       }
-
     } catch (e) {
       if (kDebugMode) {
         print('Global profile update error: $e');
@@ -148,8 +135,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final ref = FirebaseStorage.instance.ref().child(destination);
       final uploadTask = ref.putFile(imageFile);
       final snapshot = await uploadTask.whenComplete(() {});
-
-      // Récupérer et retourner l'URL de l'image
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
       if (kDebugMode) {
@@ -165,7 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
-        _selectedAvatar = null; // Réinitialiser l'avatar s'il y en avait un
+        _selectedAvatar = null;
       });
     }
   }
@@ -173,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _selectAvatar(String avatarPath) {
     setState(() {
       _selectedAvatar = avatarPath;
-      _imageFile = null; // Réinitialiser l'image s'il y en avait une
+      _imageFile = null;
     });
   }
 
@@ -202,7 +187,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-              // Option pour sélectionner depuis la galerie
               GestureDetector(
                 onTap: () {
                   Navigator.pop(context);
@@ -231,19 +215,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authService = Provider.of<AuthService>(context);
     final currentUser = authService.currentUser;
 
-    // Si l'utilisateur n'est pas connecté, on affiche un écran de chargement
     if (currentUser == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    // Récupération des données de l'utilisateur
     final displayName = currentUser.displayName ?? 'MathKid';
     final email = currentUser.email ?? '';
     final photoURL = currentUser.photoURL;
 
-    // Initialiser le contrôleur avec le displayName actuel si ce n'est pas encore fait
     if (_displayNameController.text.isEmpty && !_isEditing) {
       _displayNameController.text = displayName;
     }
@@ -251,7 +232,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -309,8 +289,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
-              await authService.signOut();
-              Navigator.pop(context);
+              try {
+                await authService.signOut(); // Déconnexion
+                Navigator.pop(context); // Retourne au wrapper
+              } catch (e) {
+                if (kDebugMode) {
+                  print('Error during logout: $e');
+                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erreur lors de la déconnexion : $e')),
+                );
+              }
             },
           ),
         ],
@@ -319,28 +308,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildUserInfo(String displayName, String email, String? photoURL) {
-    // Déterminer l'image à afficher
     ImageProvider? profileImage;
 
     if (_imageFile != null) {
-      // Image sélectionnée depuis la galerie
       profileImage = FileImage(_imageFile!);
     } else if (_selectedAvatar != null) {
-      // Avatar prédéfini sélectionné
       if (_selectedAvatar!.startsWith('assets/')) {
         profileImage = AssetImage(_selectedAvatar!);
       } else {
         profileImage = NetworkImage(_selectedAvatar!);
       }
     } else if (photoURL != null) {
-      // Image de profil existante sur Firebase
       if (photoURL.startsWith('assets/')) {
         profileImage = AssetImage(photoURL);
       } else {
         profileImage = NetworkImage(photoURL);
       }
     } else {
-      // Avatar par défaut
       profileImage = const AssetImage('assets/avatars/avatar1.png');
     }
 
@@ -353,7 +337,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           key: _formKey,
           child: Column(
             children: [
-              // Photo de profil avec bouton pour modifier
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -380,8 +363,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-
-              // Nom d'utilisateur (éditable)
               if (_isEditing)
                 TextFormField(
                   controller: _displayNameController,
@@ -401,18 +382,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   displayName,
                   style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-
               const SizedBox(height: 5),
-
-              // Email (non éditable)
               Text(
                 email,
                 style: const TextStyle(color: Colors.grey),
               ),
-
               const SizedBox(height: 15),
-
-              // Bouton d'édition ou de sauvegarde
               if (_isEditing)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -479,7 +454,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
-          // Aide
           ListTile(
             leading: const Icon(Icons.help, color: AppColors.primary),
             title: const Text('Aide'),
@@ -494,7 +468,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     actions: [
                       TextButton(
                         onPressed: () {
-                          Navigator.of(context).pop(); // Fermer le popup
+                          Navigator.of(context).pop();
                         },
                         child: const Text('Annuler'),
                       ),
@@ -502,7 +476,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onPressed: () async {
                           const url = 'https://www.alloprof.qc.ca/fr/eleves/bv/mathematiques';
                           if (await canLaunch(url)) {
-                            await launch(url); // Ouvrir le lien
+                            await launch(url);
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -519,7 +493,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
-          // Mes Badges
           ListTile(
             leading: const Icon(Icons.star, color: AppColors.primary),
             title: const Text('Mes Badges'),
@@ -532,7 +505,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
-          // Retourner à l'accueil
           ListTile(
             leading: const Icon(Icons.home, color: AppColors.primary),
             title: const Text('Retourner à l\'accueil'),
@@ -542,7 +514,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(
                   builder: (context) => const HomeScreen(),
                 ),
-                    (route) => false, // Supprime toutes les routes précédentes
+                    (route) => false,
               );
             },
           ),

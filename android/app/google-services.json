@@ -12,7 +12,20 @@
           "package_name": "com.example.mathscool"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "235827840040-ke636qdtjf9t6e778mk6jfoup27vqh6t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mathscool",
+            "certificate_hash": "6345a3087dcfe455751f607afa03f8fb5adb1777"
+          }
+        },
+        {
+          "client_id": "235827840040-lj22uonuidka1anvt50ntieb6tod0f5e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBG8v_DqPgkO9BiOylLm4NIFw1lzz35poI"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "235827840040-lj22uonuidka1anvt50ntieb6tod0f5e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

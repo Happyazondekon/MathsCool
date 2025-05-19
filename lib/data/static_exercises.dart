@@ -56,7 +56,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '15 - 6 = ?', options: ['9', '10', '8', '11'], correctAnswer: 0),
       Exercise(question: '7 - 2 = ?', options: ['5', '4', '6', '3'], correctAnswer: 0),
       Exercise(question: '10 - 8 = ?', options: ['2', '3', '1', '4'], correctAnswer: 0),
-      Exercise(question: '6 - 1 = ?', options: ['4', '3', '5', '6'], correctAnswer: 1),
+      Exercise(question: '6 - 1 = ?', options: ['4', '3', '5', '6'], correctAnswer: 2),
       Exercise(question: '13 - 8 = ?', options: ['6', '4', '5', '7'], correctAnswer: 2),
     ],
     'Multiplication': [
@@ -77,7 +77,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '6 ÷ 2 = ?', options: ['2', '3', '4', '6'], correctAnswer: 1),
       Exercise(question: '8 ÷ 4 = ?', options: ['2', '1', '3', '4'], correctAnswer: 0),
       Exercise(question: '9 ÷ 3 = ?', options: ['2', '3', '4', '5'], correctAnswer: 1),
-      Exercise(question: '12 ÷ 6 = ?', options: ['1', '2', '3', '4'], correctAnswer: 0),
+      Exercise(question: '12 ÷ 6 = ?', options: ['1', '2', '3', '4'], correctAnswer: 1),
       Exercise(question: '10 ÷ 5 = ?', options: ['2', '3', '1', '4'], correctAnswer: 0),
       Exercise(question: '15 ÷ 3 = ?', options: ['5', '4', '6', '3'], correctAnswer: 0),
       Exercise(question: '16 ÷ 4 = ?', options: ['2', '3', '4', '5'], correctAnswer: 2),
@@ -125,7 +125,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '17 - 6 = ?', options: ['10', '13', '12', '11'], correctAnswer: 3),
       Exercise(question: '22 - 13 = ?', options: ['8', '9', '10', '11'], correctAnswer: 1),
       Exercise(question: '30 - 15 = ?', options: ['13', '14', '15', '16'], correctAnswer: 2),
-      Exercise(question: '25 - 9 = ?', options: ['14', '15', '16', '17'], correctAnswer: 0),
+      Exercise(question: '25 - 9 = ?', options: ['14', '15', '16', '17'], correctAnswer: 2),
       Exercise(question: '17 - 8 = ?', options: ['8', '9', '10', '11'], correctAnswer: 1),
       Exercise(question: '23 - 16 = ?', options: ['7', '6', '8', '9'], correctAnswer: 0),
       Exercise(question: '14 - 5 = ?', options: ['8', '10', '9', '11'], correctAnswer: 2),
@@ -150,7 +150,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '18 ÷ 3 = ?', options: ['5', '6', '7', '8'], correctAnswer: 1),
       Exercise(question: '20 ÷ 5 = ?', options: ['3', '5', '4', '6'], correctAnswer: 2),
       Exercise(question: '24 ÷ 6 = ?', options: ['4', '3', '5', '6'], correctAnswer: 0 ),
-      Exercise(question: '36 ÷ 4 = ?', options: ['8', '9', '10', '11'], correctAnswer: 0),
+      Exercise(question: '36 ÷ 4 = ?', options: ['8', '9', '10', '11'], correctAnswer: 1),
       Exercise(question: '21 ÷ 7 = ?', options: ['2', '5', '4', '3'], correctAnswer: 3),
       Exercise(question: '12 ÷ 6 = ?', options: ['1', '2', '3', '4'], correctAnswer: 1),
       Exercise(question: '28 ÷ 7 = ?', options: ['3', '6', '5', '4'], correctAnswer: 3),
@@ -178,7 +178,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
     'Addition': [
       Exercise(
           question: 'Sarah a 125 billes et en gagne 87 à la récréation. Combien de billes a-t-elle maintenant ?',
-          options: ['213', '210', '212', '211'],
+          options: ['212', '210', '213', '211'],
           correctAnswer: 0
       ),
       Exercise(
@@ -198,7 +198,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une école a 198 élèves en CE2 et 207 en CM1. Combien d\'élèves y a-t-il dans ces deux classes ?',
-      options: ['407', '408', '405', '406'],
+      options: ['407', '408', '406', '405'],
           correctAnswer: 3
       ),
       Exercise(
@@ -228,7 +228,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une classe récolte 77 euros et une autre 33 euros. Quelle somme ont-ils en tout ?',
-          options: ['112', '109', '111', '110'],
+          options: ['112', '109', '110', '111'],
           correctAnswer: 2
       ),
       Exercise(
@@ -265,13 +265,13 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une boîte contient 200 billes. On en retire 65. Combien de billes restent dans la boîte ?',
-          options: ['135', '137', '136', '134'],
+          options: ['134', '137', '136', '135'],
           correctAnswer: 3
       ),
       Exercise(
           question: '178 élèves sont inscrits à la cantine, 99 sont absents. Combien mangent à la cantine ?',
           options: ['81', '80', '79', '78'],
-          correctAnswer: 3
+          correctAnswer: 2
       ),
       Exercise(
           question: '141 enfants partent en sortie, 70 restent à l\'école. Combien sont partis en sortie ?',
@@ -286,7 +286,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(
           question: '175 oiseaux étaient sur un fil, 75 s\'envolent. Combien restent-ils ?',
       options: ['101', '100', '102', '99'],
-          correctAnswer: 3
+          correctAnswer: 1
       ),
       Exercise(
           question: '210 stylos, 101 sont utilisés. Combien restent-ils neufs ?',
@@ -296,7 +296,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(
           question: '325 élèves étaient prévus, 123 sont absents. Combien d\'élèves sont présents ?',
       options: ['203', '202', '201', '200'],
-          correctAnswer: 3
+          correctAnswer: 1
       ),
     ],
     'Multiplication': [
@@ -322,7 +322,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '6 sacs contiennent chacun 9 billes. Combien de billes au total ?',
-          options: ['56', '53', '54', '55'],
+          options: ['54', '53', '56', '55'],
           correctAnswer: 0
       ),
       Exercise(
@@ -352,7 +352,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '2 boîtes de 12 crayons. Combien de crayons ?',
-          options: ['25', '23', '24', '26'],
+          options: ['24', '23', '25', '26'],
           correctAnswer: 0
       ),
       Exercise(
@@ -374,7 +374,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '80 pommes sont mises en 10 paniers. Combien par panier ?',
-          options: ['9', '7', '8', '10'],
+          options: ['8', '7', '9', '10'],
           correctAnswer: 0
       ),
       Exercise(
@@ -442,7 +442,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
     'Addition': [
       Exercise(
           question: 'Un club sportif compte 1 235 filles et 1 897 garçons. Quel est le nombre total d\'adhérents ?',
-      options: ['3134', '3133', '3132', '3135'],
+      options: ['3134', '3133', '3135', '3132'],
           correctAnswer: 3
       ),
       Exercise(
@@ -462,7 +462,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Le bus 1 transporte 245 passagers, le bus 2 en transporte 198. Combien de passagers ont voyagé ?',
-          options: ['443', '442', '444', '445'],
+          options: ['444', '442', '443', '445'],
           correctAnswer: 2
       ),
       Exercise(
@@ -524,7 +524,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Thomas avait 870 billes. Il en a donné 395. Combien lui reste-t-il ?',
-          options: ['475', '474', '476', '477'],
+          options: ['476', '474', '475', '477'],
           correctAnswer: 2
       ),
       Exercise(
@@ -544,7 +544,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une classe de 1 800 élèves, 900 partent en vacances. Combien restent-ils ?',
-          options: ['900', '899', '901', '902'],
+          options: ['902', '899', '901', '900'],
           correctAnswer: 3
       ),
       Exercise(
@@ -554,7 +554,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un commerçant a 650 euros, il dépense 321 euros. Combien lui reste-t-il ?',
-          options: ['329', '328', '330', '331'],
+          options: ['330', '328', '329', '331'],
           correctAnswer: 2
       ),
       Exercise(
@@ -571,7 +571,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '28 élèves sont répartis en 6 groupes de même taille. Combien d\'élèves par groupe ?',
-          options: ['168', '167', '169', '170'],
+          options: ['170', '167', '169', '168'],
           correctAnswer: 3
       ),
       Exercise(
@@ -601,12 +601,12 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '24 équipes participent à 7 matchs chacune. Combien de matchs au total ?',
-          options: ['168', '167', '169', '170'],
+          options: ['169', '167', '168', '170'],
           correctAnswer: 2
       ),
       Exercise(
           question: '13 boîtes contiennent 11 billes chacune. Combien de billes en tout ?',
-          options: ['141', '142', '143', '144'],
+          options: ['141', '143', '142', '144'],
           correctAnswer: 1
       ),
       Exercise(
@@ -616,7 +616,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '21 voitures transportent 5 enfants chacune. Combien d\'enfants ?',
-          options: ['105', '104', '106', '107'],
+          options: ['106', '104', '105', '107'],
           correctAnswer: 2
       ),
       Exercise(
@@ -648,7 +648,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '210 stylos en 7 boîtes. Combien dans chaque boîte ?',
-          options: ['30', '29', '31', '32'],
+          options: ['33', '29', '31', '30'],
           correctAnswer: 3
       ),
       Exercise(
@@ -658,7 +658,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '90 bonbons à partager entre 5 enfants. Combien chacun ?',
-          options: ['18', '17', '19', '20'],
+          options: ['20', '17', '19', '18'],
           correctAnswer: 3
       ),
       Exercise(
@@ -759,7 +759,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une société vend 8 465 articles en janvier et 9 874 en février. Combien d\'articles au total ?',
-          options: ['18339', '18337', '18336', '18338'],
+          options: ['18338', '18337', '18336', '18339'],
           correctAnswer: 3
       ),
       Exercise(
@@ -784,7 +784,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Paul possède 1 999 billes et en gagne 2 001. Combien possède-t-il maintenant ?',
-          options: ['4001', '4002', '4000', '3999'],
+          options: ['4000', '4002', '4003', '3999'],
           correctAnswer: 0
       ),
       Exercise(
@@ -804,7 +804,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un supermarché vend 9 800 produits puis 201 autres. Total vendu ?',
-          options: ['10003', '10001', '10002', '10000'],
+          options: ['10003', '10000', '10002', '10001'],
           correctAnswer: 3
       ),
       Exercise(
@@ -826,7 +826,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Julien avait 3 200 €. Il dépense 1 789 €. Combien lui reste-t-il ?',
-          options: ['1412', '1410', '1413', '1411'],
+          options: ['1412', '1411', '1413', '1410'],
           correctAnswer: 1
       ),
       Exercise(
@@ -866,12 +866,12 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un entrepôt a 8 000 colis, 1 234 partent. Combien reste-t-il ?',
-          options: ['6768', '6767', '6765', '6766'],
+          options: ['6768', '6767', '6766', '6765'],
           correctAnswer: 2
       ),
       Exercise(
           question: 'L\'école avait 14 000 élèves, 4 567 changent d\'établissement. Combien restent-ils ?',
-          options: ['9435', '9434', '9436', '9433'],
+          options: ['9435', '9433', '9436', '9434'],
           correctAnswer: 1
       ),
     ],

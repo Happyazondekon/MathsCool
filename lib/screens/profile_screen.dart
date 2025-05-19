@@ -10,6 +10,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'home_screen.dart';
 
@@ -454,6 +455,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Column(
         children: [
+          // Aide
           ListTile(
             leading: const Icon(Icons.help, color: AppColors.primary),
             title: const Text('Aide'),
@@ -464,7 +466,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return AlertDialog(
                     title: const Text('Aide'),
                     content: const Text(
-                        'Vous pouvez réviser vos mathématiques sur le site suivant :\n\nhttps://www.alloprof.qc.ca/fr/eleves/bv/mathematiques'),
+                        'Tu peux réviser tes mathématiques dans ce Manuel pour être un MathKid'),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -474,15 +476,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          const url = 'https://www.alloprof.qc.ca/fr/eleves/bv/mathematiques';
-                          if (await canLaunch(url)) {
-                            await launch(url);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Le lien n\'a pas pu être ouvert !'),
+                          const url =
+                              'https://drive.google.com/file/d/1sVq6QMqMdpwkc7l0Hx1NIwvskMgdgT2N/view?usp=sharing';
+
+                          try {
+                            final Uri uri = Uri.parse(url);
+
+                            // Utiliser inAppWebView pour s'assurer que le lien s'ouvre
+                            bool launched = await launchUrl(
+                              uri,
+                              mode: LaunchMode.inAppWebView,
+                              webViewConfiguration: const WebViewConfiguration(
+                                enableJavaScript: true,
+                                enableDomStorage: true,
                               ),
                             );
+
+                            if (!launched && context.mounted) {
+                              // Essayer avec platformDefault si inAppWebView échoue
+                              launched = await launchUrl(
+                                uri,
+                                mode: LaunchMode.platformDefault,
+                              );
+
+                              if (!launched && context.mounted) {
+                                // Si les deux méthodes échouent, montrer une erreur
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Impossible d\'ouvrir le lien. Vérifiez votre connexion ou essayez avec un autre navigateur.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Erreur lors de l\'ouverture du lien: ${e.toString()}',
+                                  ),
+                                ),
+                              );
+                            }
                           }
                         },
                         child: const Text('Visiter'),
@@ -493,6 +530,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
+          // Mes Badges
           ListTile(
             leading: const Icon(Icons.star, color: AppColors.primary),
             title: const Text('Mes Badges'),
@@ -505,6 +543,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
+          // Retourner à l'accueil
           ListTile(
             leading: const Icon(Icons.home, color: AppColors.primary),
             title: const Text('Retourner à l\'accueil'),

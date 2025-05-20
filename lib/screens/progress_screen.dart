@@ -4,6 +4,8 @@ import 'package:mathscool/widgets/progress_chart.dart';
 import 'package:mathscool/data/static_exercises.dart';
 import 'package:mathscool/data/user_results.dart';
 import 'package:confetti/confetti.dart';
+// Importer notre nouveau widget
+import '../widgets/theme_badge.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -182,12 +184,22 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                           ),
                         ),
                         const SizedBox(height: 20),
+
+                        // Nouvelle implémentation avec le widget ThemeBadge
                         Wrap(
                           spacing: 15,
                           runSpacing: 15,
                           children: userProgressByCategory.entries.map((entry) {
                             final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
-                            return _buildFancyBadge(entry.key, earned, entry.value);
+                            return ThemeBadge(
+                              theme: entry.key,
+                              level: entry.key == 'Addition' ? '1' :
+                              entry.key == 'Soustraction' ? '2' :
+                              entry.key == 'Multiplication' ? '3' :
+                              entry.key == 'Division' ? '4' : '',  // Niveau optionnel
+                              obtained: earned,
+                              progress: entry.value,
+                            );
                           }).toList(),
                         ),
                       ],
@@ -442,165 +454,5 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
         ],
       ),
     );
-  }
-
-  Widget _buildFancyBadge(String title, bool earned, double progress) {
-    final themeColors = _getBadgeThemeColors(title);
-
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            // Badge extérieur
-            Container(
-              width: 85,
-              height: 85,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: earned
-                    ? RadialGradient(
-                  colors: [themeColors['light']!, themeColors['dark']!],
-                  center: Alignment.topLeft,
-                  radius: 1.5,
-                )
-                    : null,
-                color: earned ? null : Colors.grey[300],
-                boxShadow: earned ? [
-                  BoxShadow(
-                    color: themeColors['dark']!.withOpacity(0.4),
-                    blurRadius: 6,
-                    spreadRadius: 2,
-                  ),
-                ] : null,
-              ),
-            ),
-
-            // Icône du badge
-            Positioned(
-              child: Container(
-                width: 65,
-                height: 65,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: earned ? Colors.white.withOpacity(0.85) : Colors.grey[200],
-                ),
-                child: Center(
-                  child: Icon(
-                    _getBadgeIcon(title),
-                    size: 35,
-                    color: earned ? themeColors['dark'] : Colors.grey,
-                  ),
-                ),
-              ),
-            ),
-
-            // Indicateur de progrès
-            if (progress > 0 && !earned)
-              Positioned(
-                bottom: 5,
-                child: Container(
-                  width: 50,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: Colors.white,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _getProgressColor(progress),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-            // Animation d'étoiles pour badges gagnés
-            if (earned)
-              ...List.generate(3, (index) {
-                return Positioned(
-                  top: index * 25.0,
-                  right: index * 10.0 - 15.0,
-                  child: Icon(
-                    Icons.star,
-                    size: 15,
-                    color: Colors.yellow[700],
-                  ),
-                );
-              }),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-          decoration: BoxDecoration(
-            color: earned ? themeColors['light'] : Colors.grey[300],
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: earned ? themeColors['dark'] : Colors.grey[700],
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Comic Sans MS',
-            ),
-          ),
-        ),
-        if (earned)
-          Text(
-            '${(progress * 100).toInt()}%',
-            style: TextStyle(
-              color: themeColors['dark'],
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-      ],
-    );
-  }
-
-  Map<String, Color> _getBadgeThemeColors(String theme) {
-    switch (theme.toLowerCase()) {
-      case 'addition':
-        return {'light': Colors.green[300]!, 'dark': Colors.green[700]!};
-      case 'soustraction':
-        return {'light': Colors.red[300]!, 'dark': Colors.red[700]!};
-      case 'multiplication':
-        return {'light': Colors.blue[300]!, 'dark': Colors.blue[700]!};
-      case 'division':
-        return {'light': Colors.orange[300]!, 'dark': Colors.orange[700]!};
-      case 'géométrie':
-        return {'light': Colors.purple[300]!, 'dark': Colors.purple[700]!};
-      default:
-        return {'light': Colors.teal[300]!, 'dark': Colors.teal[700]!};
-    }
-  }
-
-  IconData _getBadgeIcon(String theme) {
-    switch (theme.toLowerCase()) {
-      case 'addition':
-        return Icons.exposure_plus_1;
-      case 'soustraction':
-        return Icons.exposure_minus_1;
-      case 'multiplication':
-        return Icons.close;
-      case 'division':
-        return Icons.functions;
-      case 'géométrie':
-        return Icons.category;
-      default:
-        return Icons.star;
-    }
-  }
-
-  Color _getProgressColor(double value) {
-    if (value < 0.4) return Colors.red[400]!;
-    if (value < 0.7) return Colors.orange[400]!;
-    return Colors.green[400]!;
   }
 }

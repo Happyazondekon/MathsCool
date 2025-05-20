@@ -207,27 +207,27 @@ class ProgressChart extends StatelessWidget {
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
       case 'addition':
-        return Icons.exposure_plus_1;
+        return Icons.add_circle_outline; // Symbole d'addition plus clair
       case 'soustraction':
-        return Icons.exposure_minus_1;
+        return Icons.remove_circle_outline; // Symbole de soustraction plus clair
       case 'multiplication':
-        return Icons.close;
+        return Icons.clear; // Symbole de multiplication (X)
       case 'division':
-        return Icons.functions;
+        return Icons.shape_line; // Symbole qui évoque une division (barre oblique)
       case 'géométrie':
-        return Icons.category;
+        return Icons.square_foot; // Icône liée aux formes géométriques
       case 'cp':
-        return Icons.looks_one;
+        return Icons.filter_1; // Chiffre 1 bien visible
       case 'ce1':
-        return Icons.looks_two;
+        return Icons.filter_2; // Chiffre 2 bien visible
       case 'ce2':
-        return Icons.looks_3;
+        return Icons.filter_3; // Chiffre 3 bien visible
       case 'cm1':
-        return Icons.looks_4;
+        return Icons.filter_4; // Chiffre 4 bien visible
       case 'cm2':
-        return Icons.looks_5;
+        return Icons.filter_5; // Chiffre 5 bien visible
       default:
-        return Icons.star;
+        return Icons.school; // Icône scolaire par défaut
     }
   }
 }

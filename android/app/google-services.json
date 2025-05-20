@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "235827840040-g55m2n88tdtvs79sg08ll80db9rea3gg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mathscool",
+            "certificate_hash": "d7716e8f5843b62839ca6a819562df6213e59a89"
+          }
+        },
+        {
           "client_id": "235827840040-ke636qdtjf9t6e778mk6jfoup27vqh6t.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

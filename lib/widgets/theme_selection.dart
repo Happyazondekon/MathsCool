@@ -8,7 +8,11 @@ class ThemeSelectionScreen extends StatelessWidget {
     {'name': 'Addition', 'icon': Icons.add, 'color': Colors.orange},
     {'name': 'Soustraction', 'icon': Icons.remove, 'color': Colors.blue},
     {'name': 'Multiplication', 'icon': Icons.close, 'color': Colors.green},
-    {'name': 'Division', 'icon': Icons.percent, 'color': Colors.purple},
+    {
+      'name': 'Division',
+      'symbolText': '÷',  // Symbole de division
+      'color': Colors.purple
+    },
     {'name': 'Géométrie', 'icon': Icons.square_foot, 'color': Colors.red},
   ];
 
@@ -145,11 +149,23 @@ class ThemeSelectionScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              theme['icon'],
-              size: 50,
-              color: isDisabled ? Colors.white54 : Colors.white,
-            ),
+            // Si on a un texte de symbole spécial (comme ÷), on l'utilise
+            if (theme.containsKey('symbolText'))
+              Text(
+                theme['symbolText'],
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  color: isDisabled ? Colors.white54 : Colors.white,
+                ),
+              )
+            // Sinon on utilise l'icône standard
+            else
+              Icon(
+                theme['icon'],
+                size: 50,
+                color: isDisabled ? Colors.white54 : Colors.white,
+              ),
             const SizedBox(height: 10),
             Text(
               theme['name'],

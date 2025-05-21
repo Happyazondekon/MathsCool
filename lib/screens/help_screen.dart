@@ -53,22 +53,21 @@ class HelpScreen extends StatelessWidget {
         color: AppColors.primary,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
-      child: const Column(
+      child: Stack( // Utilisation d'un Stack pour superposer la flèche et le texte
+        alignment: Alignment.center, // Centre le texte
         children: [
-          Text(
-            'Centre d\'aide',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'ComicNeue',
+          Align( // Aligne la flèche à gauche
+            alignment: Alignment.centerLeft,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            'Comment peut-on t\'aider aujourd\'hui ?',
+          const Text( // Texte centré
+            'Centre d\'aide',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
               fontFamily: 'ComicNeue',
             ),

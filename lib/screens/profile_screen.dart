@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:mathscool/screens/help_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/screens/progress_screen.dart';
@@ -460,73 +461,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             leading: const Icon(Icons.help, color: AppColors.primary),
             title: const Text('Aide'),
             onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('Aide'),
-                    content: const Text(
-                        'Tu peux réviser tes mathématiques dans ce Manuel pour être un MathKid'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('Annuler'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          const url =
-                              'https://drive.google.com/file/d/1sVq6QMqMdpwkc7l0Hx1NIwvskMgdgT2N/view?usp=sharing';
-
-                          try {
-                            final Uri uri = Uri.parse(url);
-
-                            // Utiliser inAppWebView pour s'assurer que le lien s'ouvre
-                            bool launched = await launchUrl(
-                              uri,
-                              mode: LaunchMode.inAppWebView,
-                              webViewConfiguration: const WebViewConfiguration(
-                                enableJavaScript: true,
-                                enableDomStorage: true,
-                              ),
-                            );
-
-                            if (!launched && context.mounted) {
-                              // Essayer avec platformDefault si inAppWebView échoue
-                              launched = await launchUrl(
-                                uri,
-                                mode: LaunchMode.platformDefault,
-                              );
-
-                              if (!launched && context.mounted) {
-                                // Si les deux méthodes échouent, montrer une erreur
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Impossible d\'ouvrir le lien. Vérifiez votre connexion ou essayez avec un autre navigateur.',
-                                    ),
-                                  ),
-                                );
-                              }
-                            }
-                          } catch (e) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Erreur lors de l\'ouverture du lien: ${e.toString()}',
-                                  ),
-                                ),
-                              );
-                            }
-                          }
-                        },
-                        child: const Text('Visiter'),
-                      ),
-                    ],
-                  );
-                },
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const HelpScreen(),
+                ),
               );
             },
           ),

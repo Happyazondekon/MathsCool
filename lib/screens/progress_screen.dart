@@ -175,33 +175,9 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                           _buildMathKidBadge(),
 
                         const SizedBox(height: 30),
-                        const Text(
-                          'Mes Badges',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Comic Sans MS',
-                          ),
-                        ),
-                        const SizedBox(height: 20),
 
-                        // Nouvelle implémentation avec le widget ThemeBadge
-                        Wrap(
-                          spacing: 15,
-                          runSpacing: 15,
-                          children: userProgressByCategory.entries.map((entry) {
-                            final earned = entry.value >= 0.7; // Badge obtenu si progression >= 70%
-                            return ThemeBadge(
-                              theme: entry.key,
-                              level: entry.key == 'Addition' ? '1' :
-                              entry.key == 'Soustraction' ? '2' :
-                              entry.key == 'Multiplication' ? '3' :
-                              entry.key == 'Division' ? '4' : '',  // Niveau optionnel
-                              obtained: earned,
-                              progress: entry.value,
-                            );
-                          }).toList(),
-                        ),
+                        // Section des badges avec un cadre attrayant
+                        _buildBadgesSection(),
                       ],
                     ),
                   ),
@@ -226,6 +202,309 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 Colors.orange,
                 Colors.purple,
                 Colors.yellow,
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadgesSection() {
+    int earnedBadges = userProgressByCategory.values.where((progress) => progress >= 0.7).length;
+    int totalBadges = userProgressByCategory.length;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.indigo.shade50,
+            Colors.purple.shade50,
+            Colors.pink.shade50,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.3),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withOpacity(0.15),
+            blurRadius: 15,
+            spreadRadius: 2,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.white.withOpacity(0.8),
+            blurRadius: 10,
+            spreadRadius: -5,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Motifs décoratifs en arrière-plan
+          Positioned(
+            top: -10,
+            right: -10,
+            child: Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.yellow.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -5,
+            left: -5,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+          // Étoiles décoratives
+          Positioned(
+            top: 20,
+            left: 30,
+            child: Icon(
+              Icons.star,
+              color: Colors.yellow.withOpacity(0.3),
+              size: 16,
+            ),
+          ),
+          Positioned(
+            top: 40,
+            right: 40,
+            child: Icon(
+              Icons.star,
+              color: Colors.orange.withOpacity(0.3),
+              size: 12,
+            ),
+          ),
+          Positioned(
+            bottom: 30,
+            right: 60,
+            child: Icon(
+              Icons.star,
+              color: Colors.pink.withOpacity(0.3),
+              size: 14,
+            ),
+          ),
+
+          // Contenu principal
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                // En-tête de la section avec icône et titre
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.secondary,
+                            AppColors.secondary.withOpacity(0.7),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.secondary.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.emoji_events,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Mes Badges',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'ComicNeue',
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        Text(
+                          '$earnedBadges/$totalBadges badges obtenus',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                            fontFamily: 'ComicNeue',
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Barre de progression des badges
+                Container(
+                  height: 12,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final progressWidth = totalBadges > 0
+                          ? constraints.maxWidth * (earnedBadges / totalBadges)
+                          : 0.0;
+
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 12,
+                            width: progressWidth,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.secondary,
+                                  AppColors.accent,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  earnedBadges == totalBadges
+                      ? '🎉 Tous les badges débloqués ! Champion !'
+                      : 'Continue pour débloquer ${totalBadges - earnedBadges} badge${totalBadges - earnedBadges > 1 ? 's' : ''} !',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: earnedBadges == totalBadges ? Colors.green.shade700 : Colors.grey.shade600,
+                    fontFamily: 'ComicNeue',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 24),
+
+                // Grille des badges
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.8),
+                      width: 1,
+                    ),
+                  ),
+                  child: Wrap(
+                    spacing: 20,
+                    runSpacing: 20,
+                    alignment: WrapAlignment.center,
+                    children: userProgressByCategory.entries.map((entry) {
+                      final earned = entry.value >= 0.7;
+                      return TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0.0, end: 1.0),
+                        duration: Duration(milliseconds: 500 + (userProgressByCategory.keys.toList().indexOf(entry.key) * 200)),
+                        curve: Curves.elasticOut,
+                        builder: (context, animationValue, child) {
+                          return Transform.scale(
+                            scale: animationValue,
+                            child: ThemeBadge(
+                              theme: entry.key,
+                              level: entry.key == 'Addition' ? '1' :
+                              entry.key == 'Soustraction' ? '2' :
+                              entry.key == 'Multiplication' ? '3' :
+                              entry.key == 'Division' ? '4' : '5',
+                              obtained: earned,
+                              progress: entry.value,
+                            ),
+                          );
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Message d'encouragement
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.blue.shade100,
+                        Colors.indigo.shade100,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(
+                      color: Colors.blue.shade200,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.lightbulb_outline,
+                        color: Colors.blue.shade600,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          earnedBadges == 0
+                              ? 'Commence à résoudre des exercices pour gagner tes premiers badges !'
+                              : earnedBadges == totalBadges
+                              ? 'Bravo ! Tu es un véritable MathKid ! 🌟'
+                              : 'Super ! Continue comme ça pour débloquer tous les badges !',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.blue.shade700,
+                            fontFamily: 'ComicNeue',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -304,7 +583,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.purple,
-                fontFamily: 'Comic Sans MS',
+                fontFamily: 'ComicNeue',
                 letterSpacing: 1.5,
               ),
             ),
@@ -445,7 +724,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontFamily: 'Comic Sans MS',
+                fontFamily: 'ComicNeue',
               ),
               textAlign: TextAlign.center,
             ),

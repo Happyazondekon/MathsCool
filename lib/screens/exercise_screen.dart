@@ -6,6 +6,7 @@ import 'package:mathscool/models/exercise_model.dart';
 import 'package:mathscool/data/static_exercises.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/data/user_results.dart';
+import 'package:mathscool/screens/help_screen.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -90,6 +91,15 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         });
       });
     });
+  }
+
+  void _goToManual() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HelpScreen(),
+      ),
+    );
   }
 
   @override
@@ -422,7 +432,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     return Container(
       color: Colors.black.withOpacity(0.5),
       child: Center(
-        child: TweenAnimationBuilder<double>( // <- ici c’est corrigé
+        child: TweenAnimationBuilder<double>(
           tween: Tween<double>(begin: 0.0, end: 1.0),
           duration: const Duration(milliseconds: 400),
           curve: Curves.elasticOut,
@@ -485,7 +495,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       ),
     );
   }
-
 
   Widget _buildResultsScreen() {
     final bool isMathKid = _score >= _exercises.length / 2;
@@ -554,11 +563,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 Text(
                   isMathKid
                       ? 'Super! Tu as réussi!'
-                      : 'Révise encore et réessaie!',
+                      : 'N\'hésite pas à consulter notre manuel pour t\'améliorer!',
                   style: const TextStyle(
                     fontSize: 18,
                     color: Colors.black54,
                   ),
+                  textAlign: TextAlign.center,
                 ),
 
                 const SizedBox(height: 20),
@@ -602,6 +612,69 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
                 const SizedBox(height: 24),
 
+                // Boutons d'action
+                if (!isMathKid) ...[
+                  // Bouton vers le manuel pour les non-MathKids
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ElevatedButton.icon(
+                      onPressed: _goToManual,
+                      icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
+                      label: const Text(
+                        'Consulter le Manuel MathKid',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4CAF50), // Vert pour le manuel
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 5,
+                      ),
+                    ),
+                  ),
+                  // Message d'encouragement
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF4CAF50).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.lightbulb_outline,
+                          color: Color(0xFF4CAF50),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Expanded(
+                          child: Text(
+                            'Le manuel t\'aidera à réviser et à mieux comprendre !',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF4CAF50),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                // Boutons standard
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

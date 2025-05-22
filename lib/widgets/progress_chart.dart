@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mathscool/utils/colors.dart';
 
 class ProgressChart extends StatelessWidget {
@@ -8,7 +9,7 @@ class ProgressChart extends StatelessWidget {
   const ProgressChart({
     required this.progressData,
     this.title = 'Ma progression',
-    super.key
+    super.key,
   });
 
   @override
@@ -62,11 +63,7 @@ class ProgressChart extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Icon(
-                              _getCategoryIcon(entry.key),
-                              color: _getProgressColor(entry.value),
-                              size: 18,
-                            ),
+                            _getIconOrBadge(entry.key, entry.value),
                             const SizedBox(width: 8),
                             Text(
                               entry.key,
@@ -98,7 +95,6 @@ class ProgressChart extends StatelessWidget {
                     const SizedBox(height: 8),
                     Stack(
                       children: [
-                        // Background track
                         Container(
                           height: 18,
                           decoration: BoxDecoration(
@@ -114,7 +110,6 @@ class ProgressChart extends StatelessWidget {
                             ],
                           ),
                         ),
-                        // Progress indicator
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Container(
@@ -130,7 +125,6 @@ class ProgressChart extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Fun decoration elements
                         if (entry.value > 0.5)
                           ...List.generate(
                             (entry.value * 5).toInt().clamp(0, 5),
@@ -144,8 +138,6 @@ class ProgressChart extends StatelessWidget {
                               ),
                             ),
                           ),
-
-                        // Fun character at the end of progress bar
                         if (entry.value > 0)
                           Positioned(
                             left: (MediaQuery.of(context).size.width * 0.7 * entry.value) - 15,
@@ -189,13 +181,9 @@ class ProgressChart extends StatelessWidget {
   }
 
   List<Color> _getProgressGradient(double value) {
-    if (value < 0.4) {
-      return [Colors.red[300]!, Colors.red[500]!];
-    } else if (value < 0.7) {
-      return [Colors.orange[300]!, Colors.orange[500]!];
-    } else {
-      return [Colors.green[300]!, Colors.green[500]!];
-    }
+    if (value < 0.4) return [Colors.red[300]!, Colors.red[500]!];
+    if (value < 0.7) return [Colors.orange[300]!, Colors.orange[500]!];
+    return [Colors.green[300]!, Colors.green[500]!];
   }
 
   IconData _getProgressIcon(double value) {
@@ -204,30 +192,50 @@ class ProgressChart extends StatelessWidget {
     return Icons.sentiment_very_satisfied;
   }
 
-  IconData _getCategoryIcon(String category) {
+  Widget _getIconOrBadge(String category, double value) {
+    const levels = ['ci', 'cp', 'ce1', 'ce2', 'cm1', 'cm2'];
+
+    if (levels.contains(category.toLowerCase())) {
+      return CircleAvatar(
+        radius: 12,
+        backgroundColor: _getProgressColor(value).withOpacity(0.2),
+        child: Text(
+          category.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: _getProgressColor(value),
+          ),
+        ),
+      );
+    }
+
+    // FontAwesome icons for subjects
+    IconData icon;
     switch (category.toLowerCase()) {
       case 'addition':
-        return Icons.add_circle_outline; // Symbole d'addition plus clair
+        icon = FontAwesomeIcons.plus;
+        break;
       case 'soustraction':
-        return Icons.remove_circle_outline; // Symbole de soustraction plus clair
+        icon = FontAwesomeIcons.minus;
+        break;
       case 'multiplication':
-        return Icons.clear; // Symbole de multiplication (X)
+        icon = FontAwesomeIcons.xmark;
+        break;
       case 'division':
-        return Icons.shape_line; // Symbole qui évoque une division (barre oblique)
+        icon = FontAwesomeIcons.divide;
+        break;
       case 'géométrie':
-        return Icons.square_foot; // Icône liée aux formes géométriques
-      case 'cp':
-        return Icons.filter_1; // Chiffre 1 bien visible
-      case 'ce1':
-        return Icons.filter_2; // Chiffre 2 bien visible
-      case 'ce2':
-        return Icons.filter_3; // Chiffre 3 bien visible
-      case 'cm1':
-        return Icons.filter_4; // Chiffre 4 bien visible
-      case 'cm2':
-        return Icons.filter_5; // Chiffre 5 bien visible
+        icon = Icons.square_foot;
+        break;
       default:
-        return Icons.school; // Icône scolaire par défaut
+        icon = FontAwesomeIcons.book;
     }
+
+    return FaIcon(
+      icon,
+      color: _getProgressColor(value),
+      size: 18,
+    );
   }
 }

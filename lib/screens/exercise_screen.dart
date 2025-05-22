@@ -7,6 +7,7 @@ import 'package:mathscool/data/static_exercises.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/data/user_results.dart';
 import 'package:mathscool/screens/help_screen.dart';
+import 'package:mathscool/screens/progress_screen.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -98,6 +99,15 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       context,
       MaterialPageRoute(
         builder: (context) => const HelpScreen(),
+      ),
+    );
+  }
+
+  void _goToProgress() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ProgressScreen(),
       ),
     );
   }
@@ -497,8 +507,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   }
 
   Widget _buildResultsScreen() {
-    final bool isMathKid = _score >= _exercises.length / 2;
     final double percentage = (_score / _exercises.length) * 100.0;
+    final bool isMathKid = percentage >= 100.0;
+    final bool isOnRightTrack = percentage >= 50.0 && percentage < 100.0;
 
     return Container(
       width: double.infinity,
@@ -523,7 +534,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               ],
             ),
             child: Lottie.asset(
-              isMathKid
+              isMathKid || isOnRightTrack
                   ? 'assets/animations/success.json'
                   : 'assets/animations/encouragement.json',
               width: 180,
@@ -550,11 +561,19 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             child: Column(
               children: [
                 Text(
-                  isMathKid ? '🎉 Tu es un Mathkid! 🎉' : '🙂 Presque un Mathkid!',
+                  isMathKid
+                      ? '🎉 Tu es un Mathkid! 🎉'
+                      : isOnRightTrack
+                      ? '🌟 Tu es sur la bonne voie! 🌟'
+                      : '🙂 Presque un Mathkid!',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: isMathKid ? AppColors.primary : Colors.orange,
+                    color: isMathKid
+                        ? AppColors.primary
+                        : isOnRightTrack
+                        ? Colors.green
+                        : Colors.orange,
                   ),
                 ),
 
@@ -562,7 +581,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
                 Text(
                   isMathKid
-                      ? 'Super! Tu as réussi!'
+                      ? 'Parfait! Tu maîtrises parfaitement!'
+                      : isOnRightTrack
+                      ? 'Excellent travail! Continue comme ça!'
                       : 'N\'hésite pas à consulter notre manuel pour t\'améliorer!',
                   style: const TextStyle(
                     fontSize: 18,
@@ -587,10 +608,11 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         width: 200 * (_score / _exercises.length.toDouble()),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              AppColors.primary,
-                              AppColors.secondary,
-                            ],
+                            colors: isMathKid
+                                ? [AppColors.primary, AppColors.secondary]
+                                : isOnRightTrack
+                                ? [Colors.green, Colors.lightGreen]
+                                : [Colors.orange, Colors.deepOrange],
                           ),
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -612,9 +634,72 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
                 const SizedBox(height: 24),
 
-                // Boutons d'action
-                if (!isMathKid) ...[
-                  // Bouton vers le manuel pour les non-MathKids
+                // Boutons d'action basés sur le score
+                if (percentage >= 50.0) ...[
+                  // Bouton vers Ma Progression pour ceux qui ont 50% et plus
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ElevatedButton.icon(
+                      onPressed: _goToProgress,
+                      icon: const Icon(Icons.trending_up, color: Colors.white),
+                      label: const Text(
+                        'Voir ma progression',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF9C27B0), // Violet pour la progression
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 5,
+                      ),
+                    ),
+                  ),
+                  // Message d'encouragement pour progression
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF9C27B0).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFF9C27B0).withOpacity(0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.emoji_events,
+                          color: Color(0xFF9C27B0),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            isMathKid
+                                ? 'Découvre tous tes badges et ta progression globale !'
+                                : 'Consulte tes progrès et vois tous tes badges !',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF9C27B0),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
+                if (percentage < 50.0) ...[
+                  // Bouton vers le manuel pour ceux qui ont moins de 50%
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.only(bottom: 16),
@@ -639,7 +724,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       ),
                     ),
                   ),
-                  // Message d'encouragement
+                  // Message d'encouragement pour le manuel
                   Container(
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 16),

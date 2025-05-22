@@ -100,208 +100,221 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             },
           ),
 
-          // Éléments décoratifs
-          Positioned(
-            top: 100,
-            left: -30,
-            child: _buildFloatingShape(Icons.calculate, 80),
-          ),
-          Positioned(
-            bottom: 150,
-            right: -20,
-            child: _buildFloatingShape(Icons.star, 60),
-          ),
+          // Éléments décoratifs - Ajustés pour les petits écrans
+          if (size.height > 600) ...[
+            Positioned(
+              top: 100,
+              left: -30,
+              child: _buildFloatingShape(Icons.calculate, 60), // Réduit de 80 à 60
+            ),
+            Positioned(
+              bottom: 150,
+              right: -20,
+              child: _buildFloatingShape(Icons.star, 45), // Réduit de 60 à 45
+            ),
+          ],
 
           SafeArea(
-            child: Column(
-              children: [
-                // En-tête
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      AnimatedScale(
-                        scale: 1.1,
-                        duration: const Duration(seconds: 2),
-                        curve: Curves.elasticOut,
-                        child: RichText(
-                          text: TextSpan(
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'ComicNeue',
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Maths',
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                ),
+                child: Column(
+                  children: [
+                    // En-tête
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Réduit de 15 à 10
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          AnimatedScale(
+                            scale: 1.1,
+                            duration: const Duration(seconds: 2),
+                            curve: Curves.elasticOut,
+                            child: RichText(
+                              text: TextSpan(
                                 style: TextStyle(
+                                  fontSize: size.width < 350 ? 24 : 26, // Adaptatif selon la largeur
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'ComicNeue',
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'Maths',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          blurRadius: 10,
+                                          offset: const Offset(2, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: 'Cool',
+                                    style: TextStyle(
+                                      color: AppColors.secondary,
+                                      fontStyle: FontStyle.italic,
+                                      shadows: [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.3),
+                                          blurRadius: 10,
+                                          offset: const Offset(2, 2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Avatar avec gestion de l'image
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                            ).then((_) => _loadSavedAvatar()), // Recharger l'avatar au retour
+                            child: AnimatedScale(
+                              scale: _isPressed ? 0.9 : 1.0,
+                              duration: const Duration(milliseconds: 200),
+                              child: Container(
+                                padding: const EdgeInsets.all(6), // Réduit de 8 à 6
+                                decoration: BoxDecoration(
                                   color: Colors.white,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withOpacity(0.3),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
                                       blurRadius: 10,
-                                      offset: const Offset(2, 2),
+                                      offset: const Offset(0, 4),
                                     ),
                                   ],
+                                ),
+                                child: CircleAvatar(
+                                  radius: 20, // Réduit de 24 à 20
+                                  backgroundColor: Color.alphaBlend(
+                                    AppColors.primary.withOpacity(0.1),
+                                    Colors.white,
+                                  ),
+                                  backgroundImage: _getProfileImage(photoURL),
                                 ),
                               ),
-                              TextSpan(
-                                text: 'Cool',
-                                style: TextStyle(
-                                  color: AppColors.secondary,
-                                  fontStyle: FontStyle.italic,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.black.withOpacity(0.3),
-                                      blurRadius: 10,
-                                      offset: const Offset(2, 2),
-                                    ),
-                                  ],
-                                ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Message de bienvenue avec le nom d'utilisateur
+                    AnimatedSlide(
+                      offset: const Offset(0, -0.2),
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.elasticOut,
+                      child: Container(
+                        margin: const EdgeInsets.only(top: 5, bottom: 15), // Réduit les marges
+                        child: Text(
+                          'Bonjour $displayName 👋',
+                          style: TextStyle(
+                            fontSize: size.width < 350 ? 20 : 22, // Adaptatif
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'ComicNeue',
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 5,
+                                offset: const Offset(2, 2),
                               ),
                             ],
                           ),
                         ),
                       ),
+                    ),
 
-                      // Avatar avec gestion de l'image
-                      GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                        ).then((_) => _loadSavedAvatar()), // Recharger l'avatar au retour
-                        child: AnimatedScale(
-                          scale: _isPressed ? 0.9 : 1.0,
-                          duration: const Duration(milliseconds: 200),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: CircleAvatar(
-                              radius: 24,
-                              backgroundColor: Color.alphaBlend(
-                                AppColors.primary.withOpacity(0.1),
-                                Colors.white,
-                              ),
-                              backgroundImage: _getProfileImage(photoURL),
+                    // Contenu principal
+                    SizedBox(
+                      height: size.height * 0.6, // Hauteur fixe mais adaptative
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Lottie Animation
+                          Positioned(
+                            top: size.height * 0.02, // Réduit de 0.05 à 0.02
+                            child: Lottie.asset(
+                              'assets/animations/home.json',
+                              width: size.width * 0.75, // Réduit de 0.8 à 0.75
+                              height: size.height * 0.35, // Réduit de 0.4 à 0.35
+                              fit: BoxFit.contain,
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
 
-                // Message de bienvenue avec le nom d'utilisateur
-                AnimatedSlide(
-                  offset: const Offset(0, -0.2),
-                  duration: const Duration(milliseconds: 800),
-                  curve: Curves.elasticOut,
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 10, bottom: 20),
-                    child: Text(
-                      'Bonjour $displayName 👋',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'ComicNeue',
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 5,
-                            offset: const Offset(2, 2),
+                          // Bouton principal
+                          Positioned(
+                            bottom: size.height * 0.05, // Réduit de 0.1 à 0.05
+                            child: AnimatedScale(
+                              scale: 1.0,
+                              duration: const Duration(seconds: 3),
+                              curve: Curves.elasticOut,
+                              child: InkWell(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const LevelSelectionScreen()),
+                                ),
+                                borderRadius: BorderRadius.circular(35), // Réduit de 40 à 35
+                                child: Container(
+                                  width: size.width * 0.75, // Réduit de 0.7 à 0.65
+                                  height: 60, // Réduit de 70 à 60
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [AppColors.secondary, AppColors.primary],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(35),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary.withOpacity(0.4),
+                                        blurRadius: 15,
+                                        offset: const Offset(0, 8),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(Icons.play_circle_filled,
+                                            color: Colors.white, size: 26), // Réduit de 30 à 26
+                                        const SizedBox(width: 8), // Réduit de 10 à 8
+                                        Text(
+                                          'Commencer à apprendre',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: size.width < 350 ? 16 : 18, // Adaptatif, réduit de 20
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'ComicNeue',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ),
 
-                // Contenu principal
-                Expanded(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Lottie Animation
-                      Positioned(
-                        top: size.height * 0.05,
-                        child: Lottie.asset(
-                          'assets/animations/home.json',
-                          width: size.width * 0.8,
-                          height: size.height * 0.4,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-
-                      // Bouton principal
-                      Positioned(
-                        bottom: size.height * 0.1,
-                        child: AnimatedScale(
-                          scale: 1.0,
-                          duration: const Duration(seconds: 3),
-                          curve: Curves.elasticOut,
-                          child: InkWell(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => const LevelSelectionScreen()),
-                            ),
-                            borderRadius: BorderRadius.circular(40),
-                            child: Container(
-                              width: size.width * 0.7,
-                              height: 70,
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [AppColors.secondary, AppColors.primary],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(40),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.primary.withOpacity(0.4),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                              ),
-                              child: const Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.play_circle_filled,
-                                        color: Colors.white, size: 30),
-                                    SizedBox(width: 10),
-                                    Text(
-                                      'Commencer à apprendre',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: 'ComicNeue',
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                    // Espacement en bas pour le scroll
+                    SizedBox(height: size.height * 0.05),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ],

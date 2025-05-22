@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mathscool/screens/help_screen.dart';
+import 'package:mathscool/screens/notification_settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/screens/progress_screen.dart';
@@ -469,15 +470,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
-          // Mes Badges
+
           ListTile(
-            leading: const Icon(Icons.star, color: AppColors.primary),
-            title: const Text('Mes Badges'),
+            leading: const Icon(Icons.notifications, color: AppColors.primary),
+            title: const Text('Notifications Math'),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ProgressScreen(),
+                  builder: (context) => const NotificationSettingsScreen(),
                 ),
               );
             },

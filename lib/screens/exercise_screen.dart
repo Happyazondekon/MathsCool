@@ -511,314 +511,322 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final bool isMathKid = percentage >= 100.0;
     final bool isOnRightTrack = percentage >= 50.0 && percentage < 100.0;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Animation pour les résultats
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 15,
-                  spreadRadius: 5,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
-            child: Lottie.asset(
-              isMathKid || isOnRightTrack
-                  ? 'assets/animations/success.json'
-                  : 'assets/animations/encouragement.json',
-              width: 180,
+    return SingleChildScrollView(
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animation pour les résultats
+            Container(
+              width: 180, // Réduit la taille
               height: 180,
-              fit: BoxFit.contain,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 15,
+                    spreadRadius: 5,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Lottie.asset(
+                isMathKid || isOnRightTrack
+                    ? 'assets/animations/success.json'
+                    : 'assets/animations/encouragement.json',
+                width: 160,
+                height: 160,
+                fit: BoxFit.contain,
+              ),
             ),
-          ),
 
-          const SizedBox(height: 30),
+            const SizedBox(height: 20), // Réduit l'espacement
 
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Text(
-                  isMathKid
-                      ? '🎉 Tu es un Mathkid! 🎉'
-                      : isOnRightTrack
-                      ? '🌟 Tu es sur la bonne voie! 🌟'
-                      : '🙂 Presque un Mathkid!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: isMathKid
-                        ? AppColors.primary
+            Container(
+              padding: const EdgeInsets.all(20), // Réduit le padding
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    isMathKid
+                        ? '🎉 Tu es un Mathkid! 🎉'
                         : isOnRightTrack
-                        ? Colors.green
-                        : Colors.orange,
+                        ? '🌟 Tu es sur la bonne voie! 🌟'
+                        : '🙂 Presque un Mathkid!',
+                    style: TextStyle(
+                      fontSize: 22, // Réduit la taille de police
+                      fontWeight: FontWeight.bold,
+                      color: isMathKid
+                          ? AppColors.primary
+                          : isOnRightTrack
+                          ? Colors.green
+                          : Colors.orange,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 12), // Réduit l'espacement
 
-                Text(
-                  isMathKid
-                      ? 'Parfait! Tu maîtrises parfaitement!'
-                      : isOnRightTrack
-                      ? 'Excellent travail! Continue comme ça!'
-                      : 'N\'hésite pas à consulter notre manuel pour t\'améliorer!',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    color: Colors.black54,
+                  Text(
+                    isMathKid
+                        ? 'Parfait! Tu maîtrises parfaitement!'
+                        : isOnRightTrack
+                        ? 'Excellent travail! Continue comme ça!'
+                        : 'N\'hésite pas à consulter notre manuel pour t\'améliorer!',
+                    style: const TextStyle(
+                      fontSize: 16, // Réduit la taille de police
+                      color: Colors.black54,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
 
-                const SizedBox(height: 20),
+                  const SizedBox(height: 16), // Réduit l'espacement
 
-                Container(
-                  height: 20,
-                  width: 200,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 20,
-                        width: 200 * (_score / _exercises.length.toDouble()),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: isMathKid
-                                ? [AppColors.primary, AppColors.secondary]
-                                : isOnRightTrack
-                                ? [Colors.green, Colors.lightGreen]
-                                : [Colors.orange, Colors.deepOrange],
+                  Container(
+                    height: 18, // Réduit la hauteur
+                    width: 180, // Réduit la largeur
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          height: 18,
+                          width: 180 * (_score / _exercises.length.toDouble()),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isMathKid
+                                  ? [AppColors.primary, AppColors.secondary]
+                                  : isOnRightTrack
+                                  ? [Colors.green, Colors.lightGreen]
+                                  : [Colors.orange, Colors.deepOrange],
+                            ),
+                            borderRadius: BorderRadius.circular(9),
                           ),
-                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  Text(
+                    '${percentage.toInt()}% correct',
+                    style: const TextStyle(
+                      fontSize: 14, // Réduit la taille de police
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16), // Réduit l'espacement
+
+                  // Boutons d'action basés sur le score
+                  if (percentage >= 50.0) ...[
+                    // Bouton vers Ma Progression pour ceux qui ont 50% et plus
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
+                      child: ElevatedButton.icon(
+                        onPressed: _goToProgress,
+                        icon: const Icon(Icons.trending_up, color: Colors.white, size: 18),
+                        label: const Text(
+                          'Voir ma progression',
+                          style: TextStyle(
+                            fontSize: 14, // Réduit la taille de police
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF9C27B0),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 5,
+                        ),
+                      ),
+                    ),
+                    // Message d'encouragement pour progression
+                    Container(
+                      padding: const EdgeInsets.all(10), // Réduit le padding
+                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF9C27B0).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFF9C27B0).withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.emoji_events,
+                            color: Color(0xFF9C27B0),
+                            size: 18, // Réduit la taille de l'icône
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              isMathKid
+                                  ? 'Découvre tous tes badges et ta progression globale !'
+                                  : 'Consulte tes progrès et vois tous tes badges !',
+                              style: const TextStyle(
+                                fontSize: 12, // Réduit la taille de police
+                                color: Color(0xFF9C27B0),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  if (percentage < 50.0) ...[
+                    // Bouton vers le manuel pour ceux qui ont moins de 50%
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
+                      child: ElevatedButton.icon(
+                        onPressed: _goToManual,
+                        icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 18),
+                        label: const Text(
+                          'Consulter le Manuel MathKid',
+                          style: TextStyle(
+                            fontSize: 14, // Réduit la taille de police
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4CAF50),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          elevation: 5,
+                        ),
+                      ),
+                    ),
+                    // Message d'encouragement pour le manuel
+                    Container(
+                      padding: const EdgeInsets.all(10), // Réduit le padding
+                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFF4CAF50).withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.lightbulb_outline,
+                            color: Color(0xFF4CAF50),
+                            size: 18, // Réduit la taille de l'icône
+                          ),
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Le manuel t\'aidera à réviser et à mieux comprendre !',
+                              style: TextStyle(
+                                fontSize: 12, // Réduit la taille de police
+                                color: Color(0xFF4CAF50),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
+                  // Boutons standard
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(Icons.home_rounded, color: Colors.white, size: 18),
+                          label: const Text(
+                            'Retour',
+                            style: TextStyle(
+                              fontSize: 14, // Réduit la taille de police
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 5,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12), // Réduit l'espacement
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _currentIndex = 0;
+                              _score = 0;
+                              _animationController.reset();
+                              _animationController.forward();
+                            });
+                          },
+                          icon: const Icon(Icons.replay_rounded, color: Colors.white, size: 18),
+                          label: const Text(
+                            'Rejouer',
+                            style: TextStyle(
+                              fontSize: 14, // Réduit la taille de police
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.secondary,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 5,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 8),
-
-                Text(
-                  '${percentage.toInt()}% correct',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Boutons d'action basés sur le score
-                if (percentage >= 50.0) ...[
-                  // Bouton vers Ma Progression pour ceux qui ont 50% et plus
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: ElevatedButton.icon(
-                      onPressed: _goToProgress,
-                      icon: const Icon(Icons.trending_up, color: Colors.white),
-                      label: const Text(
-                        'Voir ma progression',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF9C27B0), // Violet pour la progression
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 5,
-                      ),
-                    ),
-                  ),
-                  // Message d'encouragement pour progression
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF9C27B0).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF9C27B0).withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.emoji_events,
-                          color: Color(0xFF9C27B0),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            isMathKid
-                                ? 'Découvre tous tes badges et ta progression globale !'
-                                : 'Consulte tes progrès et vois tous tes badges !',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF9C27B0),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
-
-                if (percentage < 50.0) ...[
-                  // Bouton vers le manuel pour ceux qui ont moins de 50%
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: ElevatedButton.icon(
-                      onPressed: _goToManual,
-                      icon: const Icon(Icons.menu_book_rounded, color: Colors.white),
-                      label: const Text(
-                        'Consulter le Manuel MathKid',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4CAF50), // Vert pour le manuel
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 5,
-                      ),
-                    ),
-                  ),
-                  // Message d'encouragement pour le manuel
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF4CAF50).withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.lightbulb_outline,
-                          color: Color(0xFF4CAF50),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'Le manuel t\'aidera à réviser et à mieux comprendre !',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF4CAF50),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                // Boutons standard
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(Icons.home_rounded, color: Colors.white),
-                      label: const Text(
-                        'Retour',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 5,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _currentIndex = 0;
-                          _score = 0;
-                          _animationController.reset();
-                          _animationController.forward();
-                        });
-                      },
-                      icon: const Icon(Icons.replay_rounded, color: Colors.white),
-                      label: const Text(
-                        'Rejouer',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 5,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 20), // Ajoute un espacement en bas pour le scroll
+          ],
+        ),
       ),
     );
   }

@@ -8,6 +8,8 @@ import 'package:lottie/lottie.dart';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'notification_settings_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -105,12 +107,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             Positioned(
               top: 100,
               left: -30,
-              child: _buildFloatingShape(Icons.calculate, 60), // Réduit de 80 à 60
+              child: _buildFloatingShape(Icons.calculate, 80), // Réduit de 80 à 60
             ),
             Positioned(
               bottom: 150,
               right: -20,
-              child: _buildFloatingShape(Icons.star, 45), // Réduit de 60 à 45
+              child: _buildFloatingShape(Icons.star, 60), // Réduit de 60 à 45
             ),
           ],
 
@@ -208,6 +210,36 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ],
                       ),
                     ),
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationSettingsScreen(
+                            userName: displayName,
+                          ),
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.notifications,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
 
                     // Message de bienvenue avec le nom d'utilisateur
                     AnimatedSlide(
@@ -219,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         child: Text(
                           'Bonjour $displayName 👋',
                           style: TextStyle(
-                            fontSize: size.width < 350 ? 20 : 22, // Adaptatif
+                            fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                             fontFamily: 'ComicNeue',
@@ -243,18 +275,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         children: [
                           // Lottie Animation
                           Positioned(
-                            top: size.height * 0.02, // Réduit de 0.05 à 0.02
+                            top: size.height * 0.05, // Réduit de 0.05 à 0.02
                             child: Lottie.asset(
                               'assets/animations/home.json',
-                              width: size.width * 0.75, // Réduit de 0.8 à 0.75
-                              height: size.height * 0.35, // Réduit de 0.4 à 0.35
+                              width: size.width * 0.8, // Réduit de 0.8 à 0.75
+                              height: size.height * 0.4, // Réduit de 0.4 à 0.35
                               fit: BoxFit.contain,
                             ),
                           ),
 
                           // Bouton principal
                           Positioned(
-                            bottom: size.height * 0.05, // Réduit de 0.1 à 0.05
+                            bottom: size.height * 0.1, // Réduit de 0.1 à 0.05
                             child: AnimatedScale(
                               scale: 1.0,
                               duration: const Duration(seconds: 3),
@@ -264,10 +296,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   context,
                                   MaterialPageRoute(builder: (context) => const LevelSelectionScreen()),
                                 ),
-                                borderRadius: BorderRadius.circular(35), // Réduit de 40 à 35
+                                borderRadius: BorderRadius.circular(40), // Réduit de 40 à 35
                                 child: Container(
                                   width: size.width * 0.75, // Réduit de 0.7 à 0.65
-                                  height: 60, // Réduit de 70 à 60
+                                  height: 70, // Réduit de 70 à 60
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
                                       colors: [AppColors.secondary, AppColors.primary],
@@ -288,13 +320,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         const Icon(Icons.play_circle_filled,
-                                            color: Colors.white, size: 26), // Réduit de 30 à 26
-                                        const SizedBox(width: 8), // Réduit de 10 à 8
+                                            color: Colors.white, size: 30), // Réduit de 30 à 26
+                                        const SizedBox(width: 10), // Réduit de 10 à 8
                                         Text(
                                           'Commencer à apprendre',
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: size.width < 350 ? 16 : 18, // Adaptatif, réduit de 20
+                                            fontSize: 20, // Adaptatif, réduit de 20
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'ComicNeue',
                                           ),
@@ -412,8 +444,8 @@ class _MathBackgroundPainter extends CustomPainter {
       }
     }
   }
-
   @override
   bool shouldRepaint(covariant _MathBackgroundPainter oldDelegate) =>
       oldDelegate.animation != animation;
 }
+

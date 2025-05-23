@@ -8,19 +8,17 @@ import 'package:mathscool/auth/screens/login_screen.dart';
 import 'package:mathscool/auth/screens/register_screen.dart';
 import 'package:mathscool/auth/screens/forgot_password_screen.dart';
 import 'package:mathscool/services/user_service.dart';
-
-// Import des services de notification
-import 'package:mathscool/notification_service.dart';
-import 'package:mathscool/notification_scheduler.dart';
+import 'package:mathscool/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialisation de Firebase
+  // Initialiser Firebase
   await Firebase.initializeApp();
 
-  // Initialisation du système de notifications
-  await _initializeNotifications();
+  // Initialiser le service de notifications
+  final notificationService = NotificationService();
+  await notificationService.initialize();
 
   runApp(
     MultiProvider(
@@ -31,26 +29,11 @@ void main() async {
         ),
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => UserService()),
-        // Ajout des services de notification
-        Provider(create: (_) => NotificationService()),
-        Provider(create: (_) => NotificationScheduler()),
+        Provider.value(value: notificationService), // Ajouter le service de notifications
       ],
       child: const MathsCoolApp(),
     ),
   );
-}
-
-// Initialisation du système de notifications
-Future<void> _initializeNotifications() async {
-  try {
-    // Initialiser seulement le service de base, pas le scheduler
-    final notificationService = NotificationService();
-    await notificationService.initialize();
-    print('✅ Service de notifications initialisé avec succès');
-  } catch (e) {
-    print('❌ Erreur lors de l\'initialisation des notifications: $e');
-    // Ne pas faire échouer l'app si les notifications ne marchent pas
-  }
 }
 
 class MathsCoolApp extends StatelessWidget {
@@ -62,24 +45,11 @@ class MathsCoolApp extends StatelessWidget {
       title: 'MathsCool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.blue,
         fontFamily: 'ComicNeue',
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        // Couleurs personnalisées pour l'app
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF2196F3),
-          brightness: Brightness.light,
-        ),
       ),
       home: const AuthWrapper(),
-      // Routes pour la navigation
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/login': (context) => LoginScreen(
-          onRegisterClicked: () {},
-          onForgotPasswordClicked: () {},
-        ),
-      },
     );
   }
 }
@@ -91,96 +61,9 @@ class AuthWrapper extends StatefulWidget {
   _AuthWrapperState createState() => _AuthWrapperState();
 }
 
-class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
+class _AuthWrapperState extends State<AuthWrapper> {
   bool _isLoginScreen = true;
   bool _isForgotPasswordScreen = false;
-  NotificationScheduler? _notificationScheduler;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _initializeNotificationScheduler();
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    // Nettoyage sécurisé du scheduler
-    try {
-      _notificationScheduler?.dispose();
-    } catch (e) {
-      print('❌ Erreur lors du nettoyage du scheduler: $e');
-    }
-    super.dispose();
-  }
-
-  void _initializeNotificationScheduler() {
-    try {
-      _notificationScheduler = Provider.of<NotificationScheduler>(context, listen: false);
-      // Initialiser le scheduler après que le widget soit construit
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        try {
-          await _notificationScheduler!.initialize();
-        } catch (e) {
-          print('❌ Erreur initialisation scheduler: $e');
-        }
-      });
-    } catch (e) {
-      print('❌ Erreur récupération scheduler: $e');
-    }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    // Gestion du cycle de vie de l'app pour les notifications
-    switch (state) {
-      case AppLifecycleState.resumed:
-      // L'app est revenue au premier plan
-        _handleAppResumed();
-        break;
-      case AppLifecycleState.paused:
-      // L'app est passée en arrière-plan
-        _handleAppPaused();
-        break;
-      case AppLifecycleState.detached:
-      // L'app va être fermée
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _handleAppResumed() {
-    // Vérifier si l'utilisateur est connecté et programmer des notifications
-    final user = Provider.of<AppUser?>(context, listen: false);
-    if (user != null) {
-      _scheduleNotificationsForUser();
-    }
-  }
-
-  void _handleAppPaused() {
-    // L'app passe en arrière-plan, les notifications programmées continueront
-    print('📱 App en arrière-plan - notifications actives');
-  }
-
-  Future<void> _scheduleNotificationsForUser() async {
-    try {
-      // S'assurer que le scheduler est initialisé
-      if (_notificationScheduler == null) return;
-
-      // S'assurer que les notifications sont programmées pour l'utilisateur connecté
-      final isEnabled = await _notificationScheduler!.areNotificationsEnabled();
-      if (isEnabled) {
-        print('🔔 Vérification et programmation des notifications...');
-        // Le scheduler vérifie automatiquement et programme si nécessaire
-      }
-    } catch (e) {
-      print('❌ Erreur lors de la programmation des notifications: $e');
-    }
-  }
 
   void _toggleToRegister() {
     setState(() {
@@ -206,18 +89,18 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<AppUser?>(context);
+    final notificationService = Provider.of<NotificationService>(context, listen: false);
 
-    // Si l'utilisateur est connecté, programmer les notifications et afficher l'écran d'accueil
+    // Si l'utilisateur est connecté, programmer les notifications
     if (user != null) {
-      // Programmer les notifications lors de la connexion
+      // Programmer les notifications de manière asynchrone
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scheduleNotificationsForUser();
+        _scheduleNotificationsForUser(user, notificationService);
       });
 
       return const HomeScreen();
     }
 
-    // Écrans d'authentification
     if (_isForgotPasswordScreen) {
       return ForgotPasswordScreen(
         onLoginClicked: _toggleToLogin,
@@ -234,5 +117,16 @@ class _AuthWrapperState extends State<AuthWrapper> with WidgetsBindingObserver {
       onRegisterClicked: _toggleToRegister,
       onForgotPasswordClicked: _toggleToForgotPassword,
     );
+  }
+
+  // Méthode pour programmer les notifications pour l'utilisateur connecté
+  Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
+    try {
+      final userName = user.displayName ?? 'MathKid';
+      await notificationService.scheduleRecurringNotifications(userName);
+      print('Notifications programmées pour $userName');
+    } catch (e) {
+      print('Erreur lors de la programmation des notifications: $e');
+    }
   }
 }

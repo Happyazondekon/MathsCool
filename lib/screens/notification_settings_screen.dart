@@ -1,78 +1,76 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../notification_scheduler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/utils/colors.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
-  const NotificationSettingsScreen({super.key});
+  final String userName;
+
+  const NotificationSettingsScreen({
+    super.key,
+    required this.userName,
+  });
 
   @override
-  _NotificationSettingsScreenState createState() => _NotificationSettingsScreenState();
+  State<NotificationSettingsScreen> createState() => _NotificationSettingsScreenState();
 }
 
 class _NotificationSettingsScreenState extends State<NotificationSettingsScreen> {
+  final NotificationService _notificationService = NotificationService();
   bool _notificationsEnabled = true;
-  int _morningHour = 9;
-  int _eveningHour = 19;
-  Map<String, dynamic>? _notificationStats;
-  late NotificationScheduler _scheduler;
+  List<PendingNotificationRequest> _pendingNotifications = [];
 
   @override
   void initState() {
     super.initState();
-    _scheduler = Provider.of<NotificationScheduler>(context, listen: false);
-    _loadSettings();
+    _loadNotificationSettings();
+    _loadPendingNotifications();
   }
 
-  Future<void> _loadSettings() async {
-    try {
-      final enabled = await _scheduler.areNotificationsEnabled();
-      final timeSlots = await _scheduler.getPreferredTimeSlots();
-      final stats = await _scheduler.getNotificationStats();
+  Future<void> _loadNotificationSettings() async {
+    final enabled = await _notificationService.areNotificationsEnabled();
+    setState(() {
+      _notificationsEnabled = enabled;
+    });
+  }
 
-      setState(() {
-        _notificationsEnabled = enabled;
-        _morningHour = timeSlots['morning'] ?? 9;
-        _eveningHour = timeSlots['evening'] ?? 19;
-        _notificationStats = stats;
-      });
-    } catch (e) {
-      print('Erreur lors du chargement des paramètres: $e');
+  Future<void> _loadPendingNotifications() async {
+    final pending = await _notificationService.getPendingNotifications();
+    setState(() {
+      _pendingNotifications = pending;
+    });
+  }
+
+  Future<void> _toggleNotifications(bool value) async {
+    setState(() {
+      _notificationsEnabled = value;
+    });
+
+    await _notificationService.setNotificationsEnabled(value);
+
+    if (value) {
+      // Programmer les notifications
+      await _notificationService.scheduleRecurringNotifications(widget.userName);
+      _showSnackBar('Notifications activées ! 📱', Colors.green);
+    } else {
+      _showSnackBar('Notifications désactivées', Colors.orange);
     }
+
+    // Recharger les notifications en attente
+    await _loadPendingNotifications();
   }
 
-  Future<void> _updateNotificationSettings() async {
-    try {
-      await _scheduler.setNotificationsEnabled(_notificationsEnabled);
-      if (_notificationsEnabled) {
-        await _scheduler.setPreferredTimeSlots(
-          morningHour: _morningHour,
-          eveningHour: _eveningHour,
-        );
-      }
-      _showSuccessMessage('Paramètres mis à jour avec succès! 🎉');
-      _loadSettings(); // Recharger les statistiques
-    } catch (e) {
-      _showErrorMessage('Erreur lors de la mise à jour: $e');
-    }
+  Future<void> _testNotification() async {
+    await _notificationService.showImmediateNotification(widget.userName);
+    _showSnackBar('Notification de test envoyée ! 🔔', Colors.blue);
   }
 
-  void _showSuccessMessage(String message) {
+  void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.secondary,
-        duration: const Duration(seconds: 3),
-      ),
-    );
-  }
-
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 3),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -80,327 +78,292 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.primary, Colors.white],
-              ),
-            ),
+      appBar: AppBar(
+        title: const Text(
+          'Notifications',
+          style: TextStyle(
+            fontFamily: 'ComicNeue',
+            fontWeight: FontWeight.bold,
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(16.0),
-                    children: [
-                      _buildWelcomeCard(),
-                      const SizedBox(height: 20),
-                      _buildNotificationToggleCard(),
-                      const SizedBox(height: 20),
-                      if (_notificationsEnabled) ...[
-                        _buildTimeSettingsCard(),
-                        const SizedBox(height: 20),
-                        if (_notificationStats != null)
-                          _buildStatsCard(),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
       ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          const Text(
-            'Rappels',
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          const SizedBox(width: 48), // Pour équilibrer avec le bouton retour
-        ],
-      ),
-    );
-  }
-
-  Widget _buildWelcomeCard() {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24.0),
+      body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [AppColors.primary.withOpacity(0.8), AppColors.primary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primary.withOpacity(0.1),
+              Colors.white,
+            ],
           ),
-          borderRadius: BorderRadius.circular(20),
         ),
-        child: const Column(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-            Icon(
-              Icons.notifications_active,
-              size: 48,
-              color: Colors.white,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Restez motivé(e) avec MathsCool!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            // Section principale
+            _buildSettingsCard(
+              title: 'Rappels quotidiens',
+              subtitle: 'Recevoir des rappels pour jouer',
+              icon: Icons.notifications_active,
+              child: Switch.adaptive(
+                value: _notificationsEnabled,
+                onChanged: _toggleNotifications,
+                activeColor: AppColors.primary,
               ),
-              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 8),
-            Text(
-              'Configurez vos rappels pour ne jamais manquer une session de maths',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
-              textAlign: TextAlign.center,
-            ),
+
+            const SizedBox(height: 16),
+
+            // Section informations
+            _buildInfoCard(),
+
+            const SizedBox(height: 16),
+
+            // Section test
+            _buildTestCard(),
+
+            const SizedBox(height: 16),
+
+            // Section notifications programmées
+            if (_pendingNotifications.isNotEmpty) _buildPendingNotificationsCard(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNotificationToggleCard() {
+  Widget _buildSettingsCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Widget child,
+  }) {
     return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: SwitchListTile(
-        title: const Text(
-          'Activer les notifications',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: const Text('Recevez des rappels motivants pour faire des maths'),
-        value: _notificationsEnabled,
-        activeColor: AppColors.secondary,
-        onChanged: (value) {
-          setState(() {
-            _notificationsEnabled = value;
-          });
-          _updateNotificationSettings();
-        },
-        secondary: Icon(
-          _notificationsEnabled ? Icons.notifications_active : Icons.notifications_off,
-          color: _notificationsEnabled ? AppColors.secondary : Colors.grey,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeSettingsCard() {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(16),
+        child: Row(
           children: [
-            const Text(
-              'Horaires préférés',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Heure du matin
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.wb_sunny, color: Colors.orange),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Notification du matin',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButton<int>(
-                      value: _morningHour,
-                      dropdownColor: Color(0xFF34A853),
-                      underline: Container(),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      items: List.generate(24, (index) => index)
-                          .map((hour) => DropdownMenuItem(
-                        value: hour,
-                        child: Text('${hour.toString().padLeft(2, '0')}:00'),
-                      ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _morningHour = value;
-                          });
-                          _updateNotificationSettings();
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Heure du soir
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.indigo.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.brightness_3, color: Colors.indigo),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      'Notification du soir',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButton<int>(
-                      value: _eveningHour,
-                      dropdownColor: Color(0xFF34A853),
-                      underline: Container(),
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                      items: List.generate(24, (index) => index)
-                          .map((hour) => DropdownMenuItem(
-                        value: hour,
-                        child: Text('${hour.toString().padLeft(2, '0')}:00'),
-                      ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() {
-                            _eveningHour = value;
-                          });
-                          _updateNotificationSettings();
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatsCard() {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Statistiques',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Row(
+              child: Icon(
+                icon,
+                color: AppColors.primary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.schedule, color: AppColors.primary),
-                  const SizedBox(width: 12),
                   Text(
-                    'Notifications programmées: ${_notificationStats!['pending_count']}',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ComicNeue',
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontFamily: 'ComicNeue',
+                    ),
                   ),
                 ],
               ),
             ),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
 
+  Widget _buildInfoCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: AppColors.secondary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Comment ça marche ?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
+            _buildInfoItem('🌅', 'Rappel du matin à 9h00'),
+            _buildInfoItem('🌙', 'Rappel du soir à 21h00'),
+            _buildInfoItem('🎯', 'Messages motivants personnalisés'),
+            _buildInfoItem('🔔', 'Notifications adaptées aux enfants'),
+          ],
+        ),
+      ),
+    );
+  }
 
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _notificationStats!['is_enabled']
-                    ? AppColors.secondary.withOpacity(0.1)
-                    : Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+  Widget _buildInfoItem(String emoji, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 16)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 14,
+                fontFamily: 'ComicNeue',
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.bug_report,
+                  color: AppColors.accent,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Test des notifications',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Teste une notification pour voir à quoi elle ressemble',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontFamily: 'ComicNeue',
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _testNotification,
+              icon: const Icon(Icons.send, color: Colors.white),
+              label: const Text(
+                'Envoyer un test',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'ComicNeue',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPendingNotificationsCard() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.schedule,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Notifications programmées',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '${_pendingNotifications.length} notification(s) en attente',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontFamily: 'ComicNeue',
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...(_pendingNotifications.take(3).map((notification) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
               child: Row(
                 children: [
-                  Icon(
-                    _notificationStats!['is_enabled'] ? Icons.check_circle : Icons.cancel,
-                    color: _notificationStats!['is_enabled'] ? AppColors.secondary : Colors.red,
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Statut: ${_notificationStats!['is_enabled'] ? 'Activées' : 'Désactivées'}',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  const Icon(Icons.notifications, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      notification.title ?? 'Notification MathsCool',
+                      style: const TextStyle(fontSize: 12, fontFamily: 'ComicNeue'),
+                    ),
                   ),
                 ],
               ),
-            ),
+            ))),
           ],
         ),
       ),

@@ -16,8 +16,8 @@ class NotificationService {
   FlutterLocalNotificationsPlugin();
 
   static const String _notificationEnabledKey = 'notifications_enabled';
+  static const String _customNotificationsKey = 'custom_notifications';
   static const String _lastNotificationKey = 'last_notification_time';
-
   // Messages attrayants pour les enfants
   final List<String> _motivationalMessages = [
     "Il est temps de faire des mathématiques magiques ! ✨",
@@ -35,6 +35,12 @@ class NotificationService {
     "Il est temps de faire briller ton cerveau ! ✨",
     "Viens collectionner de nouveaux succès ! 🏆",
     "Une dose de maths pour bien commencer ! ☀️"
+    "Tes amis les chiffres t'attendent ! 🔢",
+    "Viens découvrir de nouveaux défis mathématiques ! 🎯",
+    "C'est l'heure de devenir un super héros des maths ! 🦸‍♂️",
+    "Les équations t'appellent ! Prêt(e) à jouer ? 🎮",
+    "Une nouvelle leçon t'attend ! 🌟",
+    "Prêt(e) pour ta session d'apprentissage ? 💫"
   ];
 
   // Initialisation du service de notifications
@@ -98,23 +104,6 @@ class NotificationService {
     // Annuler les notifications existantes
     await cancelAllNotifications();
 
-    // Programmer pour 9h du matin
-    await _scheduleNotificationAt(
-      id: 1,
-      hour: 9,
-      minute: 0,
-      userName: userName,
-      title: "Bonjour $userName ! 🌅",
-    );
-
-    // Programmer pour 21h le soir
-    await _scheduleNotificationAt(
-      id: 2,
-      hour: 21,
-      minute: 0,
-      userName: userName,
-      title: "Bonsoir $userName ! 🌙",
-    );
 
     print('Notifications programmées pour $userName');
   }
@@ -187,42 +176,155 @@ class NotificationService {
     );
   }
 
-  // Envoyer une notification immédiate (pour test)
-  Future<void> showImmediateNotification(String userName) async {
-    final random = Random();
-    final message = _motivationalMessages[random.nextInt(_motivationalMessages.length)];
 
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'mathscool_immediate',
-      'Test MathsCool',
-      channelDescription: 'Notifications de test pour MathsCool',
+
+  // Nouvelle méthode pour programmer une notification personnalisée
+  Future<void> scheduleCustomNotification({
+    required String userName,
+    required int hour,
+    required int minute,
+    required int id,
+    required bool isRepeating,
+    String? customMessage,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    // Si l'heure est déjà passée aujourd'hui, programmer pour demain
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    final message = customMessage ?? _getRandomMotivationalMessage();
+
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'mathscool_custom',
+      'Sessions personnalisées',
+      channelDescription: 'Notifications pour les sessions personnalisées',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
       color: Color(0xFF2196F3),
+      enableLights: true,
+      enableVibration: true,
+      playSound: true,
     );
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-    DarwinNotificationDetails(
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       sound: 'default',
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
 
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
+    const NotificationDetails platformDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
     );
 
-    await _flutterLocalNotificationsPlugin.show(
-      0,
-      "Hey $userName ! 👋",
+    await _flutterLocalNotificationsPlugin.zonedSchedule(
+      id,
+      "Hey $userName! 📚",
       message,
-      platformChannelSpecifics,
-      payload: 'mathscool_test',
+      scheduledDate,
+      platformDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: isRepeating ? DateTimeComponents.time : null,
+      payload: 'mathscool_custom_session',
     );
+
+    // Sauvegarder la notification personnalisée
+    await _saveCustomNotification(id, hour, minute, isRepeating, customMessage);
+  }
+
+  // Sauvegarder une notification personnalisée
+  Future<void> _saveCustomNotification(
+      int id,
+      int hour,
+      int minute,
+      bool isRepeating,
+      String? message,
+      ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final customNotifications = prefs.getStringList(_customNotificationsKey) ?? [];
+
+    final notificationData = {
+      'id': id.toString(),
+      'hour': hour.toString(),
+      'minute': minute.toString(),
+      'isRepeating': isRepeating.toString(),
+      if (message != null) 'message': message,
+    };
+
+    customNotifications.add(encodedNotification(notificationData));
+    await prefs.setStringList(_customNotificationsKey, customNotifications);
+  }
+
+  // Encoder les données de notification
+  String encodedNotification(Map<String, String> data) {
+    return data.entries.map((e) => '${e.key}:${e.value}').join(',');
+  }
+
+  // Décoder les données de notification
+  Map<String, String> decodeNotification(String encoded) {
+    final pairs = encoded.split(',');
+    return Map.fromEntries(
+      pairs.map((pair) {
+        final parts = pair.split(':');
+        return MapEntry(parts[0], parts[1]);
+      }),
+    );
+  }
+
+  // Obtenir toutes les notifications personnalisées
+  Future<List<Map<String, String>>> getCustomNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getStringList(_customNotificationsKey) ?? [];
+    return encoded.map((e) => decodeNotification(e)).toList();
+  }
+
+  // Supprimer une notification personnalisée
+  Future<void> removeCustomNotification(int id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final notifications = prefs.getStringList(_customNotificationsKey) ?? [];
+
+    notifications.removeWhere((encoded) {
+      final data = decodeNotification(encoded);
+      return data['id'] == id.toString();
+    });
+
+    await prefs.setStringList(_customNotificationsKey, notifications);
+    await _flutterLocalNotificationsPlugin.cancel(id);
+  }
+
+  // Restaurer toutes les notifications personnalisées (à appeler au démarrage)
+  Future<void> restoreCustomNotifications(String userName) async {
+    final notifications = await getCustomNotifications();
+
+    for (final notification in notifications) {
+      await scheduleCustomNotification(
+        userName: userName,
+        hour: int.parse(notification['hour']!),
+        minute: int.parse(notification['minute']!),
+        id: int.parse(notification['id']!),
+        isRepeating: notification['isRepeating'] == 'true',
+        customMessage: notification['message'],
+      );
+    }
+  }
+
+  String _getRandomMotivationalMessage() {
+    final random = Random();
+    return _motivationalMessages[random.nextInt(_motivationalMessages.length)];
   }
 
   // Activer/Désactiver les notifications

@@ -472,7 +472,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // Mes Badges
           ListTile(
             leading: const Icon(Icons.star, color: AppColors.primary),
-            title: const Text('Mes Badges'),
+            title: const Text('Mes Rappels'),
             onTap: () {
               Navigator.push(
                 context,

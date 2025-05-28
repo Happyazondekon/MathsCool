@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   final String userName;
@@ -55,7 +56,23 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       _customNotifications = notifications;
     });
   }
+  Future<void> _checkAndRequestPermissions() async {
+    if (await Permission.notification.isDenied) {
+      await Permission.notification.request();
+    }
 
+    // Autorisation pour les alarmes exactes
+    if (await Permission.scheduleExactAlarm.isDenied) {
+      final result = await Permission.scheduleExactAlarm.request();
+      if (result.isDenied || result.isPermanentlyDenied) {
+        _showSnackBar('Veuillez autoriser les alarmes exactes dans vos paramètres.', Colors.red);
+        openAppSettings();
+      }
+    }
+
+    // Recharger les paramètres après demande
+    await _loadNotificationSettings();
+  }
   void _showAddNotificationDialog() {
     // Créer une copie locale de _isRepeating pour le dialogue
     bool dialogIsRepeating = _isRepeating;

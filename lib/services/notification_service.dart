@@ -75,15 +75,30 @@ class NotificationService {
     await _requestPermissions();
   }
 
+
   // Demander les permissions nécessaires
   Future<void> _requestPermissions() async {
     // Permission pour les notifications
-    await Permission.notification.request();
+    final notificationStatus = await Permission.notification.request();
 
-    // Permission spécifique Android 13+
-    if (await Permission.scheduleExactAlarm.isDenied) {
-      await Permission.scheduleExactAlarm.request();
+    if (notificationStatus.isDenied || notificationStatus.isPermanentlyDenied) {
+      // Gérer le cas où l'utilisateur refuse de donner la permission
+      print("Permission pour les notifications refusée.");
+      return;
     }
+
+    // Permission spécifique Android 12+ pour les alarmes exactes
+    if (await Permission.scheduleExactAlarm.isDenied) {
+      final result = await Permission.scheduleExactAlarm.request();
+
+      if (result.isDenied || result.isPermanentlyDenied) {
+        // Rediriger l'utilisateur vers les paramètres pour autoriser manuellement
+        openAppSettings();
+        print("Redirection vers les paramètres pour autoriser les alarmes exactes.");
+      }
+    }
+
+    print("Toutes les permissions nécessaires sont accordées.");
   }
 
   // Gérer le tap sur la notification
@@ -93,88 +108,6 @@ class NotificationService {
     print('Notification tapped: ${notificationResponse.payload}');
   }
 
-  // Programmer les notifications récurrentes toutes les 12 heures
-  Future<void> scheduleRecurringNotifications(String userName) async {
-    // Vérifier si les notifications sont activées
-    final prefs = await SharedPreferences.getInstance();
-    final isEnabled = prefs.getBool(_notificationEnabledKey) ?? true;
-
-    if (!isEnabled) return;
-
-    // Annuler les notifications existantes
-    await cancelAllNotifications();
-
-
-    print('Notifications programmées pour $userName');
-  }
-
-  // Programmer une notification à une heure spécifique
-  Future<void> _scheduleNotificationAt({
-    required int id,
-    required int hour,
-    required int minute,
-    required String userName,
-    required String title,
-  }) async {
-    final random = Random();
-    final message = _motivationalMessages[random.nextInt(_motivationalMessages.length)];
-
-    // Créer la date/heure pour la prochaine occurrence
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
-
-    // Si l'heure est déjà passée aujourd'hui, programmer pour demain
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
-    }
-
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-      'mathscool_reminders',
-      'Rappels MathsCool',
-      channelDescription: 'Notifications de rappel pour jouer à MathsCool',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF2196F3),
-      enableLights: true,
-      enableVibration: true,
-      playSound: true,
-    );
-
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-    DarwinNotificationDetails(
-      sound: 'default',
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics,
-      iOS: iOSPlatformChannelSpecifics,
-    );
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      title,
-      message,
-      scheduledDate,
-      platformChannelSpecifics,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Répéter quotidiennement
-      payload: 'mathscool_reminder',
-    );
-  }
 
 
 
@@ -187,65 +120,78 @@ class NotificationService {
     required bool isRepeating,
     String? customMessage,
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduledDate = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
-    );
+    try {
+      // Check if notifications are enabled
+      if (!await areNotificationsEnabled()) {
+        print('Notifications are disabled');
+        return;
+      }
 
-    // Si l'heure est déjà passée aujourd'hui, programmer pour demain
-    if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(const Duration(days: 1));
+      final now = tz.TZDateTime.now(tz.local);
+      var scheduledDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+
+      // If the time has passed today, schedule for tomorrow
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+
+      final message = customMessage ?? _getRandomMotivationalMessage();
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'mathscool_custom',
+        'Sessions personnalisées',
+        channelDescription: 'Notifications pour les sessions personnalisées',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/ic_launcher',
+        color: Color(0xFF2196F3),
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        sound: 'default',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        id,
+        "Hey $userName! 📚",
+        message,
+        scheduledDate,
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: isRepeating ? DateTimeComponents.time : null,
+        payload: 'mathscool_custom_session',
+      );
+
+      // Save the custom notification
+      await _saveCustomNotification(id, hour, minute, isRepeating, customMessage);
+      print('Notification scheduled successfully for $scheduledDate');
+
+    } catch (e) {
+      print('Error scheduling notification: $e');
+      // You might want to show a user-friendly error message here
+      rethrow;
     }
-
-    final message = customMessage ?? _getRandomMotivationalMessage();
-
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'mathscool_custom',
-      'Sessions personnalisées',
-      channelDescription: 'Notifications pour les sessions personnalisées',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      color: Color(0xFF2196F3),
-      enableLights: true,
-      enableVibration: true,
-      playSound: true,
-    );
-
-    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-      sound: 'default',
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    const NotificationDetails platformDetails = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _flutterLocalNotificationsPlugin.zonedSchedule(
-      id,
-      "Hey $userName! 📚",
-      message,
-      scheduledDate,
-      platformDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: isRepeating ? DateTimeComponents.time : null,
-      payload: 'mathscool_custom_session',
-    );
-
-    // Sauvegarder la notification personnalisée
-    await _saveCustomNotification(id, hour, minute, isRepeating, customMessage);
   }
-
   // Sauvegarder une notification personnalisée
   Future<void> _saveCustomNotification(
       int id,

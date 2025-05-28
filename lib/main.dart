@@ -123,7 +123,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
     try {
       final userName = user.displayName ?? 'MathKid';
-      await notificationService.scheduleRecurringNotifications(userName);
+
       print('Notifications programmées pour $userName');
     } catch (e) {
       print('Erreur lors de la programmation des notifications: $e');

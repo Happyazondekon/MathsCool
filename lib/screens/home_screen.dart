@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       vsync: this,
     )..repeat(reverse: true);
 
-    _backgroundAnimation = Tween<double>(begin: 0.9, end: 1.1).animate(
+    _backgroundAnimation = Tween<double>(begin: 0.0, end: 2 * pi).animate(
       CurvedAnimation(
         parent: _backgroundAnimationController,
         curve: Curves.easeInOut,
@@ -95,24 +95,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   ),
                 ),
                 child: CustomPaint(
-                  painter: _MathBackgroundPainter(animation: _backgroundAnimation.value),
+                  painter: _MathBackgroundPainter(animationValue: _backgroundAnimation.value),
                   size: Size(size.width, size.height),
                 ),
               );
             },
           ),
 
-          // Éléments décoratifs - Ajustés pour les petits écrans
+          // Éléments décoratifs
           if (size.height > 600) ...[
             Positioned(
               top: 100,
               left: -30,
-              child: _buildFloatingShape(Icons.calculate, 80), // Réduit de 80 à 60
+              child: _buildFloatingShape(Icons.calculate, 80),
             ),
             Positioned(
               bottom: 150,
               right: -20,
-              child: _buildFloatingShape(Icons.star, 60), // Réduit de 60 à 45
+              child: _buildFloatingShape(Icons.star, 60),
             ),
           ],
 
@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   children: [
                     // En-tête
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Réduit de 15 à 10
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -137,7 +137,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             child: RichText(
                               text: TextSpan(
                                 style: TextStyle(
-                                  fontSize: size.width < 350 ? 24 : 26, // Adaptatif selon la largeur
+                                  fontSize: size.width < 350 ? 24 : 26,
                                   fontWeight: FontWeight.bold,
                                   fontFamily: 'ComicNeue',
                                 ),
@@ -179,12 +179,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                            ).then((_) => _loadSavedAvatar()), // Recharger l'avatar au retour
+                            ).then((_) => _loadSavedAvatar()),
                             child: AnimatedScale(
                               scale: _isPressed ? 0.9 : 1.0,
                               duration: const Duration(milliseconds: 200),
                               child: Container(
-                                padding: const EdgeInsets.all(6), // Réduit de 8 à 6
+                                padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   ],
                                 ),
                                 child: CircleAvatar(
-                                  radius: 20, // Réduit de 24 à 20
+                                  radius: 20,
                                   backgroundColor: Color.alphaBlend(
                                     AppColors.primary.withOpacity(0.1),
                                     Colors.white,
@@ -247,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.elasticOut,
                       child: Container(
-                        margin: const EdgeInsets.only(top: 5, bottom: 15), // Réduit les marges
+                        margin: const EdgeInsets.only(top: 5, bottom: 15),
                         child: Text(
                           'Bonjour $displayName 👋',
                           style: TextStyle(
@@ -269,24 +269,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                     // Contenu principal
                     SizedBox(
-                      height: size.height * 0.6, // Hauteur fixe mais adaptative
+                      height: size.height * 0.6,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
                           // Lottie Animation
                           Positioned(
-                            top: size.height * 0.05, // Réduit de 0.05 à 0.02
+                            top: size.height * 0.05,
                             child: Lottie.asset(
                               'assets/animations/home.json',
-                              width: size.width * 0.8, // Réduit de 0.8 à 0.75
-                              height: size.height * 0.4, // Réduit de 0.4 à 0.35
+                              width: size.width * 0.8,
+                              height: size.height * 0.4,
                               fit: BoxFit.contain,
                             ),
                           ),
 
                           // Bouton principal
                           Positioned(
-                            bottom: size.height * 0.1, // Réduit de 0.1 à 0.05
+                            bottom: size.height * 0.1,
                             child: AnimatedScale(
                               scale: 1.0,
                               duration: const Duration(seconds: 3),
@@ -296,10 +296,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   context,
                                   MaterialPageRoute(builder: (context) => const LevelSelectionScreen()),
                                 ),
-                                borderRadius: BorderRadius.circular(40), // Réduit de 40 à 35
+                                borderRadius: BorderRadius.circular(40),
                                 child: Container(
-                                  width: size.width * 0.75, // Réduit de 0.7 à 0.65
-                                  height: 70, // Réduit de 70 à 60
+                                  width: size.width * 0.75,
+                                  height: 70,
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
                                       colors: [AppColors.secondary, AppColors.primary],
@@ -320,13 +320,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         const Icon(Icons.play_circle_filled,
-                                            color: Colors.white, size: 30), // Réduit de 30 à 26
-                                        const SizedBox(width: 10), // Réduit de 10 à 8
+                                            color: Colors.white, size: 30),
+                                        const SizedBox(width: 10),
                                         Text(
                                           'Commencer à apprendre',
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 20, // Adaptatif, réduit de 20
+                                            fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                             fontFamily: 'ComicNeue',
                                           ),
@@ -356,25 +356,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   // Fonction pour déterminer quelle image de profil afficher
   ImageProvider _getProfileImage(String? photoURL) {
-    // Vérifier d'abord si un avatar a été chargé depuis SharedPreferences
     if (_avatarPath != null) {
-      // Si c'est un chemin d'asset
       if (_avatarPath!.startsWith('assets/')) {
         return AssetImage(_avatarPath!);
       }
-      // Si c'est une URL (photo uploadée)
       return NetworkImage(_avatarPath!);
     }
-    // Si aucun avatar n'est dans les préférences mais que photoURL existe dans le profil Firebase
     else if (photoURL != null) {
-      // Si c'est un chemin d'asset
       if (photoURL.startsWith('assets/')) {
         return AssetImage(photoURL);
       }
-      // Si c'est une URL
       return NetworkImage(photoURL);
     }
-    // Avatar par défaut si rien n'est défini
     return const AssetImage('assets/avatars/avatar1.png');
   }
 
@@ -401,9 +394,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 }
 
 class _MathBackgroundPainter extends CustomPainter {
-  final double animation;
+  final double animationValue;
 
-  _MathBackgroundPainter({this.animation = 1.0});
+  _MathBackgroundPainter({required this.animationValue});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -411,26 +404,22 @@ class _MathBackgroundPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.05)
       ..style = PaintingStyle.fill;
 
-    final seedValue = 42; // Valeur fixe pour un motif cohérent
+    final seedValue = 42;
     final random = Random(seedValue);
 
     for (int i = 0; i < 30; i++) {
-      // Utilisation de l'animation pour un léger mouvement des éléments
-      final baseX = random.nextDouble() * size.width;
-      final baseY = random.nextDouble() * size.height;
+      // Utilisation de l'animation pour un mouvement fluide
+      final x = random.nextDouble() * size.width + sin(animationValue + i * 0.5) * 30;
+      final y = random.nextDouble() * size.height + cos(animationValue + i * 0.5) * 30;
 
-      // Animation subtile des éléments
-      final x = baseX + sin(animation * i * 0.1) * 5;
-      final y = baseY + cos(animation * i * 0.1) * 5;
-
-      final radius = (random.nextDouble() * 20 + 10) * animation;
+      final radius = (random.nextDouble() * 20 + 10) * (0.8 + 0.2 * sin(animationValue * 0.5));
 
       if (i % 3 == 0) {
         canvas.drawCircle(Offset(x, y), radius, paint);
       } else {
         final textPainter = TextPainter(
           text: TextSpan(
-            text: ['+', '-', '×', '÷', '='][random.nextInt(5)],
+            text: ['+', '-','0','1','×', '÷', '='][random.nextInt(5)],
             style: TextStyle(
               color: Colors.white.withOpacity(0.08),
               fontSize: radius * 2,
@@ -444,8 +433,7 @@ class _MathBackgroundPainter extends CustomPainter {
       }
     }
   }
-  @override
-  bool shouldRepaint(covariant _MathBackgroundPainter oldDelegate) =>
-      oldDelegate.animation != animation;
-}
 
+  @override
+  bool shouldRepaint(covariant _MathBackgroundPainter oldDelegate) => true;
+}

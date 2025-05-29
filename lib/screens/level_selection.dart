@@ -25,18 +25,20 @@ class LevelSelectionScreen extends StatelessWidget {
           // Fond avec motif mathématique
           Container(
             decoration: BoxDecoration(
-              color: AppColors.primary,
-              image: DecorationImage(
-                image: const AssetImage('assets/images/math_pattern.png'),
-                fit: BoxFit.cover,
-                opacity: 0.5,
-                colorFilter: ColorFilter.mode(
-                  AppColors.primary.withOpacity(0.3),
-                  BlendMode.dstATop,
-                ),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.primary,
+                  Color.lerp(AppColors.primary, Colors.white, 0.3)!,
+                  Color.lerp(AppColors.primary, Colors.white, 0.6)!,
+                  Colors.white,
+                ],
+                stops: [0.0, 0.3, 0.6, 1.0],
               ),
             ),
           ),
+
 
           // Contenu principal
           SafeArea(

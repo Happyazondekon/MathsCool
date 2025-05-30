@@ -528,7 +528,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 Text(
                   'Configure tes rappels pour ne jamais oublier tes sessions de maths !',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 13,
                     fontFamily: 'ComicNeue',
                     color: Colors.white.withOpacity(0.7),
                   ),

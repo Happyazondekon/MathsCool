@@ -45,7 +45,7 @@ class MathsCoolApp extends StatelessWidget {
       title: 'MathsCool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
         fontFamily: 'ComicNeue',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),

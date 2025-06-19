@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'home_screen.dart';
+import 'notification_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -451,6 +452,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildAccountActions(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final displayName = authService.currentUser?.displayName ?? 'MathKid';
+
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -469,15 +473,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
           ),
-          // Mes Badges
+          // Mes Rappels
           ListTile(
-            leading: const Icon(Icons.star, color: AppColors.primary),
+            leading: const Icon(Icons.notifications, color: AppColors.primary),
             title: const Text('Mes Rappels'),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ProgressScreen(),
+                  builder: (context) => NotificationSettingsScreen(
+                    userName: displayName,
+                  ),
                 ),
               );
             },

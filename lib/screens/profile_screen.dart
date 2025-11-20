@@ -240,7 +240,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.primary, Colors.white],
+                colors: [AppColors.christ, Colors.white],
               ),
             ),
           ),
@@ -272,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.christ,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
       child: Row(
@@ -353,7 +353,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Container(
                         padding: const EdgeInsets.all(5),
                         decoration: const BoxDecoration(
-                          color: AppColors.primary,
+                          color: AppColors.christ,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -436,7 +436,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ListTile(
-        leading: const Icon(Icons.bar_chart, color: AppColors.primary),
+        leading: const Icon(Icons.bar_chart, color: AppColors.christ),
         title: const Text(
           'Voir ma progression',
           style: TextStyle(fontWeight: FontWeight.bold),
@@ -462,7 +462,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           // Aide
           ListTile(
-            leading: const Icon(Icons.help, color: AppColors.primary),
+            leading: const Icon(Icons.help, color: AppColors.christ),
             title: const Text('Aide'),
             onTap: () {
               Navigator.push(
@@ -475,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           // Mes Rappels
           ListTile(
-            leading: const Icon(Icons.notifications, color: AppColors.primary),
+            leading: const Icon(Icons.notifications, color: AppColors.christ),
             title: const Text('Mes Rappels'),
             onTap: () {
               Navigator.push(
@@ -490,7 +490,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           // Retourner à l'accueil
           ListTile(
-            leading: const Icon(Icons.home, color: AppColors.primary),
+            leading: const Icon(Icons.home, color: AppColors.christ),
             title: const Text('Retourner à l\'accueil'),
             onTap: () {
               Navigator.pushAndRemoveUntil(

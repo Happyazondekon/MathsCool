@@ -5,12 +5,15 @@ class AppUser {
   final String? email;
   final String? displayName;
   final String? photoURL;
+  // NOUVEAU: Statut de vérification de l'email
+  final bool emailVerified;
 
   AppUser({
     required this.uid,
     this.email,
     this.displayName,
     this.photoURL,
+    required this.emailVerified, // <-- AJOUTÉ
   });
 
   /// Factory method pour créer un AppUser à partir d'un User Firebase
@@ -20,6 +23,7 @@ class AppUser {
       email: firebaseUser.email,
       displayName: firebaseUser.displayName,
       photoURL: firebaseUser.photoURL,
+      emailVerified: firebaseUser.emailVerified, // <-- AJOUTÉ
     );
   }
 
@@ -29,17 +33,19 @@ class AppUser {
     String? email,
     String? displayName,
     String? photoURL,
+    bool? emailVerified, // <-- AJOUTÉ
   }) {
     return AppUser(
       uid: uid ?? this.uid,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
       photoURL: photoURL ?? this.photoURL,
+      emailVerified: emailVerified ?? this.emailVerified, // <-- AJOUTÉ
     );
   }
 
   @override
   String toString() {
-    return 'AppUser(uid: $uid, email: $email, displayName: $displayName, photoURL: $photoURL)';
+    return 'AppUser(uid: $uid, email: $email, displayName: $displayName, photoURL: $photoURL, emailVerified: $emailVerified)';
   }
 }

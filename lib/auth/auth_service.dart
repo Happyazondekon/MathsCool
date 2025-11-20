@@ -22,6 +22,11 @@ class AuthService {
     return user != null ? AppUser.fromFirebase(user) : null;
   }
 
+  // NOUVEAU: Getter pour l'utilisateur Firebase brut (pour accéder à sendEmailVerification)
+  User? get currentFirebaseUser {
+    return _auth.currentUser;
+  }
+
   Future<void> signOut() async {
     // Déconnexion de Google si connecté
     if (await _googleSignIn.isSignedIn()) {
@@ -30,6 +35,34 @@ class AuthService {
 
     // Déconnexion Firebase
     await _auth.signOut();
+  }
+
+  // NOUVEAU: Méthode pour envoyer l'email de vérification
+  Future<void> sendEmailVerification() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+      }
+    } on FirebaseAuthException catch (e) {
+      throw _authErrorMapper(e);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error sending verification email: $e');
+      }
+      throw 'Erreur lors de l\'envoi de l\'email de vérification';
+    }
+  }
+
+  // NOUVEAU: Méthode pour recharger l'utilisateur
+  Future<void> reloadUser() async {
+    try {
+      await _auth.currentUser?.reload();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error reloading user: $e');
+      }
+    }
   }
 
   // Connexion avec Google
@@ -76,6 +109,13 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      // NOUVEAU: Vérifier si l'email est vérifié
+      if (result.user != null && !result.user!.emailVerified) {
+        // L'utilisateur existe mais l'email n'est pas vérifié
+        throw 'Veuillez vérifier votre email avant de vous connecter';
+      }
+
       return result.user;
     } on FirebaseAuthException catch (e) {
       throw _authErrorMapper(e);
@@ -87,6 +127,10 @@ class AuthService {
     } catch (e) {
       if (kDebugMode) {
         print('Unexpected error: $e');
+      }
+      // Si c'est notre message personnalisé, on le relance
+      if (e.toString().contains('Veuillez vérifier votre email')) {
+        rethrow;
       }
       throw 'Une erreur inattendue est survenue. Réessayez.';
     }
@@ -109,6 +153,11 @@ class AuthService {
         await result.user!.updateDisplayName(displayName);
         // Recharger l'utilisateur pour que les changements soient pris en compte
         await result.user!.reload();
+      }
+
+      // NOUVEAU: Envoyer automatiquement l'email de vérification
+      if (result.user != null) {
+        await result.user!.sendEmailVerification();
       }
 
       return _auth.currentUser; // Pour obtenir les informations mises à jour
@@ -199,8 +248,26 @@ class AuthService {
         return 'Cette opération nécessite une authentification récente. Veuillez vous reconnecter.';
       case 'account-exists-with-different-credential':
         return 'Un compte existe déjà avec cette adresse email mais avec une méthode de connexion différente.';
+      case 'too-many-requests':
+        return 'Trop de tentatives. Veuillez réessayer plus tard.';
       default:
         return 'Une erreur est survenue : ${e.code}';
+    }
+  }
+  Future<void> reloadCurrentUser() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        // Appelle la méthode reload sur l'objet User natif de Firebase
+        await user.reload();
+      }
+    } on FirebaseAuthException catch (e) {
+      throw _authErrorMapper(e);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error reloading user: $e');
+      }
+      throw 'Erreur lors du rechargement de l\'utilisateur';
     }
   }
 }

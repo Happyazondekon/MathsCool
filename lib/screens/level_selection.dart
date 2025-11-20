@@ -29,10 +29,10 @@ class LevelSelectionScreen extends StatelessWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.primary,
-                  Color.lerp(AppColors.primary, Colors.white, 0.3)!,
-                  Color.lerp(AppColors.primary, Colors.white, 0.6)!,
-                  Colors.white,
+                  AppColors.christ,
+                  Color.lerp(AppColors.christ, Colors.red, 0.3)!,
+                  Color.lerp(AppColors.christ, Colors.red, 0.6)!,
+                  Colors.red,
                 ],
                 stops: [0.0, 0.3, 0.6, 1.0],
               ),
@@ -76,7 +76,7 @@ class LevelSelectionScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.christ,
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(30),
         ),

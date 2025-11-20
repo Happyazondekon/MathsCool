@@ -15,7 +15,7 @@ class HelpScreen extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.primary, Colors.white],
+                colors: [AppColors.christ, Colors.white],
                 stops: const [0.0, 0.6],
               ),
             ),
@@ -49,7 +49,7 @@ class HelpScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.christ,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
       child: Stack(
@@ -81,7 +81,7 @@ class HelpScreen extends StatelessWidget {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ExpansionTile(
-        leading: Icon(Icons.question_answer, color: AppColors.primary),
+        leading: Icon(Icons.question_answer, color: AppColors.christ),
         title: const Text(
           'Questions fréquentes',
           style: TextStyle(
@@ -141,7 +141,7 @@ class HelpScreen extends StatelessWidget {
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ExpansionTile(
-        leading: Icon(Icons.menu_book, color: AppColors.primary),
+        leading: Icon(Icons.menu_book, color: AppColors.christ),
         title: const Text(
           'Manuel MathKid - Deviens un champion des maths !',
           style: TextStyle(
@@ -226,7 +226,7 @@ class HelpScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.christ.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -237,7 +237,7 @@ class HelpScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: AppColors.christ,
               fontFamily: 'ComicNeue',
             ),
           ),
@@ -273,7 +273,7 @@ class HelpScreen extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('• ', style: TextStyle(color: AppColors.primary, fontSize: 16)),
+              Text('• ', style: TextStyle(color: AppColors.christ, fontSize: 16)),
               Expanded(
                 child: Text(
                   item,
@@ -350,7 +350,7 @@ class HelpScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.lightbulb, color: AppColors.primary),
+                Icon(Icons.lightbulb, color: AppColors.christ),
                 const SizedBox(width: 8),
                 const Text(
                   'Astuces pour progresser',

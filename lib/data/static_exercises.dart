@@ -13,6 +13,17 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '1 + 3 = ?', options: ['4', '2', '1', '5'], correctAnswer: 0),
       Exercise(question: '0 + 0 = ?', options: ['0', '1', '2', '3'], correctAnswer: 0),
       Exercise(question: '2 + 1 = ?', options: ['4', '3', '2', '1'], correctAnswer: 1),
+      // Nouveaux exercices d'Addition (11 à 20)
+      Exercise(question: '3 + 3 = ?', options: ['5', '6', '7', '4'], correctAnswer: 1),
+      Exercise(question: '1 + 4 = ?', options: ['4', '6', '5', '3'], correctAnswer: 2),
+      Exercise(question: '0 + 5 = ?', options: ['0', '6', '4', '5'], correctAnswer: 3),
+      Exercise(question: '2 + 4 = ?', options: ['5', '7', '6', '4'], correctAnswer: 2),
+      Exercise(question: '5 + 0 = ?', options: ['6', '5', '4', '3'], correctAnswer: 1),
+      Exercise(question: '1 + 0 = ?', options: ['0', '2', '1', '3'], correctAnswer: 2),
+      Exercise(question: '4 + 1 = ?', options: ['6', '5', '3', '4'], correctAnswer: 1),
+      Exercise(question: '0 + 3 = ?', options: ['1', '3', '2', '4'], correctAnswer: 1),
+      Exercise(question: '3 + 1 = ?', options: ['4', '3', '5', '6'], correctAnswer: 0),
+      Exercise(question: '1 + 5 = ?', options: ['5', '7', '6', '4'], correctAnswer: 2),
     ],
     'Soustraction': [
       Exercise(question: '2 - 1 = ?', options: ['1', '2', '0', '3'], correctAnswer: 0),
@@ -25,6 +36,17 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '3 - 3 = ?', options: ['1', '2', '3', '0'], correctAnswer: 3),
       Exercise(question: '2 - 0 = ?', options: ['2', '0', '1', '3'], correctAnswer: 0),
       Exercise(question: '1 - 1 = ?', options: ['2', '3', '1', '0'], correctAnswer: 3),
+      // Nouveaux exercices de Soustraction (11 à 20)
+      Exercise(question: '6 - 2 = ?', options: ['3', '5', '4', '2'], correctAnswer: 2),
+      Exercise(question: '5 - 2 = ?', options: ['4', '2', '3', '1'], correctAnswer: 2),
+      Exercise(question: '4 - 0 = ?', options: ['5', '3', '4', '0'], correctAnswer: 2),
+      Exercise(question: '6 - 3 = ?', options: ['2', '4', '3', '1'], correctAnswer: 2),
+      Exercise(question: '3 - 0 = ?', options: ['4', '2', '3', '1'], correctAnswer: 2),
+      Exercise(question: '5 - 4 = ?', options: ['0', '2', '1', '3'], correctAnswer: 2),
+      Exercise(question: '6 - 0 = ?', options: ['6', '5', '4', '3'], correctAnswer: 0),
+      Exercise(question: '4 - 1 = ?', options: ['2', '4', '3', '1'], correctAnswer: 2),
+      Exercise(question: '6 - 5 = ?', options: ['2', '1', '0', '3'], correctAnswer: 1),
+      Exercise(question: '5 - 5 = ?', options: ['1', '0', '2', '5'], correctAnswer: 1),
     ],
     'Multiplication': [],
     'Division': [],
@@ -44,6 +66,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '0 + 8 = ?', options: ['7', '8', '9', '6'], correctAnswer: 1),
       Exercise(question: '9 + 6 = ?', options: ['15', '14', '16', '13'], correctAnswer: 0),
       Exercise(question: '12 + 3 = ?', options: ['14', '15', '16', '13'], correctAnswer: 1),
+      // Exercices supplémentaires
+      Exercise(question: '11 + 9 = ?', options: ['19', '21', '20', '18'], correctAnswer: 2),
+      Exercise(question: '15 + 2 = ?', options: ['18', '17', '16', '15'], correctAnswer: 1),
+      Exercise(question: '10 + 10 = ?', options: ['19', '20', '21', '18'], correctAnswer: 1),
+      Exercise(question: '14 + 5 = ?', options: ['18', '20', '19', '17'], correctAnswer: 2),
+      Exercise(question: '1 + 13 = ?', options: ['14', '13', '15', '16'], correctAnswer: 0),
+      Exercise(question: '7 + 7 = ?', options: ['13', '15', '14', '12'], correctAnswer: 2),
+      Exercise(question: '16 + 4 = ?', options: ['19', '21', '20', '18'], correctAnswer: 2),
+      Exercise(question: '17 + 1 = ?', options: ['17', '19', '16', '18'], correctAnswer: 3),
     ],
     'Soustraction': [
       Exercise(question: '12 - 3 = ?', options: ['8', '9', '10', '11'], correctAnswer: 1),
@@ -58,6 +89,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '10 - 8 = ?', options: ['2', '3', '1', '4'], correctAnswer: 0),
       Exercise(question: '6 - 1 = ?', options: ['4', '3', '5', '6'], correctAnswer: 2),
       Exercise(question: '13 - 8 = ?', options: ['6', '4', '5', '7'], correctAnswer: 2),
+      // Exercices supplémentaires
+      Exercise(question: '18 - 5 = ?', options: ['12', '13', '14', '11'], correctAnswer: 1),
+      Exercise(question: '20 - 10 = ?', options: ['9', '11', '10', '12'], correctAnswer: 2),
+      Exercise(question: '16 - 7 = ?', options: ['8', '10', '9', '7'], correctAnswer: 2),
+      Exercise(question: '11 - 3 = ?', options: ['7', '9', '8', '6'], correctAnswer: 2),
+      Exercise(question: '17 - 1 = ?', options: ['15', '17', '16', '14'], correctAnswer: 2),
+      Exercise(question: '19 - 9 = ?', options: ['11', '10', '9', '8'], correctAnswer: 1),
+      Exercise(question: '15 - 7 = ?', options: ['9', '7', '8', '6'], correctAnswer: 2),
+      Exercise(question: '12 - 5 = ?', options: ['6', '8', '7', '5'], correctAnswer: 2),
     ],
     'Multiplication': [
       Exercise(question: '2 x 3 = ?', options: ['6', '5', '7', '4'], correctAnswer: 0),
@@ -72,6 +112,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '2 x 6 = ?', options: ['10', '12', '11', '8'], correctAnswer: 1),
       Exercise(question: '4 x 3 = ?', options: ['11', '12', '13', '14'], correctAnswer: 1),
       Exercise(question: '5 x 2 = ?', options: ['12', '9', '10', '11'], correctAnswer: 2),
+      // Exercices supplémentaires
+      Exercise(question: '5 x 4 = ?', options: ['20', '15', '25', '18'], correctAnswer: 0),
+      Exercise(question: '3 x 4 = ?', options: ['10', '14', '12', '13'], correctAnswer: 2),
+      Exercise(question: '2 x 5 = ?', options: ['8', '12', '10', '9'], correctAnswer: 2),
+      Exercise(question: '10 x 1 = ?', options: ['10', '9', '11', '12'], correctAnswer: 0),
+      Exercise(question: '4 x 4 = ?', options: ['12', '16', '14', '18'], correctAnswer: 1),
+      Exercise(question: '5 x 5 = ?', options: ['20', '25', '30', '15'], correctAnswer: 1),
+      Exercise(question: '6 x 3 = ?', options: ['15', '18', '21', '16'], correctAnswer: 1),
+      Exercise(question: '2 x 7 = ?', options: ['12', '16', '14', '15'], correctAnswer: 2),
     ],
     'Division': [
       Exercise(question: '6 ÷ 2 = ?', options: ['2', '3', '4', '6'], correctAnswer: 1),
@@ -86,6 +135,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '14 ÷ 7 = ?', options: ['1', '0', '3', '2'], correctAnswer: 3),
       Exercise(question: '8 ÷ 2 = ?', options: ['4', '3', '2', '5'], correctAnswer: 0),
       Exercise(question: '6 ÷ 3 = ?', options: ['3', '2', '1', '0'], correctAnswer: 1),
+      // Exercices supplémentaires
+      Exercise(question: '12 ÷ 4 = ?', options: ['4', '3', '2', '5'], correctAnswer: 1),
+      Exercise(question: '25 ÷ 5 = ?', options: ['4', '6', '5', '3'], correctAnswer: 2),
+      Exercise(question: '10 ÷ 2 = ?', options: ['6', '4', '5', '3'], correctAnswer: 2),
+      Exercise(question: '18 ÷ 3 = ?', options: ['7', '5', '6', '8'], correctAnswer: 2),
+      Exercise(question: '16 ÷ 8 = ?', options: ['3', '2', '4', '1'], correctAnswer: 1),
+      Exercise(question: '20 ÷ 4 = ?', options: ['6', '5', '4', '3'], correctAnswer: 1),
+      Exercise(question: '12 ÷ 3 = ?', options: ['5', '3', '4', '6'], correctAnswer: 2),
+      Exercise(question: '9 ÷ 1 = ?', options: ['8', '9', '10', '7'], correctAnswer: 1),
     ],
     'Géométrie': [
       Exercise(question: 'Combien de côtés a un rectangle ?', options: ['3', '5', '4', '6'], correctAnswer: 2),
@@ -100,6 +158,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: 'Combien de faces a une pyramide ?', options: ['5', '4', '6', '3'], correctAnswer: 0),
       Exercise(question: 'Combien de sommets a un cube ?', options: ['5', '6', '7', '8'], correctAnswer: 3),
       Exercise(question: 'Combien de côtés a un triangle ?', options: ['3', '2', '4', '5'], correctAnswer: 0),
+      // Exercices supplémentaires
+      Exercise(question: 'Quelle figure a six côtés égaux ?', options: ['Carré', 'Triangle', 'Hexagone', 'Pentagone'], correctAnswer: 2),
+      Exercise(question: 'Quel corps solide ressemble à une balle de football ?', options: ['Cube', 'Cône', 'Sphère', 'Cylindre'], correctAnswer: 2),
+      Exercise(question: 'Un triangle a-t-il toujours trois angles ?', options: ['Non', 'Oui', 'Parfois', 'Deux'], correctAnswer: 1),
+      Exercise(question: 'Combien de côtés a un trapèze ?', options: ['3', '4', '5', '6'], correctAnswer: 1),
+      Exercise(question: 'Le soleil est-il un exemple de... ?', options: ['Cylindre', 'Cône', 'Sphère', 'Pyramide'], correctAnswer: 2),
+      Exercise(question: 'Combien de sommets a un cône ?', options: ['1', '2', '0', '3'], correctAnswer: 0),
+      Exercise(question: 'Quelle figure a quatre côtés égaux et quatre angles droits ?', options: ['Rectangle', 'Losange', 'Trapèze', 'Carré'], correctAnswer: 3),
+      Exercise(question: 'Combien d\'arêtes a un cube ?', options: ['8', '10', '12', '6'], correctAnswer: 2),
     ],
   },
   'CE1': {
@@ -116,6 +183,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '8 + 13 = ?', options: ['20', '23', '22', '21'], correctAnswer: 3),
       Exercise(question: '7 + 16 = ?', options: ['21', '22', '23', '24'], correctAnswer: 2),
       Exercise(question: '19 + 4 = ?', options: ['22', '23', '24', '25'], correctAnswer: 1),
+      // Exercices supplémentaires
+      Exercise(question: '25 + 7 = ?', options: ['31', '33', '32', '34'], correctAnswer: 2),
+      Exercise(question: '10 + 20 = ?', options: ['20', '30', '35', '25'], correctAnswer: 1),
+      Exercise(question: '16 + 15 = ?', options: ['30', '32', '31', '29'], correctAnswer: 2),
+      Exercise(question: '13 + 13 = ?', options: ['24', '26', '28', '25'], correctAnswer: 1),
+      Exercise(question: '21 + 9 = ?', options: ['29', '31', '30', '28'], correctAnswer: 2),
+      Exercise(question: '19 + 11 = ?', options: ['29', '30', '31', '32'], correctAnswer: 1),
+      Exercise(question: '3 + 28 = ?', options: ['30', '31', '29', '32'], correctAnswer: 1),
+      Exercise(question: '15 + 15 = ?', options: ['28', '30', '32', '31'], correctAnswer: 1),
     ],
     'Soustraction': [
       Exercise(question: '20 - 9 = ?', options: ['10', '11', '12', '13'], correctAnswer: 1),
@@ -130,6 +206,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '23 - 16 = ?', options: ['7', '6', '8', '9'], correctAnswer: 0),
       Exercise(question: '14 - 5 = ?', options: ['8', '10', '9', '11'], correctAnswer: 2),
       Exercise(question: '26 - 17 = ?', options: ['7', '8', '9', '10'], correctAnswer: 2),
+      // Exercices supplémentaires
+      Exercise(question: '19 - 6 = ?', options: ['12', '13', '14', '15'], correctAnswer: 1),
+      Exercise(question: '28 - 10 = ?', options: ['17', '18', '19', '16'], correctAnswer: 1),
+      Exercise(question: '35 - 5 = ?', options: ['31', '30', '29', '28'], correctAnswer: 1),
+      Exercise(question: '21 - 4 = ?', options: ['16', '18', '17', '15'], correctAnswer: 2),
+      Exercise(question: '16 - 9 = ?', options: ['6', '8', '7', '5'], correctAnswer: 2),
+      Exercise(question: '29 - 11 = ?', options: ['17', '19', '18', '20'], correctAnswer: 2),
+      Exercise(question: '25 - 18 = ?', options: ['8', '7', '6', '5'], correctAnswer: 1),
+      Exercise(question: '33 - 13 = ?', options: ['19', '20', '21', '22'], correctAnswer: 1),
     ],
     'Multiplication': [
       Exercise(question: '3 x 6 = ?', options: ['18', '17', '16', '19'], correctAnswer: 0),
@@ -144,6 +229,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '4 x 5 = ?', options: ['19', '20', '21', '22'], correctAnswer: 1),
       Exercise(question: '7 x 3 = ?', options: ['20', '21', '22', '23'], correctAnswer: 1),
       Exercise(question: '2 x 8 = ?', options: ['15', '18', '17', '16'], correctAnswer: 3),
+      // Exercices supplémentaires
+      Exercise(question: '10 x 4 = ?', options: ['30', '40', '50', '20'], correctAnswer: 1),
+      Exercise(question: '5 x 6 = ?', options: ['35', '30', '25', '40'], correctAnswer: 1),
+      Exercise(question: '4 x 7 = ?', options: ['26', '28', '24', '30'], correctAnswer: 1),
+      Exercise(question: '3 x 8 = ?', options: ['21', '24', '27', '25'], correctAnswer: 1),
+      Exercise(question: '10 x 3 = ?', options: ['20', '30', '40', '50'], correctAnswer: 1),
+      Exercise(question: '5 x 9 = ?', options: ['40', '45', '50', '35'], correctAnswer: 1),
+      Exercise(question: '4 x 8 = ?', options: ['30', '32', '34', '36'], correctAnswer: 1),
+      Exercise(question: '6 x 4 = ?', options: ['22', '24', '26', '28'], correctAnswer: 1),
     ],
     'Division': [
       Exercise(question: '16 ÷ 4 = ?', options: ['4', '3', '2', '5'], correctAnswer: 0),
@@ -158,6 +252,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: '27 ÷ 3 = ?', options: ['8', '9', '10', '11'], correctAnswer: 1),
       Exercise(question: '14 ÷ 2 = ?', options: ['5', '6', '7', '8'], correctAnswer: 2),
       Exercise(question: '18 ÷ 2 = ?', options: ['9', '8', '10', '7'], correctAnswer: 0),
+      // Exercices supplémentaires
+      Exercise(question: '30 ÷ 5 = ?', options: ['5', '6', '7', '4'], correctAnswer: 1),
+      Exercise(question: '40 ÷ 10 = ?', options: ['3', '5', '4', '6'], correctAnswer: 2),
+      Exercise(question: '24 ÷ 4 = ?', options: ['5', '7', '6', '8'], correctAnswer: 2),
+      Exercise(question: '30 ÷ 3 = ?', options: ['9', '11', '10', '12'], correctAnswer: 2),
+      Exercise(question: '35 ÷ 5 = ?', options: ['6', '8', '7', '9'], correctAnswer: 2),
+      Exercise(question: '45 ÷ 9 = ?', options: ['5', '6', '4', '7'], correctAnswer: 0),
+      Exercise(question: '20 ÷ 2 = ?', options: ['8', '10', '9', '11'], correctAnswer: 1),
+      Exercise(question: '15 ÷ 3 = ?', options: ['4', '5', '6', '3'], correctAnswer: 1),
     ],
     'Géométrie': [
       Exercise(question: 'Combien de côtés a un rectangle ?', options: ['2', '3', '4', '5'], correctAnswer: 2),
@@ -172,6 +275,15 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: 'Combien de côtés a un cercle ?', options: ['0', '1', '2', '3'], correctAnswer: 0),
       Exercise(question: 'Combien de faces a un parallélépipède ?', options: ['6', '7', '5', '8'], correctAnswer: 0),
       Exercise(question: 'Combien d\'arêtes a un cube ?', options: ['14', '11', '13', '12'], correctAnswer: 3),
+      // Exercices supplémentaires
+      Exercise(question: 'Quelle forme a une face circulaire et un sommet ?', options: ['Cylindre', 'Cône', 'Sphère', 'Cube'], correctAnswer: 1),
+      Exercise(question: 'Combien de côtés a un octogone ?', options: ['7', '8', '9', '6'], correctAnswer: 1),
+      Exercise(question: 'Un cube a-t-il des arêtes courbes ?', options: ['Oui', 'Non', 'Parfois', 'Seulement 4'], correctAnswer: 1),
+      Exercise(question: 'Quel est le nom d\'une figure à 3 côtés ?', options: ['Carré', 'Triangle', 'Cercle', 'Rectangle'], correctAnswer: 1),
+      Exercise(question: 'Combien de faces a un cylindre ?', options: ['1', '2', '3', '4'], correctAnswer: 2),
+      Exercise(question: 'Un losange a combien de côtés ?', options: ['3', '4', '5', '6'], correctAnswer: 1),
+      Exercise(question: 'Quelle figure est ronde et plate ?', options: ['Cercle', 'Cube', 'Cylindre', 'Triangle'], correctAnswer: 0),
+      Exercise(question: 'Une ligne droite qui ne se termine jamais est appelée...', options: ['Segment', 'Rayon', 'Ligne', 'Point'], correctAnswer: 2),
     ],
   },
   'CE2': {
@@ -198,7 +310,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une école a 198 élèves en CE2 et 207 en CM1. Combien d\'élèves y a-t-il dans ces deux classes ?',
-      options: ['407', '408', '406', '405'],
+          options: ['407', '408', '406', '405'],
           correctAnswer: 3
       ),
       Exercise(
@@ -208,7 +320,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un magasin vend 89 jouets le matin et 111 jouets l\'après-midi. Combien de jouets ont été vendus en tout ?',
-      options: ['201', '200', '198', '199'],
+          options: ['201', '200', '198', '199'],
           correctAnswer: 1
       ),
       Exercise(
@@ -235,6 +347,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           question: 'Maman achète 180 g de farine et 19 g de sucre. Quel est le poids total ?',
           options: ['201', '199', '198', '200'],
           correctAnswer: 1
+      ),
+      // Exercices supplémentaires d'Addition
+      Exercise(
+          question: 'Dans un train, il y a 238 personnes. 145 personnes montent à l\'arrêt suivant. Combien y a-t-il de personnes dans le train ?',
+          options: ['383', '381', '382', '384'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un jeu vidéo coûte 129 euros, et un autre 78 euros. Quel est le coût total ?',
+          options: ['205', '206', '207', '204'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Jules a 200 images, et sa sœur lui donne 115 de plus. Combien d\'images a-t-il ?',
+          options: ['314', '316', '315', '317'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Une voiture roule 175 km puis 185 km. Quelle distance a-t-elle parcourue ?',
+          options: ['360', '350', '340', '370'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un boulanger prépare 250 croissants le matin et 130 l\'après-midi. Combien de croissants a-t-il préparés ?',
+          options: ['390', '380', '370', '400'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '49 + 253 = ?',
+          options: ['301', '302', '303', '304'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un sac pèse 215 g. On ajoute 95 g de sable. Quel est le poids total ?',
+          options: ['300', '310', '320', '315'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '105 + 98 = ?',
+          options: ['203', '204', '202', '205'],
+          correctAnswer: 0
       ),
     ],
     'Soustraction': [
@@ -275,7 +428,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '141 enfants partent en sortie, 70 restent à l\'école. Combien sont partis en sortie ?',
-      options: ['73', '71', '70', '72'],
+          options: ['73', '71', '70', '72'],
           correctAnswer: 1
       ),
       Exercise(
@@ -285,7 +438,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '175 oiseaux étaient sur un fil, 75 s\'envolent. Combien restent-ils ?',
-      options: ['101', '100', '102', '99'],
+          options: ['101', '100', '102', '99'],
           correctAnswer: 1
       ),
       Exercise(
@@ -295,8 +448,49 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '325 élèves étaient prévus, 123 sont absents. Combien d\'élèves sont présents ?',
-      options: ['203', '202', '201', '200'],
+          options: ['203', '202', '201', '200'],
           correctAnswer: 1
+      ),
+      // Exercices supplémentaires de Soustraction
+      Exercise(
+          question: 'Dans un réservoir de 350 litres, on en utilise 150. Combien de litres restent ?',
+          options: ['190', '200', '210', '180'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un voyageur parcourt 400 km. Il lui en reste 115 à faire. Combien de km a-t-il déjà parcouru ?',
+          options: ['285', '275', '295', '265'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '315 - 90 = ?',
+          options: ['220', '215', '225', '230'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Le prix était de 299 euros. Il baisse de 100 euros. Quel est le nouveau prix ?',
+          options: ['199', '200', '198', '201'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Dans un carton de 250 œufs, 75 sont cassés. Combien d\'œufs restent ?',
+          options: ['170', '185', '165', '175'],
+          correctAnswer: 4
+      ),
+      Exercise(
+          question: '450 - 150 = ?',
+          options: ['200', '300', '350', '250'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un paquet de 100 feuilles en contient 42 qui sont gâchées. Combien de feuilles utilisables ?',
+          options: ['57', '58', '59', '56'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '190 - 78 = ?',
+          options: ['112', '110', '113', '111'],
+          correctAnswer: 0
       ),
     ],
     'Multiplication': [
@@ -307,7 +501,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un jardinier plante 9 rangées de 6 arbres. Combien d\'arbres au total ?',
-      options: ['55', '54', '53', '56'],
+          options: ['55', '54', '53', '56'],
           correctAnswer: 1
       ),
       Exercise(
@@ -337,7 +531,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '5 amis collectionnent chacun 9 images. Combien d\'images en tout ?',
-      options: ['47', '44', '46', '45'],
+          options: ['47', '44', '46', '45'],
           correctAnswer: 3
       ),
       Exercise(
@@ -360,6 +554,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['41', '44', '43', '42'],
           correctAnswer: 3
       ),
+      // Exercices supplémentaires de Multiplication
+      Exercise(
+          question: '10 boîtes de 50 trombones. Combien de trombones en tout ?',
+          options: ['400', '500', '600', '450'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '5 paquets de 15 feutres. Combien de feutres ?',
+          options: ['70', '75', '80', '65'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Combien font 12 x 5 ?',
+          options: ['65', '55', '60', '70'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Combien font 9 x 10 ?',
+          options: ['80', '100', '90', '95'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '3 rangées de 12 chaises. Combien de chaises ?',
+          options: ['33', '35', '36', '37'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '4 boîtes de 10 gommes. Combien de gommes ?',
+          options: ['40', '50', '30', '45'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '15 pièces de 2 euros. Quelle somme ?',
+          options: ['28', '35', '30', '32'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '8 x 8 = ?',
+          options: ['65', '64', '63', '62'],
+          correctAnswer: 1
+      ),
     ],
     'Division': [
       Exercise(
@@ -379,7 +614,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: '60 élèves sont répartis en 5 groupes. Combien d\'élèves dans chaque groupe ?',
-      options: ['13', '15', '14', '12'],
+          options: ['13', '15', '14', '12'],
           correctAnswer: 3
       ),
       Exercise(
@@ -422,6 +657,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['11', '10', '9', '12'],
           correctAnswer: 3
       ),
+      // Exercices supplémentaires de Division
+      Exercise(
+          question: '49 stylos à ranger par 7. Combien de groupes ?',
+          options: ['6', '7', '8', '5'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '50 cahiers à distribuer à 10 élèves. Combien chacun ?',
+          options: ['6', '5', '4', '7'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '40 ÷ 8 = ?',
+          options: ['4', '5', '6', '3'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '120 billes à répartir en 10 boîtes. Combien par boîte ?',
+          options: ['10', '12', '11', '13'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '45 ÷ 5 = ?',
+          options: ['8', '10', '7', '9'],
+          correctAnswer: 3
+      ),
+      Exercise(
+          question: '30 ÷ 3 = ?',
+          options: ['9', '11', '10', '12'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '144 ÷ 12 = ?',
+          options: ['13', '11', '12', '10'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '200 élèves répartis en 5 classes. Combien par classe ?',
+          options: ['30', '50', '40', '60'],
+          correctAnswer: 2
+      ),
     ],
     'Géométrie': [
       Exercise(question: 'Un losange a combien de côtés égaux ?', options: ['3', '5', '4', '2'], correctAnswer: 2),
@@ -436,13 +712,22 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(question: 'Combien d\'angles droits a un rectangle ?', options: ['5', '2', '3', '4'], correctAnswer: 3),
       Exercise(question: 'Combien de faces a une pyramide à base carrée ?', options: ['7', '4', '6', '5'], correctAnswer: 3),
       Exercise(question: 'Combien de sommets a une pyramide à base carrée ?', options: ['7', '6', '4', '5'], correctAnswer: 3),
+      // Exercices supplémentaires de Géométrie
+      Exercise(question: 'Quelle forme 3D a un cercle pour base et un sommet ?', options: ['Cylindre', 'Cône', 'Sphère', 'Cube'], correctAnswer: 1),
+      Exercise(question: 'Comment appelle-t-on la figure qui a 5 côtés ?', options: ['Hexagone', 'Pentagone', 'Octogone', 'Trapèze'], correctAnswer: 1),
+      Exercise(question: 'Une ligne qui passe par le centre d\'un cercle s\'appelle le ... ?', options: ['Rayon', 'Diamètre', 'Côté', 'Arête'], correctAnswer: 1),
+      Exercise(question: 'Quel solide ressemble à une boîte de conserve ?', options: ['Cône', 'Pyramide', 'Cylindre', 'Cube'], correctAnswer: 2),
+      Exercise(question: 'Un triangle qui a tous ses côtés égaux est un triangle ... ?', options: ['Rectangle', 'Isocèle', 'Scalène', 'Équilatéral'], correctAnswer: 3),
+      Exercise(question: 'Combien de faces a un pavé droit ?', options: ['4', '6', '8', '12'], correctAnswer: 1),
+      Exercise(question: 'Quatre côtés égaux sans angle droit, c\'est un... ?', options: ['Carré', 'Rectangle', 'Losange', 'Trapèze'], correctAnswer: 2),
+      Exercise(question: 'La distance du centre à la bordure d\'un cercle est le... ?', options: ['Diamètre', 'Rayon', 'Périmètre', 'Côté'], correctAnswer: 1),
     ],
   },
   'CM1': {
     'Addition': [
       Exercise(
           question: 'Un club sportif compte 1 235 filles et 1 897 garçons. Quel est le nombre total d\'adhérents ?',
-      options: ['3134', '3133', '3135', '3132'],
+          options: ['3134', '3133', '3135', '3132'],
           correctAnswer: 3
       ),
       Exercise(
@@ -457,7 +742,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un magasin vend 432 livres le matin et 567 l\'après-midi. Quel est le nombre total de livres vendus ?',
-      options: ['999', '998', '1000', '997'],
+          options: ['999', '998', '1000', '997'],
           correctAnswer: 0
       ),
       Exercise(
@@ -467,7 +752,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une bibliothèque contient 543 livres de contes et 257 livres d\'aventure. Combien de livres au total ?',
-      options: ['799', '801', '800', '802'],
+          options: ['799', '801', '800', '802'],
           correctAnswer: 2
       ),
       Exercise(
@@ -499,6 +784,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           question: 'La classe A récolte 789 pièces et la classe B 211 pièces. Combien de pièces en tout ?',
           options: ['1001', '999', '1002', '1000'],
           correctAnswer: 3
+      ),
+      // Exercices supplémentaires d'Addition
+      Exercise(
+          question: '3 450 + 1 670 = ?',
+          options: ['5 120', '5 020', '5 110', '5 010'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Une école achète 1 500 feuilles bleues et 850 feuilles jaunes. Combien de feuilles au total ?',
+          options: ['2 340', '2 350', '2 450', '2 250'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Le prix d\'une télévision est 499 euros et celui d\'un lecteur DVD 129 euros. Prix total ?',
+          options: ['628', '627', '638', '618'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un agriculteur a 950 moutons et 1050 vaches. Combien d\'animaux a-t-il au total ?',
+          options: ['1 900', '2 100', '2 000', '2 050'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Le train parcourt 560 km puis 440 km. Quelle est la distance totale parcourue ?',
+          options: ['900', '1 100', '1 000', '950'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '2 100 + 99 = ?',
+          options: ['2 199', '2 201', '2 200', '2 198'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '1 250 + 750 = ?',
+          options: ['1 900', '2 100', '2 000', '1 950'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'La population d\'un village est de 400 habitants. 15 nouveaux s\'installent. Nouvelle population ?',
+          options: ['414', '416', '415', '417'],
+          correctAnswer: 2
       ),
     ],
     'Soustraction': [
@@ -562,6 +888,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['422', '421', '423', '424'],
           correctAnswer: 0
       ),
+      // Exercices supplémentaires de Soustraction
+      Exercise(
+          question: '4 000 - 1 500 = ?',
+          options: ['2 400', '2 500', '2 600', '2 300'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un stade a 3 500 places. 1 875 sont déjà occupées. Combien de places restantes ?',
+          options: ['1 625', '1 725', '1 600', '1 700'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Une ville avait 5 000 habitants. 1 348 déménagent. Combien reste-t-il ?',
+          options: ['3 652', '3 752', '3 552', '3 648'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '2 150 - 520 = ?',
+          options: ['1 630', '1 730', '1 530', '1 430'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un arbre mesurait 250 cm. On coupe 75 cm. Quelle est sa nouvelle taille ?',
+          options: ['175', '180', '165', '170'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '1 000 - 45 = ?',
+          options: ['955', '965', '945', '950'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un jeu de 360 cartes en perd 105. Combien en reste-t-il ?',
+          options: ['255', '265', '245', '275'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '524 - 180 = ?',
+          options: ['344', '334', '354', '364'],
+          correctAnswer: 1
+      ),
     ],
     'Multiplication': [
       Exercise(
@@ -623,6 +990,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           question: '18 équipes jouent 7 matchs. Combien de matchs au total ?',
           options: ['124', '126', '125', '127'],
           correctAnswer: 1
+      ),
+      // Exercices supplémentaires de Multiplication
+      Exercise(
+          question: 'Un carton contient 100 paquets de 10 mouchoirs. Combien de mouchoirs au total ?',
+          options: ['100', '1 000', '10 000', '100 000'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un magasin vend 15 sacs de 20 billes. Combien de billes vendues ?',
+          options: ['200', '300', '350', '250'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '16 x 5 = ?',
+          options: ['70', '80', '90', '75'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '22 x 4 = ?',
+          options: ['84', '88', '92', '96'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '10 enfants reçoivent chacun 12 autocollants. Combien d\'autocollants au total ?',
+          options: ['110', '120', '130', '140'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '9 x 15 = ?',
+          options: ['130', '135', '140', '145'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Le prix est de 2 euros. Si 50 personnes l\'achètent, quelle est la recette ?',
+          options: ['90', '110', '100', '105'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '11 x 8 = ?',
+          options: ['86', '98', '88', '96'],
+          correctAnswer: 2
       ),
     ],
     'Division': [
@@ -686,6 +1094,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['45', '44', '46', '47'],
           correctAnswer: 0
       ),
+      // Exercices supplémentaires de Division
+      Exercise(
+          question: '480 g de farine pour 8 gâteaux. Combien de grammes par gâteau ?',
+          options: ['50', '60', '70', '80'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '360 minutes à diviser en 6 films. Quelle est la durée moyenne d\'un film ?',
+          options: ['55', '65', '60', '70'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '190 ÷ 5 = ?',
+          options: ['36', '40', '38', '35'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '400 ÷ 8 = ?',
+          options: ['40', '50', '60', '30'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '1 000 timbres à coller sur 100 enveloppes. Combien de timbres par enveloppe ?',
+          options: ['10', '100', '1', '20'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '288 ÷ 12 = ?',
+          options: ['22', '24', '26', '28'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '500 élèves répartis en 20 classes. Combien par classe ?',
+          options: ['20', '25', '30', '15'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '320 ÷ 4 = ?',
+          options: ['70', '90', '80', '60'],
+          correctAnswer: 2
+      ),
     ],
     'Géométrie': [
       Exercise(
@@ -706,11 +1155,11 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(
           question: 'Combien de faces a un prisme rectangulaire ?',
           options: ['6', '7', '5', '8'],
-          correctAnswer: 3
+          correctAnswer: 0 // Correction : un prisme rectangulaire (pavé droit) a 6 faces.
       ),
       Exercise(
           question: 'Combien d\'angles a un octogone ?',
-      options: ['8', '9', '10', '7'],
+          options: ['8', '9', '10', '7'],
           correctAnswer: 0
       ),
       Exercise(
@@ -721,7 +1170,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(
           question: 'Combien de sommets a un prisme à base triangulaire ?',
           options: ['6', '4', '7', '5'],
-          correctAnswer: 3
+          correctAnswer: 0 // Correction : un prisme à base triangulaire a 6 sommets (3 en haut, 3 en bas).
       ),
       Exercise(
           question: 'Combien de faces a un cylindre ?',
@@ -741,12 +1190,53 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(
           question: 'Combien de faces a un parallélépipède ?',
           options: ['6', '7', '8', '9'],
-          correctAnswer: 3
+          correctAnswer: 0 // Correction : un parallélépipède a 6 faces.
       ),
       Exercise(
           question: 'Combien de sommets a un octogone ?',
           options: ['9', '10', '8', '11'],
           correctAnswer: 2
+      ),
+      // Exercices supplémentaires de Géométrie
+      Exercise(
+          question: 'Quel est le périmètre d\'un rectangle de 10 cm de long et 5 cm de large ?',
+          options: ['30', '25', '35', '20'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'L\'aire d\'un carré de 5 cm de côté est de ... ?',
+          options: ['10 cm²', '20 cm²', '25 cm²', '30 cm²'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '1 mètre équivaut à combien de centimètres ?',
+          options: ['10', '100', '1 000', '10 000'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Quel est l\'aire d\'un rectangle de 8 cm de long et 4 cm de large ?',
+          options: ['32 cm²', '24 cm²', '36 cm²', '12 cm²'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un triangle qui a deux côtés égaux est dit ... ?',
+          options: ['Équilatéral', 'Rectangle', 'Scalène', 'Isocèle'],
+          correctAnswer: 3
+      ),
+      Exercise(
+          question: 'Quel est le périmètre d\'un triangle dont les côtés mesurent 5 cm, 7 cm et 9 cm ?',
+          options: ['20 cm', '21 cm', '22 cm', '19 cm'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Combien de millimètres y a-t-il dans 1 centimètre ?',
+          options: ['10', '100', '1 000', '1'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un angle qui mesure moins de 90° est un angle ... ?',
+          options: ['Droit', 'Obtus', 'Plat', 'Aigu'],
+          correctAnswer: 3
       ),
     ],
   },
@@ -774,7 +1264,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une école a 456 garçons et 389 filles. Combien d\'élèves en tout ?',
-      options: ['846', '844', '847', '845'],
+          options: ['846', '844', '847', '845'],
           correctAnswer: 3
       ),
       Exercise(
@@ -812,6 +1302,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['5111', '5109', '5110', '5112'],
           correctAnswer: 2
       ),
+      // Exercices supplémentaires d'Addition
+      Exercise(
+          question: '5 678 + 4 322 = ?',
+          options: ['10 000', '9 990', '10 010', '9 900'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un pays compte 45 670 hommes et 51 230 femmes. Quelle est la population totale ?',
+          options: ['96 900', '97 000', '96 800', '97 100'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un stock contient 15 000 vis, et on en ajoute 3 500. Combien de vis au total ?',
+          options: ['18 500', '18 400', '17 500', '19 500'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '6 000 + 4 567 + 1 000 = ?',
+          options: ['11 567', '11 667', '10 567', '11 467'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Une voiture pèse 1 230 kg et son chargement 45 kg. Quel est le poids total ?',
+          options: ['1 274', '1 275', '1 285', '1 265'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Le budget est de 18 900 € pour la construction et 5 600 € pour le matériel. Budget total ?',
+          options: ['24 500', '23 500', '24 000', '25 000'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un athlète court 1 500 mètres puis 2 750 mètres. Distance totale ?',
+          options: ['4 250', '4 300', '4 150', '4 200'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '10 000 + 999 = ?',
+          options: ['10 999', '11 000', '10 900', '11 999'],
+          correctAnswer: 0
+      ),
     ],
     'Soustraction': [
       Exercise(
@@ -831,7 +1362,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Une réserve contenait 8 000 litres d\'eau. On en a retiré 5 632. Combien reste-t-il ?',
-      options: ['2370', '2369', '2367', '2368'],
+          options: ['2370', '2369', '2367', '2368'],
           correctAnswer: 3
       ),
       Exercise(
@@ -873,6 +1404,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           question: 'L\'école avait 14 000 élèves, 4 567 changent d\'établissement. Combien restent-ils ?',
           options: ['9435', '9433', '9436', '9434'],
           correctAnswer: 1
+      ),
+      // Exercices supplémentaires de Soustraction
+      Exercise(
+          question: 'Un stock de 12 000 articles diminue de 4 500 unités. Combien en reste-t-il ?',
+          options: ['7 500', '7 600', '7 400', '8 500'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '3 000 - 15 = ?',
+          options: ['2 984', '2 985', '2 975', '2 995'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un budget de 25 000 € est réduit de 7 890 €. Quel est le nouveau budget ?',
+          options: ['17 110', '17 210', '18 110', '17 010'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '9 750 - 4 321 = ?',
+          options: ['5 428', '5 429', '5 439', '5 438'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: 'La distance totale est de 500 km. Après 198 km, combien reste-t-il ?',
+          options: ['301', '302', '303', '300'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '1 000 - 543 = ?',
+          options: ['457', '458', '467', '468'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Une somme de 12 500 € est donnée. Il en reste 6 250 € après un achat. Quel est le coût de l\'achat ?',
+          options: ['6 350', '6 250', '6 150', '6 050'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '21 500 - 9 800 = ?',
+          options: ['11 700', '11 600', '12 700', '11 500'],
+          correctAnswer: 0
       ),
     ],
     'Multiplication': [
@@ -936,6 +1508,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['793', '791', '792', '794'],
           correctAnswer: 2
       ),
+      // Exercices supplémentaires de Multiplication
+      Exercise(
+          question: '300 boîtes de 50 trombones. Combien de trombones ?',
+          options: ['15 000', '1 500', '150 000', '1 500 000'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '150 x 20 = ?',
+          options: ['3 000', '300', '3 500', '30 000'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '25 x 44 = ?',
+          options: ['1 100', '1 000', '1 200', '1 150'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: 'Un mur est fait de 50 rangées de 35 briques. Combien de briques ?',
+          options: ['1 750', '1 800', '1 650', '1 700'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '100 x 99 = ?',
+          options: ['990', '9900', '9 990', '9090'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '14 x 15 = ?',
+          options: ['200', '210', '220', '230'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '60 boîtes de 12 stylos. Combien de stylos au total ?',
+          options: ['700', '710', '720', '730'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Un magasin vend 24 produits à 50 € chacun. Quelle est la recette ?',
+          options: ['1 200', '1 100', '1 250', '1 150'],
+          correctAnswer: 0
+      ),
     ],
     'Division': [
       Exercise(
@@ -998,6 +1611,47 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
           options: ['110', '113', '112', '111'],
           correctAnswer: 2
       ),
+      // Exercices supplémentaires de Division
+      Exercise(
+          question: '3 600 secondes à partager entre 6 personnes. Combien chacun ?',
+          options: ['60', '600', '6', '6000'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '1 250 € à répartir entre 25 gagnants. Combien chacun ?',
+          options: ['40', '50', '60', '70'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '4 000 ÷ 100 = ?',
+          options: ['40', '400', '4', '4 000'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '945 ÷ 9 = ?',
+          options: ['105', '115', '106', '110'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '1 000 crayons à diviser en 40 lots. Combien de crayons par lot ?',
+          options: ['20', '25', '30', '15'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '550 ÷ 50 = ?',
+          options: ['12', '10', '11', '13'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: '1 600 élèves à répartir dans 32 classes. Combien par classe ?',
+          options: ['40', '50', '60', '30'],
+          correctAnswer: 1
+      ),
+      Exercise(
+          question: '2 100 ÷ 7 = ?',
+          options: ['30', '300', '3 000', '3'],
+          correctAnswer: 1
+      ),
     ],
     'Géométrie': [
       Exercise(
@@ -1007,7 +1661,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Combien d\'arêtes a un cube ?',
-      options: ['11', '13', '12', '14'],
+          options: ['11', '13', '12', '14'],
           correctAnswer: 2
       ),
       Exercise(
@@ -1022,7 +1676,7 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       ),
       Exercise(
           question: 'Un hexagone régulier a combien d\'axes de symétrie ?',
-      options: ['4', '7', '6', '5'],
+          options: ['4', '7', '6', '5'],
           correctAnswer: 2
       ),
       Exercise(
@@ -1058,7 +1712,43 @@ final Map<String, Map<String, List<Exercise>>> staticExercises = {
       Exercise(
           question: 'Combien de faces a un prisme hexagonal ?',
           options: ['8', '12', '10', '14'],
+          correctAnswer: 0 // Correction : un prisme hexagonal a 2 bases (hexagones) + 6 faces latérales (rectangles) = 8 faces.
+      ),
+      // Exercices supplémentaires de Géométrie
+      Exercise(
+          question: 'Quel est le volume d\'un pavé droit de 5 cm x 4 cm x 3 cm ?',
+          options: ['60 cm³', '50 cm³', '65 cm³', '70 cm³'],
+          correctAnswer: 0
+      ),
+      Exercise(
+          question: '1 litre équivaut à combien de millilitres ?',
+          options: ['10', '100', '1 000', '10 000'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'L\'aire d\'un triangle dont la base mesure 10 cm et la hauteur 8 cm est de ... ?',
+          options: ['40 cm²', '80 cm²', '18 cm²', '20 cm²'],
+          correctAnswer: 0 // Aire = (base x hauteur) / 2
+      ),
+      Exercise(
+          question: 'Quelle est la formule du périmètre d\'un carré de côté c ?',
+          options: ['c x c', 'c / 4', 'c + 4', '4 x c'],
+          correctAnswer: 3
+      ),
+      Exercise(
+          question: '1 kilomètre équivaut à combien de mètres ?',
+          options: ['100', '1 000', '10 000', '10'],
           correctAnswer: 1
+      ),
+      Exercise(
+          question: 'Un angle qui mesure plus de 90° est un angle ... ?',
+          options: ['Aigu', 'Droit', 'Obtus', 'Plat'],
+          correctAnswer: 2
+      ),
+      Exercise(
+          question: 'Quel solide a une base carrée et quatre faces triangulaires ?',
+          options: ['Prisme', 'Cube', 'Pyramide', 'Cylindre'],
+          correctAnswer: 2
       ),
     ],
   },

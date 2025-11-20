@@ -31,7 +31,7 @@ class ThemeSelectionScreen extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.primary, Colors.white],
+                colors: [AppColors.christ, Colors.white],
               ),
             ),
           ),
@@ -85,7 +85,7 @@ class ThemeSelectionScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.christ,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
       child: Row(

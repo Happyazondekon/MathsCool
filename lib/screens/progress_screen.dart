@@ -146,7 +146,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.primary, Colors.white],
+                colors: [AppColors.christ, Colors.white],
               ),
             ),
           ),
@@ -229,12 +229,12 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
         ),
         borderRadius: BorderRadius.circular(25),
         border: Border.all(
-          color: AppColors.primary.withOpacity(0.3),
+          color: AppColors.christ.withOpacity(0.3),
           width: 2,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.15),
+            color: AppColors.christ.withOpacity(0.15),
             blurRadius: 15,
             spreadRadius: 2,
             offset: const Offset(0, 8),
@@ -346,7 +346,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'ComicNeue',
-                            color: AppColors.primary,
+                            color: AppColors.christ,
                           ),
                         ),
                         Text(
@@ -354,7 +354,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
+                            color: AppColors.christ,
                             fontFamily: 'ComicNeue',
                           ),
                         ),
@@ -627,7 +627,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: !showGradeProgress ? AppColors.primary : Colors.white,
+                  backgroundColor: !showGradeProgress ? AppColors.christ : Colors.white,
                   foregroundColor: !showGradeProgress ? Colors.white : Colors.grey[700],
                   elevation: !showGradeProgress ? 2 : 0,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -663,7 +663,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: showGradeProgress ? AppColors.primary : Colors.white,
+                  backgroundColor: showGradeProgress ? AppColors.christ : Colors.white,
                   foregroundColor: showGradeProgress ? Colors.white : Colors.grey[700],
                   elevation: showGradeProgress ? 2 : 0,
                   padding: const EdgeInsets.symmetric(vertical: 12),
@@ -701,7 +701,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary,
+        color: AppColors.christ,
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
         boxShadow: [
           BoxShadow(

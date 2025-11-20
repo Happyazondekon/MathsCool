@@ -121,8 +121,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF5EC6FF), // Bleu clair
-              Color(0xFF3AA9FF), // Bleu intermédiaire
+              Color(0xDBD12C2C), // Bleu clair
+              Color(0xDBA30E0E), // Bleu intermédiaire
             ],
           ),
         ),
@@ -158,7 +158,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.85),
+        color: AppColors.christ.withOpacity(0.85),
         borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(30),
         ),
@@ -324,7 +324,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                     ),
                   ],
                   border: Border.all(
-                    color: AppColors.primary.withOpacity(0.5),
+                    color: AppColors.christ.withOpacity(0.5),
                     width: 3,
                   ),
                 ),
@@ -341,7 +341,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: AppColors.christ,
                         height: 1.3,
                       ),
                       textAlign: TextAlign.center,
@@ -378,9 +378,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   Widget _buildOptionButton(int index, Exercise exercise) {
     final colors = [
       const Color(0xFFFF7043), // Orange
-      const Color(0xFF42A5F5), // Bleu
+      const Color(0xDBA30E0E), // Bleu
       const Color(0xFF66BB6A), // Vert
-      const Color(0xFFAB47BC), // Violet
+      const Color(0xDBD12C2C), // Violet
     ];
 
     final color = colors[index % colors.length];
@@ -571,7 +571,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       fontSize: 22, // Réduit la taille de police
                       fontWeight: FontWeight.bold,
                       color: isMathKid
-                          ? AppColors.primary
+                          ? AppColors.christ
                           : isOnRightTrack
                           ? Colors.green
                           : Colors.orange,
@@ -611,7 +611,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isMathKid
-                                  ? [AppColors.primary, AppColors.secondary]
+                                  ? [AppColors.christ, AppColors.secondary]
                                   : isOnRightTrack
                                   ? [Colors.green, Colors.lightGreen]
                                   : [Colors.orange, Colors.deepOrange],
@@ -780,7 +780,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
+                            backgroundColor: AppColors.christ,
                             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),

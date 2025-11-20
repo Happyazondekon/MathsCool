@@ -102,7 +102,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.primary.withOpacity(0.05),
+                  AppColors.christ.withOpacity(0.05),
                   Colors.white,
                 ],
               ),
@@ -115,13 +115,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.christ.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.alarm_add,
                     size: 32,
-                    color: AppColors.primary,
+                    color: AppColors.christ,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -131,7 +131,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     fontFamily: 'ComicNeue',
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
-                    color: AppColors.primary,
+                    color: AppColors.christ,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -153,14 +153,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.access_time, color: AppColors.primary, size: 20),
+                                Icon(Icons.access_time, color: AppColors.christ, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Heure de rappel',
                                   style: TextStyle(
                                     fontFamily: 'ComicNeue',
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
+                                    color: AppColors.christ,
                                   ),
                                 ),
                               ],
@@ -182,7 +182,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
+                                    color: AppColors.christ,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -276,7 +276,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           _addCustomNotification();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
+                          backgroundColor: AppColors.christ,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -414,7 +414,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.christ,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
@@ -423,14 +423,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+              colors: [AppColors.christ, AppColors.christ.withOpacity(0.8)],
             ),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddNotificationDialog,
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.christ,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_alarm),
         label: const Text(
@@ -446,7 +446,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.primary, Colors.white],
+                colors: [AppColors.christ, Colors.white],
               ),
             ),
           ),
@@ -507,7 +507,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             child: Icon(
               Icons.notifications_active,
               size: 32,
-              color: AppColors.primary,
+              color: AppColors.christ,
             ),
           ),
           const SizedBox(width: 16),
@@ -645,7 +645,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: AppColors.christ,
                 fontFamily: 'ComicNeue',
               ),
             ),
@@ -683,12 +683,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.christ.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.access_time,
-                    color: AppColors.primary,
+                    color: AppColors.christ,
                     size: 20,
                   ),
                 ),

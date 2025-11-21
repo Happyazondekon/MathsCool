@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/widgets/progress_chart.dart';
-import 'package:mathscool/data/static_exercises.dart';
-import 'package:mathscool/data/user_results.dart';
+import 'package:mathscool/services/progress_service.dart';
+import 'package:mathscool/models/user_model.dart';
+import 'package:mathscool/models/user_progress_model.dart';
 import 'package:confetti/confetti.dart';
-// Importer notre nouveau widget
 import '../widgets/theme_badge.dart';
 
 class ProgressScreen extends StatefulWidget {
@@ -15,14 +16,13 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProviderStateMixin {
-  final UserResults _userResults = UserResults();
-  Map<String, double> userProgressByCategory = {};
-  Map<String, double> userProgressByGrade = {};
-  bool showGradeProgress = false; // Pour basculer entre les vues
+  final ProgressService _progressService = ProgressService();
+  bool showGradeProgress = false;
   late AnimationController _badgeAnimationController;
   late ConfettiController _confettiController;
-  double overallProgress = 0.0;
-  bool hasMathKidBadge = false;
+
+  UserProgress? _userProgress;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -32,7 +32,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
       duration: const Duration(milliseconds: 800),
     );
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
-    _initializeProgressData();
+    _loadUserProgress();
   }
 
   @override
@@ -42,97 +42,33 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     super.dispose();
   }
 
-  Future<void> _initializeProgressData() async {
-    await _userResults.loadResults(); // Charger les résultats de l'utilisateur
-    setState(() {
-      userProgressByCategory = _calculateProgressByCategory();
-      userProgressByGrade = _calculateProgressByGrade();
-      overallProgress = _calculateOverallProgress();
-      hasMathKidBadge = overallProgress >= 0.8;
+  Future<void> _loadUserProgress() async {
+    final user = Provider.of<AppUser?>(context, listen: false);
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
 
-      if (hasMathKidBadge) {
-        _badgeAnimationController.forward();
-        _confettiController.play();
+    try {
+      final progress = await _progressService.getUserProgress(user.uid);
+
+      if (mounted) {
+        setState(() {
+          _userProgress = progress;
+          _isLoading = false;
+
+          if (progress != null && progress.hasMathKidBadge) {
+            _badgeAnimationController.forward();
+            _confettiController.play();
+          }
+        });
       }
-    });
-  }
-
-  double _calculateOverallProgress() {
-    if (userProgressByCategory.isEmpty) return 0.0;
-
-    double totalProgress = userProgressByCategory.values.fold(0.0, (sum, value) => sum + value);
-    return totalProgress / userProgressByCategory.length;
-  }
-
-  Map<String, double> _calculateProgressByCategory() {
-    Map<String, double> progress = {};
-    Map<String, int> totalExercisesByCategory = {};
-    Map<String, int> correctExercisesByCategory = {};
-
-    // Initialiser les compteurs
-    staticExercises.forEach((grade, categories) {
-      categories.forEach((category, exercises) {
-        if (!totalExercisesByCategory.containsKey(category)) {
-          totalExercisesByCategory[category] = 0;
-          correctExercisesByCategory[category] = 0;
-        }
-        totalExercisesByCategory[category] = totalExercisesByCategory[category]! + exercises.length;
-      });
-    });
-
-    // Calculer les réponses correctes
-    staticExercises.forEach((grade, categories) {
-      categories.forEach((category, exercises) {
-        exercises.forEach((exercise) {
-          int? userAnswerIndex = _userResults.getAnswer(exercise.question);
-          if (userAnswerIndex != null && userAnswerIndex == exercise.correctAnswer) {
-            correctExercisesByCategory[category] = correctExercisesByCategory[category]! + 1;
-          }
-        });
-      });
-    });
-
-    // Calculer le pourcentage de progression
-    totalExercisesByCategory.forEach((category, total) {
-      progress[category] = total > 0 ? correctExercisesByCategory[category]! / total : 0.0;
-    });
-
-    return progress;
-  }
-
-  Map<String, double> _calculateProgressByGrade() {
-    Map<String, double> progress = {};
-    Map<String, int> totalExercisesByGrade = {};
-    Map<String, int> correctExercisesByGrade = {};
-
-    // Initialiser les compteurs
-    staticExercises.forEach((grade, categories) {
-      totalExercisesByGrade[grade] = 0;
-      correctExercisesByGrade[grade] = 0;
-
-      categories.forEach((category, exercises) {
-        totalExercisesByGrade[grade] = totalExercisesByGrade[grade]! + exercises.length;
-      });
-    });
-
-    // Calculer les réponses correctes
-    staticExercises.forEach((grade, categories) {
-      categories.forEach((category, exercises) {
-        exercises.forEach((exercise) {
-          int? userAnswerIndex = _userResults.getAnswer(exercise.question);
-          if (userAnswerIndex != null && userAnswerIndex == exercise.correctAnswer) {
-            correctExercisesByGrade[grade] = correctExercisesByGrade[grade]! + 1;
-          }
-        });
-      });
-    });
-
-    // Calculer le pourcentage de progression
-    totalExercisesByGrade.forEach((grade, total) {
-      progress[grade] = total > 0 ? correctExercisesByGrade[grade]! / total : 0.0;
-    });
-
-    return progress;
+    } catch (e) {
+      print('Erreur lors du chargement de la progression: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -140,7 +76,6 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     return Scaffold(
       body: Stack(
         children: [
-          // Fond dégradé
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -154,29 +89,37 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
             child: Column(
               children: [
                 _buildHeader(context),
-                _buildToggleButtons(),
+                if (!_isLoading) _buildToggleButtons(),
                 Expanded(
-                  child: SingleChildScrollView(
+                  child: _isLoading
+                      ? const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.christ,
+                    ),
+                  )
+                      : _userProgress == null
+                      ? const Center(
+                    child: Text(
+                      'Erreur lors du chargement',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  )
+                      : SingleChildScrollView(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
                         ProgressChart(
                           progressData: showGradeProgress
-                              ? userProgressByGrade
-                              : userProgressByCategory,
+                              ? _userProgress!.progressByGrade
+                              : _userProgress!.progressByCategory,
                           title: showGradeProgress
                               ? 'Progression par niveau'
                               : 'Progression par catégorie',
                         ),
                         const SizedBox(height: 30),
-
-                        // Badge MathKid spécial
-                        if (hasMathKidBadge)
+                        if (_userProgress!.hasMathKidBadge)
                           _buildMathKidBadge(),
-
                         const SizedBox(height: 30),
-
-                        // Section des badges avec un cadre attrayant
                         _buildBadgesSection(),
                       ],
                     ),
@@ -211,8 +154,10 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
   }
 
   Widget _buildBadgesSection() {
-    int earnedBadges = userProgressByCategory.values.where((progress) => progress >= 0.7).length;
-    int totalBadges = userProgressByCategory.length;
+    if (_userProgress == null) return const SizedBox.shrink();
+
+    int earnedBadges = _userProgress!.earnedBadges.length;
+    int totalBadges = _userProgress!.progressByCategory.length;
 
     return Container(
       width: double.infinity,
@@ -249,7 +194,6 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
       ),
       child: Stack(
         children: [
-          // Motifs décoratifs en arrière-plan
           Positioned(
             top: -10,
             right: -10,
@@ -274,41 +218,10 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               ),
             ),
           ),
-          // Étoiles décoratives
-          Positioned(
-            top: 20,
-            left: 30,
-            child: Icon(
-              Icons.star,
-              color: Colors.yellow.withOpacity(0.3),
-              size: 16,
-            ),
-          ),
-          Positioned(
-            top: 40,
-            right: 40,
-            child: Icon(
-              Icons.star,
-              color: Colors.orange.withOpacity(0.3),
-              size: 12,
-            ),
-          ),
-          Positioned(
-            bottom: 30,
-            right: 60,
-            child: Icon(
-              Icons.star,
-              color: Colors.pink.withOpacity(0.3),
-              size: 14,
-            ),
-          ),
-
-          // Contenu principal
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                // En-tête de la section avec icône et titre
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -351,7 +264,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         ),
                         Text(
                           '$earnedBadges/$totalBadges badges obtenus',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: AppColors.christ,
@@ -362,10 +275,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
-                // Barre de progression des badges
                 Container(
                   height: 12,
                   width: double.infinity,
@@ -389,7 +299,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                             height: 12,
                             width: progressWidth,
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 colors: [
                                   AppColors.secondary,
                                   AppColors.accent,
@@ -403,9 +313,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     },
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
                   earnedBadges == totalBadges
                       ? '🎉 Tous les badges débloqués ! Champion !'
@@ -418,10 +326,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   ),
                   textAlign: TextAlign.center,
                 ),
-
                 const SizedBox(height: 24),
-
-                // Grille des badges
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -436,11 +341,14 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     spacing: 20,
                     runSpacing: 20,
                     alignment: WrapAlignment.center,
-                    children: userProgressByCategory.entries.map((entry) {
-                      final earned = entry.value >= 0.7;
+                    children: _userProgress!.progressByCategory.entries.map((entry) {
+                      final earned = _userProgress!.hasBadge(entry.key);
                       return TweenAnimationBuilder<double>(
                         tween: Tween<double>(begin: 0.0, end: 1.0),
-                        duration: Duration(milliseconds: 500 + (userProgressByCategory.keys.toList().indexOf(entry.key) * 200)),
+                        duration: Duration(
+                          milliseconds: 500 +
+                              (_userProgress!.progressByCategory.keys.toList().indexOf(entry.key) * 200),
+                        ),
                         curve: Curves.elasticOut,
                         builder: (context, animationValue, child) {
                           return Transform.scale(
@@ -460,10 +368,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     }).toList(),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Message d'encouragement
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
@@ -729,7 +634,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(width: 48), // Placeholder for alignment
+          const SizedBox(width: 48),
         ],
       ),
     );

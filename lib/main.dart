@@ -1,5 +1,3 @@
-// main.dart
-
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
@@ -9,9 +7,10 @@ import 'package:mathscool/screens/home_screen.dart';
 import 'package:mathscool/auth/screens/login_screen.dart';
 import 'package:mathscool/auth/screens/register_screen.dart';
 import 'package:mathscool/auth/screens/forgot_password_screen.dart';
-import 'package:mathscool/auth/screens/email_verification_screen.dart'; // <-- NOUVEAU: Import de l'écran de vérification
+import 'package:mathscool/auth/screens/email_verification_screen.dart';
 import 'package:mathscool/services/user_service.dart';
 import 'package:mathscool/services/notification_service.dart';
+import 'package:mathscool/services/progress_service.dart'; // NOUVEAU
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,13 +26,13 @@ void main() async {
     MultiProvider(
       providers: [
         StreamProvider<AppUser?>(
-          // Le userStream fournit l'objet AppUser avec l'état 'emailVerified'
           create: (context) => AuthService().userStream,
           initialData: null,
         ),
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => UserService()),
-        Provider.value(value: notificationService), // Ajouter le service de notifications
+        Provider(create: (_) => ProgressService()), // NOUVEAU: Service de progression
+        Provider.value(value: notificationService),
       ],
       child: const MathsCoolApp(),
     ),
@@ -54,7 +53,6 @@ class MathsCoolApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const AuthWrapper(),
-      // Définir la route /home (utilisée par EmailVerificationScreen après vérification)
       routes: {
         '/home': (context) => const HomeScreen(),
       },
@@ -99,16 +97,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     final user = Provider.of<AppUser?>(context);
     final notificationService = Provider.of<NotificationService>(context, listen: false);
 
-    // 1. Si l'utilisateur est connecté
     if (user != null) {
-
-      // 2. NOUVEAU: Vérifier si l'email est vérifié
-      // Cette propriété vient du modèle AppUser que nous avons mis à jour.
       if (!user.emailVerified) {
-        return const EmailVerificationScreen(); // Rediriger vers l'écran de vérification
+        return const EmailVerificationScreen();
       }
-
-      // 3. Si l'utilisateur est connecté ET que l'email est vérifié:
 
       // Programmer les notifications de manière asynchrone
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -117,8 +109,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
 
       return const HomeScreen();
     }
-
-    // 4. Si l'utilisateur n'est PAS connecté: afficher les écrans d'authentification
 
     if (_isForgotPasswordScreen) {
       return ForgotPasswordScreen(
@@ -138,11 +128,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
     );
   }
 
-  // Méthode pour programmer les notifications pour l'utilisateur connecté
   Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
     try {
       final userName = user.displayName ?? 'MathKid';
-
       print('Notifications programmées pour $userName');
     } catch (e) {
       print('Erreur lors de la programmation des notifications: $e');

@@ -1,13 +1,14 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import 'package:mathscool/models/exercise_model.dart';
 import 'package:mathscool/data/static_exercises.dart';
 import 'package:mathscool/utils/colors.dart';
-import 'package:mathscool/data/user_results.dart';
 import 'package:mathscool/screens/help_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
+import 'package:mathscool/services/progress_service.dart';
+import 'package:mathscool/models/user_model.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -32,13 +33,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   bool _showFeedback = false;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
-  late final UserResults _userResults;
+  late final ProgressService _progressService;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    _userResults = UserResults();
-    _userResults.loadResults();
+    _progressService = ProgressService();
     _exercises = staticExercises[widget.level]?[widget.theme] ?? [];
 
     _animationController = AnimationController(
@@ -63,14 +64,17 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     super.dispose();
   }
 
-  void _answerQuestion(int selectedIndex) {
-    final isCorrect = selectedIndex == _exercises[_currentIndex].correctAnswer;
-    _userResults.updateResult(
-        _exercises[_currentIndex].question,
-        selectedIndex
-    );
+  void _answerQuestion(int selectedIndex) async {
+    if (_isSaving) return; // Empêcher les clics multiples
+
+    final user = Provider.of<AppUser?>(context, listen: false);
+    if (user == null) return;
+
+    final exercise = _exercises[_currentIndex];
+    final isCorrect = selectedIndex == exercise.correctAnswer;
 
     setState(() {
+      _isSaving = true;
       if (isCorrect) {
         _score++;
         _feedbackMessage = "Bravo ! 🥳 C'est correct 🎉";
@@ -78,20 +82,45 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         _feedbackMessage = "Essaie encore ! 😊 Tu peux le faire 💪";
       }
       _showFeedback = true;
-
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() {
-          _showFeedback = false;
-          if (_currentIndex < _exercises.length - 1) {
-            _currentIndex++;
-            _animationController.reset();
-            _animationController.forward();
-          } else {
-            _currentIndex++;
-          }
-        });
-      });
     });
+
+    // Sauvegarder dans Firestore
+    try {
+      await _progressService.updateResult(
+        user.uid,
+        exercise.question,
+        selectedIndex,
+        exercise.correctAnswer,
+      );
+    } catch (e) {
+      print('Erreur lors de la sauvegarde: $e');
+      // Afficher un message d'erreur si nécessaire
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la sauvegarde. Réessayez.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
+    // Attendre 2 secondes puis passer à la question suivante
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      setState(() {
+        _showFeedback = false;
+        _isSaving = false;
+        if (_currentIndex < _exercises.length - 1) {
+          _currentIndex++;
+          _animationController.reset();
+          _animationController.forward();
+        } else {
+          _currentIndex++;
+        }
+      });
+    }
   }
 
   void _goToManual() {
@@ -121,19 +150,17 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xDBD12C2C), // Bleu clair
-              Color(0xDBA30E0E), // Bleu intermédiaire
+              Color(0xDBD12C2C),
+              Color(0xDBA30E0E),
             ],
           ),
         ),
         child: Stack(
           children: [
-            // Motifs mathématiques en arrière-plan
             CustomPaint(
               painter: _MathBackgroundPainter(),
               size: MediaQuery.of(context).size,
             ),
-
             SafeArea(
               child: Column(
                 children: [
@@ -146,8 +173,16 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
             ),
-
             if (_showFeedback) _buildFeedbackOverlay(),
+            if (_isSaving)
+              Container(
+                color: Colors.black26,
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -207,7 +242,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               ],
             ),
           ),
-          const SizedBox(width: 48), // Pour équilibrer le layout
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -227,7 +262,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Barre de progression avec design enfantin
             Container(
               height: 18,
               width: double.infinity,
@@ -266,10 +300,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // Numéro de question avec style ludique
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
@@ -303,10 +334,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
-
-            // Carte de question avec style amélioré
             Hero(
               tag: 'question_card',
               child: Container(
@@ -350,10 +378,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ),
               ),
             ),
-
             const SizedBox(height: 40),
-
-            // Options de réponse avec un design ludique
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -377,16 +402,16 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   Widget _buildOptionButton(int index, Exercise exercise) {
     final colors = [
-      const Color(0xFFFF7043), // Orange
-      const Color(0xDBA30E0E), // Bleu
-      const Color(0xFF66BB6A), // Vert
-      const Color(0xDBD12C2C), // Violet
+      const Color(0xFFFF7043),
+      const Color(0xDBA30E0E),
+      const Color(0xFF66BB6A),
+      const Color(0xDBD12C2C),
     ];
 
     final color = colors[index % colors.length];
 
     return GestureDetector(
-      onTap: () => _answerQuestion(index),
+      onTap: _isSaving ? null : () => _answerQuestion(index),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -518,9 +543,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animation pour les résultats
             Container(
-              width: 180, // Réduit la taille
+              width: 180,
               height: 180,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -543,11 +567,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 fit: BoxFit.contain,
               ),
             ),
-
-            const SizedBox(height: 20), // Réduit l'espacement
-
+            const SizedBox(height: 20),
             Container(
-              padding: const EdgeInsets.all(20), // Réduit le padding
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(25),
@@ -568,7 +590,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         ? '🌟 Tu es sur la bonne voie! 🌟'
                         : '🙂 Presque un Mathkid!',
                     style: TextStyle(
-                      fontSize: 22, // Réduit la taille de police
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: isMathKid
                           ? AppColors.christ
@@ -578,9 +600,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-
-                  const SizedBox(height: 12), // Réduit l'espacement
-
+                  const SizedBox(height: 12),
                   Text(
                     isMathKid
                         ? 'Parfait! Tu maîtrises parfaitement!'
@@ -588,17 +608,15 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         ? 'Excellent travail! Continue comme ça!'
                         : 'N\'hésite pas à consulter notre manuel pour t\'améliorer!',
                     style: const TextStyle(
-                      fontSize: 16, // Réduit la taille de police
+                      fontSize: 16,
                       color: Colors.black54,
                     ),
                     textAlign: TextAlign.center,
                   ),
-
-                  const SizedBox(height: 16), // Réduit l'espacement
-
+                  const SizedBox(height: 16),
                   Container(
-                    height: 18, // Réduit la hauteur
-                    width: 180, // Réduit la largeur
+                    height: 18,
+                    width: 180,
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
                       borderRadius: BorderRadius.circular(9),
@@ -622,40 +640,34 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 6),
-
                   Text(
                     '${percentage.toInt()}% correct',
                     style: const TextStyle(
-                      fontSize: 14, // Réduit la taille de police
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey,
                     ),
                   ),
-
-                  const SizedBox(height: 16), // Réduit l'espacement
-
-                  // Boutons d'action basés sur le score
+                  const SizedBox(height: 16),
                   if (percentage >= 50.0) ...[
-                    // Bouton vers Ma Progression pour ceux qui ont 50% et plus
                     Container(
                       width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
+                      margin: const EdgeInsets.only(bottom: 12),
                       child: ElevatedButton.icon(
                         onPressed: _goToProgress,
                         icon: const Icon(Icons.trending_up, color: Colors.white, size: 18),
                         label: const Text(
                           'Voir ma progression',
                           style: TextStyle(
-                            fontSize: 14, // Réduit la taille de police
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF9C27B0),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -663,62 +675,25 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         ),
                       ),
                     ),
-                    // Message d'encouragement pour progression
-                    Container(
-                      padding: const EdgeInsets.all(10), // Réduit le padding
-                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF9C27B0).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF9C27B0).withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.emoji_events,
-                            color: Color(0xFF9C27B0),
-                            size: 18, // Réduit la taille de l'icône
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              isMathKid
-                                  ? 'Découvre tous tes badges et ta progression globale !'
-                                  : 'Consulte tes progrès et vois tous tes badges !',
-                              style: const TextStyle(
-                                fontSize: 12, // Réduit la taille de police
-                                color: Color(0xFF9C27B0),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
-
                   if (percentage < 50.0) ...[
-                    // Bouton vers le manuel pour ceux qui ont moins de 50%
                     Container(
                       width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
+                      margin: const EdgeInsets.only(bottom: 12),
                       child: ElevatedButton.icon(
                         onPressed: _goToManual,
                         icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 18),
                         label: const Text(
                           'Consulter le Manuel MathKid',
                           style: TextStyle(
-                            fontSize: 14, // Réduit la taille de police
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4CAF50),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -726,42 +701,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         ),
                       ),
                     ),
-                    // Message d'encouragement pour le manuel
-                    Container(
-                      padding: const EdgeInsets.all(10), // Réduit le padding
-                      margin: const EdgeInsets.only(bottom: 12), // Réduit la marge
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF4CAF50).withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.lightbulb_outline,
-                            color: Color(0xFF4CAF50),
-                            size: 18, // Réduit la taille de l'icône
-                          ),
-                          const SizedBox(width: 8),
-                          const Expanded(
-                            child: Text(
-                              'Le manuel t\'aidera à réviser et à mieux comprendre !',
-                              style: TextStyle(
-                                fontSize: 12, // Réduit la taille de police
-                                color: Color(0xFF4CAF50),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
-
-                  // Boutons standard
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -774,14 +714,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           label: const Text(
                             'Retour',
                             style: TextStyle(
-                              fontSize: 14, // Réduit la taille de police
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.christ,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -789,7 +729,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12), // Réduit l'espacement
+                      const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
@@ -804,14 +744,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           label: const Text(
                             'Rejouer',
                             style: TextStyle(
-                              fontSize: 14, // Réduit la taille de police
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.secondary,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), // Réduit le padding
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -824,7 +764,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
             ),
-            const SizedBox(height: 20), // Ajoute un espacement en bas pour le scroll
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -848,10 +788,8 @@ class _MathBackgroundPainter extends CustomPainter {
       final symbolSize = random.nextDouble() * 30 + 10;
 
       if (i % 3 == 0) {
-        // Cercles
         canvas.drawCircle(Offset(x, y), symbolSize / 2, paint);
       } else if (i % 3 == 1) {
-        // Nombres
         final textPainter = TextPainter(
           text: TextSpan(
             text: '${random.nextInt(10)}',
@@ -866,7 +804,6 @@ class _MathBackgroundPainter extends CustomPainter {
         textPainter.layout();
         textPainter.paint(canvas, Offset(x, y));
       } else {
-        // Symboles mathématiques
         final textPainter = TextPainter(
           text: TextSpan(
             text: mathSymbols[random.nextInt(mathSymbols.length)],

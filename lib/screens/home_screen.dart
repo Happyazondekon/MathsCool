@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/screens/level_selection.dart';
@@ -45,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _loadSavedAvatar();
   }
 
+  // Remplacez la méthode _loadSavedAvatar existante
   Future<void> _loadSavedAvatar() async {
     final prefs = await SharedPreferences.getInstance();
     final savedAvatar = prefs.getString(_avatarPrefsKey);
@@ -543,19 +546,39 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   // Fonction pour déterminer quelle image de profil afficher
+  // Remplacez la méthode _getProfileImage existante
   ImageProvider _getProfileImage(String? photoURL) {
+    // Priorité 1: Avatar sauvegardé localement
     if (_avatarPath != null) {
-      if (_avatarPath!.startsWith('assets/')) {
+      if (_avatarPath!.startsWith('base64:')) {
+        // Image base64 sauvegardée
+        try {
+          final base64String = _avatarPath!.substring(7); // Enlever "base64:"
+          final bytes = base64Decode(base64String);
+          return MemoryImage(bytes);
+        } catch (e) {
+          print('Error decoding base64 image: $e');
+          return const AssetImage('assets/avatars/avatar1.png');
+        }
+      } else if (_avatarPath!.startsWith('assets/')) {
+        // Avatar prédéfini
         return AssetImage(_avatarPath!);
+      } else if (_avatarPath!.startsWith('http')) {
+        // URL network
+        return NetworkImage(_avatarPath!);
       }
-      return NetworkImage(_avatarPath!);
     }
-    else if (photoURL != null) {
+
+    // Priorité 2: Photo URL de Firebase Auth
+    if (photoURL != null) {
       if (photoURL.startsWith('assets/')) {
         return AssetImage(photoURL);
+      } else if (photoURL.startsWith('http')) {
+        return NetworkImage(photoURL);
       }
-      return NetworkImage(photoURL);
     }
+
+    // Par défaut: avatar 1
     return const AssetImage('assets/avatars/avatar1.png');
   }
 }

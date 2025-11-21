@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mathscool/screens/help_screen.dart';
@@ -39,17 +41,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadSavedAvatar();
   }
 
+  // Méthode pour charger l'avatar sauvegardé
   Future<void> _loadSavedAvatar() async {
     final prefs = await SharedPreferences.getInstance();
     final savedAvatar = prefs.getString(_avatarPrefsKey);
 
     if (savedAvatar != null && mounted) {
       setState(() {
-        if (savedAvatar.startsWith('assets/')) {
-          _selectedAvatar = savedAvatar;
-        } else if (savedAvatar.isNotEmpty) {
-          _selectedAvatar = savedAvatar;
-        }
+        _selectedAvatar = savedAvatar;
       });
     }
   }
@@ -60,6 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  // Méthode de mise à jour simplifiée
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -69,22 +69,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final authService = Provider.of<AuthService>(context, listen: false);
       final prefs = await SharedPreferences.getInstance();
 
-      String? photoURL;
+      String? avatarPath;
 
+      // 1. Gérer l'avatar
       if (_imageFile != null) {
-        photoURL = await _uploadImage(_imageFile!);
-        await prefs.setString(_avatarPrefsKey, photoURL);
+        // Sauvegarder l'image en base64 dans SharedPreferences
+        final base64Image = await _saveImageLocally(_imageFile!);
+        if (base64Image != null) {
+          avatarPath = 'base64:$base64Image';
+          await prefs.setString(_avatarPrefsKey, avatarPath);
+        }
       } else if (_selectedAvatar != null) {
-        photoURL = _selectedAvatar;
+        // Utiliser l'avatar prédéfini
+        avatarPath = _selectedAvatar;
         await prefs.setString(_avatarPrefsKey, _selectedAvatar!);
       }
 
+      // 2. Mettre à jour le nom d'affichage dans Firebase Auth
       if (_displayNameController.text.trim().isNotEmpty) {
         try {
           await authService.updateUserProfile(
             displayName: _displayNameController.text.trim(),
             photoURL: null,
           );
+          await authService.reloadUser();
         } catch (e) {
           if (kDebugMode) {
             print('Error updating display name: $e');
@@ -92,69 +100,206 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-      if (photoURL != null) {
-        try {
-          await authService.updateUserProfile(
-            displayName: null,
-            photoURL: photoURL,
-          );
-        } catch (e) {
-          if (kDebugMode) {
-            print('Error updating photo URL: $e');
-          }
+      // 3. Mettre à jour l'état local
+      if (mounted) {
+        setState(() {
+          _isEditing = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil mis à jour avec succès')),
+        );
+
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
         }
-      }
-
-      setState(() {
-        _isEditing = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil mis à jour avec succès')),
-      );
-
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
       }
     } catch (e) {
       if (kDebugMode) {
         print('Global profile update error: $e');
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la mise à jour: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la mise à jour: $e')),
+        );
+      }
     } finally {
-      setState(() => _isUpdating = false);
+      if (mounted) {
+        setState(() => _isUpdating = false);
+      }
     }
   }
 
+
+
+  // Version améliorée avec compression et meilleure gestion
   Future<String> _uploadImage(File imageFile) async {
     try {
-      final fileName = path.basename(imageFile.path);
+      if (kDebugMode) {
+        print('Starting image upload...');
+      }
+
       final authService = Provider.of<AuthService>(context, listen: false);
-      final uid = authService.currentUser?.uid ?? 'unknown';
+      final uid = authService.currentUser?.uid;
+
+      if (uid == null) {
+        throw 'Utilisateur non connecté';
+      }
+
+      // Compresser l'image avant l'upload
+      File? compressedFile;
+      try {
+        // Importer image package si nécessaire
+        final bytes = await imageFile.readAsBytes();
+        if (kDebugMode) {
+          print('Image size before: ${bytes.length} bytes');
+        }
+
+        // Si l'image est trop grande, on la compresse
+        if (bytes.length > 500000) { // > 500KB
+          // Utiliser image_picker pour redimensionner
+          final XFile? compressedImage = await _picker.pickImage(
+            source: ImageSource.gallery,
+            maxWidth: 800,
+            maxHeight: 800,
+            imageQuality: 70,
+          );
+
+          if (compressedImage != null) {
+            compressedFile = File(compressedImage.path);
+            if (kDebugMode) {
+              print('Image compressed');
+            }
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Compression error (using original): $e');
+        }
+      }
+
+      final fileToUpload = compressedFile ?? imageFile;
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       final destination = 'users/$uid/profile/$fileName';
 
+      if (kDebugMode) {
+        print('Uploading to: $destination');
+      }
+
       final ref = FirebaseStorage.instance.ref().child(destination);
-      final uploadTask = ref.putFile(imageFile);
-      final snapshot = await uploadTask.whenComplete(() {});
-      return await snapshot.ref.getDownloadURL();
+
+      // Metadata pour optimiser
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'uploaded-by': uid},
+      );
+
+      final uploadTask = ref.putFile(fileToUpload, metadata);
+
+      // Écouter la progression
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        double progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        if (kDebugMode) {
+          print('Upload progress: ${(progress * 100).toStringAsFixed(0)}%');
+        }
+      });
+
+      // Attendre la fin de l'upload avec un timeout plus long
+      final snapshot = await uploadTask.timeout(
+        const Duration(minutes: 2),
+        onTimeout: () {
+          throw 'Le téléchargement prend trop de temps. Vérifiez votre connexion.';
+        },
+      );
+
+      final downloadURL = await snapshot.ref.getDownloadURL();
+
+      if (kDebugMode) {
+        print('Upload successful! URL: $downloadURL');
+      }
+
+      return downloadURL;
+    } on FirebaseException catch (e) {
+      if (kDebugMode) {
+        print('Firebase error uploading image: ${e.code} - ${e.message}');
+      }
+
+      // Messages d'erreur plus explicites
+      switch (e.code) {
+        case 'unauthorized':
+          throw 'Permission refusée. Vérifiez les règles Firebase Storage.';
+        case 'canceled':
+          throw 'Téléchargement annulé';
+        case 'unknown':
+          throw 'Erreur réseau. Vérifiez votre connexion internet.';
+        default:
+          throw 'Erreur Firebase: ${e.message ?? e.code}';
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error uploading image: $e');
       }
-      throw 'Erreur lors du téléchargement de l\'image';
+      rethrow;
     }
   }
 
+  // Méthode améliorée pour sélectionner une image
+  // Méthode simplifiée pour sélectionner une image
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 800,
+        imageQuality: 70,
+      );
 
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-        _selectedAvatar = null;
-      });
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          _selectedAvatar = null;
+        });
+
+        if (kDebugMode) {
+          print('Image selected: ${pickedFile.path}');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error picking image: $e');
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de la sélection de l\'image')),
+        );
+      }
+    }
+  }
+
+// Méthode pour sauvegarder l'image localement
+  Future<String?> _saveImageLocally(File imageFile) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // Lire les bytes de l'image
+      final bytes = await imageFile.readAsBytes();
+
+      // Convertir en base64
+      final base64Image = base64Encode(bytes);
+
+      // Sauvegarder dans SharedPreferences
+      await prefs.setString('user_avatar_base64', base64Image);
+
+      if (kDebugMode) {
+        print('Image saved locally, size: ${bytes.length} bytes');
+      }
+
+      return base64Image;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving image locally: $e');
+      }
+      return null;
     }
   }
 
@@ -310,27 +455,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildUserInfo(String displayName, String email, String? photoURL) {
+  // Widget pour afficher l'avatar (à utiliser dans _buildUserInfo)
+  Widget _buildAvatarImage() {
     ImageProvider? profileImage;
 
     if (_imageFile != null) {
+      // Image temporaire sélectionnée
       profileImage = FileImage(_imageFile!);
     } else if (_selectedAvatar != null) {
-      if (_selectedAvatar!.startsWith('assets/')) {
+      if (_selectedAvatar!.startsWith('base64:')) {
+        // Image base64 sauvegardée
+        try {
+          final base64String = _selectedAvatar!.substring(7); // Enlever "base64:"
+          final bytes = base64Decode(base64String);
+          profileImage = MemoryImage(bytes);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error decoding base64 image: $e');
+          }
+          profileImage = const AssetImage('assets/avatars/avatar1.png');
+        }
+      } else if (_selectedAvatar!.startsWith('assets/')) {
+        // Avatar prédéfini
         profileImage = AssetImage(_selectedAvatar!);
-      } else {
+      } else if (_selectedAvatar!.startsWith('http')) {
+        // URL (si jamais vous décidez de garder les anciennes images)
         profileImage = NetworkImage(_selectedAvatar!);
       }
-    } else if (photoURL != null) {
-      if (photoURL.startsWith('assets/')) {
-        profileImage = AssetImage(photoURL);
-      } else {
-        profileImage = NetworkImage(photoURL);
-      }
     } else {
+      // Avatar par défaut
       profileImage = const AssetImage('assets/avatars/avatar1.png');
     }
 
+    return CircleAvatar(
+      radius: 50,
+      backgroundImage: profileImage,
+    );
+  }
+
+// Version simplifiée de _buildUserInfo
+  Widget _buildUserInfo(String displayName, String email, String? photoURL) {
     return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -343,10 +507,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Stack(
                 alignment: Alignment.bottomRight,
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: profileImage,
-                  ),
+                  _buildAvatarImage(), // Utiliser le nouveau widget
                   if (_isEditing)
                     GestureDetector(
                       onTap: _showAvatarSelectionDialog,

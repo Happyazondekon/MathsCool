@@ -407,16 +407,16 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       color: Color(0xFFFFC107),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      exercise.question,
-                      style: TextStyle(
-                        fontSize: isCollege && exercise.question.length > 50 ? 20 : 26, // Taille adaptative
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.christ,
-                        height: 1.3,
-                      ),
+                    RichText(
                       textAlign: TextAlign.center,
-                    ),
+                      text: buildMathText(
+                        exercise.question,
+                        fontSize: isCollege && exercise.question.length > 50 ? 20 : 26,
+                        color: AppColors.christ,   // 🎯 couleur des questions
+                      ),
+                    )
+
+
                   ],
                 ),
               ),
@@ -495,23 +495,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Text(
-              exercise.options[index],
-              style: TextStyle(
-                fontSize: isList ? 18 : 22, // Texte plus petit en mode liste
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: const [
-                  Shadow(
-                    color: Colors.black26,
-                    blurRadius: 2,
-                    offset: Offset(1, 1),
-                  ),
-                ],
-              ),
+            child: RichText(
               textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              text: buildMathText(
+                exercise.options[index],
+                color: Colors.white,   // 🎯 réponses en blanc
+              ),
             ),
           ),
         ),
@@ -888,3 +877,69 @@ class _MathBackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+/// Convertit un texte contenant ^ en exposants
+InlineSpan buildMathText(
+    String input, {
+      double fontSize = 22,
+      Color color = Colors.black,
+    }) {
+  final Map<String, String> expo = {
+    "0": "⁰",
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+    "-": "⁻",
+  };
+
+  List<InlineSpan> spans = [];
+
+  for (int i = 0; i < input.length; i++) {
+    if (input[i] == '^' && i + 1 < input.length) {
+      String exp = "";
+      int j = i + 1;
+
+      while (j < input.length && expo.containsKey(input[j])) {
+        exp += expo[input[j]]!;
+        j++;
+      }
+
+      spans.add(
+        WidgetSpan(
+          child: Transform.translate(
+            offset: const Offset(0, -8),
+            child: Text(
+              exp,
+              style: TextStyle(
+                fontSize: fontSize * 0.65,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      i = j - 1;
+    } else {
+      spans.add(
+        TextSpan(
+          text: input[i],
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      );
+    }
+  }
+
+  return TextSpan(children: spans);
+}
+

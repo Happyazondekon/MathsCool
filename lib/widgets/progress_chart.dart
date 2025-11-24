@@ -52,122 +52,115 @@ class ProgressChart extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            ...progressData.entries.map((entry) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            _getIconOrBadge(entry.key, entry.value),
-                            const SizedBox(width: 8),
-                            Text(
-                              entry.key,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                fontFamily: 'Comic Sans MS',
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: _getProgressColor(entry.value).withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${(entry.value * 100).toInt()}%',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: _getProgressColor(entry.value),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Stack(
-                      children: [
-                        Container(
-                          height: 18,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: const Offset(0, 1),
+            if (progressData.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Center(child: Text("Aucune donnée pour le moment")),
+              )
+            else
+              ...progressData.entries.map((entry) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              _getIconOrBadge(entry.key, entry.value),
+                              const SizedBox(width: 8),
+                              SizedBox(
+                                width: 120, // Limite la largeur pour éviter l'overflow
+                                child: Text(
+                                  entry.key,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Comic Sans MS',
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Container(
-                            height: 18,
-                            width: MediaQuery.of(context).size.width * 0.7 * entry.value,
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: _getProgressGradient(entry.value),
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
+                              color: _getProgressColor(entry.value)
+                                  .withOpacity(0.2),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                          ),
-                        ),
-                        if (entry.value > 0.5)
-                          ...List.generate(
-                            (entry.value * 5).toInt().clamp(0, 5),
-                                (index) => Positioned(
-                              left: MediaQuery.of(context).size.width * 0.7 * entry.value * (index / 5),
-                              top: 2,
-                              child: Icon(
-                                Icons.star,
-                                size: 14,
-                                color: Colors.yellow[700],
+                            child: Text(
+                              '${(entry.value * 100).toInt()}%',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: _getProgressColor(entry.value),
                               ),
                             ),
                           ),
-                        if (entry.value > 0)
-                          Positioned(
-                            left: (MediaQuery.of(context).size.width * 0.7 * entry.value) - 15,
-                            top: -2,
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Stack(
+                        children: [
+                          Container(
+                            height: 18,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              width: 22,
-                              height: 22,
+                              height: 18,
+                              width: MediaQuery.of(context).size.width *
+                                  0.6 * // Réduit un peu la largeur relative
+                                  entry.value,
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: _getProgressColor(entry.value),
-                                  width: 2,
+                                gradient: LinearGradient(
+                                  colors: _getProgressGradient(entry.value),
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
                                 ),
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  _getProgressIcon(entry.value),
-                                  size: 12,
-                                  color: _getProgressColor(entry.value),
-                                ),
+                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+                          if (entry.value > 0.5)
+                            ...List.generate(
+                              (entry.value * 5).toInt().clamp(0, 5),
+                                  (index) => Positioned(
+                                left: MediaQuery.of(context).size.width *
+                                    0.6 *
+                                    entry.value *
+                                    (index / 5),
+                                top: 2,
+                                child: Icon(
+                                  Icons.star,
+                                  size: 14,
+                                  color: Colors.yellow[700],
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
           ],
         ),
       ),
@@ -186,33 +179,33 @@ class ProgressChart extends StatelessWidget {
     return [Colors.green[300]!, Colors.green[500]!];
   }
 
-  IconData _getProgressIcon(double value) {
-    if (value < 0.4) return Icons.sentiment_dissatisfied;
-    if (value < 0.7) return Icons.sentiment_satisfied;
-    return Icons.sentiment_very_satisfied;
-  }
-
   Widget _getIconOrBadge(String category, double value) {
-    const levels = ['ci', 'cp', 'ce1', 'ce2', 'cm1', 'cm2'];
+    // Liste complète des niveaux (Primaire + Collège)
+    const levels = [
+      'ci', 'cp', 'ce1', 'ce2', 'cm1', 'cm2',
+      '6ème', '5ème', '4ème', '3ème'
+    ];
 
     if (levels.contains(category.toLowerCase())) {
       return CircleAvatar(
-        radius: 12,
+        radius: 14, // Légèrement plus grand pour contenir "6ème"
         backgroundColor: _getProgressColor(value).withOpacity(0.2),
         child: Text(
           category.toUpperCase(),
           style: TextStyle(
-            fontSize: 10,
+            fontSize: 9, // Police plus petite pour les textes longs
             fontWeight: FontWeight.bold,
             color: _getProgressColor(value),
           ),
+          textAlign: TextAlign.center,
         ),
       );
     }
 
-    // FontAwesome icons for subjects
+    // Icônes pour tous les thèmes (Primaire + Collège)
     IconData icon;
     switch (category.toLowerCase()) {
+    // --- PRIMAIRE ---
       case 'addition':
         icon = FontAwesomeIcons.plus;
         break;
@@ -228,6 +221,27 @@ class ProgressChart extends StatelessWidget {
       case 'géométrie':
         icon = Icons.square_foot;
         break;
+
+    // --- COLLÈGE ---
+      case 'nombres relatifs':
+        icon = FontAwesomeIcons.plusMinus; // Icône +/-
+        break;
+      case 'fractions':
+        icon = FontAwesomeIcons.percent; // Ou une autre icône proche
+        break;
+      case 'algèbre':
+        icon = FontAwesomeIcons.superscript; // x² ou similaire
+        break;
+      case 'puissances':
+        icon = FontAwesomeIcons.caretUp;
+        break;
+      case 'théorèmes':
+        icon = FontAwesomeIcons.shapes; // Triangle/Formes
+        break;
+      case 'statistiques':
+        icon = FontAwesomeIcons.chartBar;
+        break;
+
       default:
         icon = FontAwesomeIcons.book;
     }

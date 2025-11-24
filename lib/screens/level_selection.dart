@@ -4,17 +4,30 @@ import 'package:mathscool/utils/colors.dart';
 
 import '../widgets/theme_selection.dart';
 
+// Assurez-vous que ce fichier existe ou retirez l'import si inutile
+// import '../widgets/theme_selection.dart';
+
 class LevelSelectionScreen extends StatelessWidget {
   const LevelSelectionScreen({super.key});
 
-  final List<String> levels = const ['CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2'];
+  // 1. AJOUT DES NIVEAUX ICI
+  final List<String> levels = const [
+    'CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2',
+    '6ème', '5ème', '4ème', '3ème'
+  ];
+
+  // 2. AJOUT DES DESCRIPTIONS CORRESPONDANTES
   final List<String> descriptions = const [
     'Pour les débutants',
     'Premiers calculs',
     'Bases de mathématiques',
     'Niveau intermédiaire',
     'Niveau avancé',
-    'Expert'
+    'Expert',
+    'Entrée au collège',
+    'Niveau central',
+    'Approfondissement',
+    'Préparation brevet'
   ];
 
   @override
@@ -34,11 +47,10 @@ class LevelSelectionScreen extends StatelessWidget {
                   Color.lerp(AppColors.christ, Colors.red, 0.6)!,
                   Colors.red,
                 ],
-                stops: [0.0, 0.3, 0.6, 1.0],
+                stops: const [0.0, 0.3, 0.6, 1.0],
               ),
             ),
           ),
-
 
           // Contenu principal
           SafeArea(
@@ -107,7 +119,7 @@ class LevelSelectionScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 48), // Pour équilibrer l'en-tête
+              const SizedBox(width: 48),
             ],
           ),
           const SizedBox(height: 8),
@@ -140,13 +152,19 @@ class LevelSelectionScreen extends StatelessWidget {
   }
 
   Widget _buildLevelCard(BuildContext context, int index) {
+    // 3. AJOUT DES COULEURS POUR LES NOUVEAUX NIVEAUX
     final List<Color> cardColors = [
-      const Color(0xFFFFF3E0), // Amber very light
-      const Color(0xFFE3F2FD), // Blue very light
-      const Color(0xFFE8F5E9), // Green very light
-      const Color(0xFFFCE4EC), // Pink very light
-      const Color(0xFFEDE7F6), // Purple very light
-      const Color(0xFFFFEBEE), // Red very light
+      const Color(0xFFFFF3E0), // Amber very light (CI)
+      const Color(0xFFE3F2FD), // Blue very light (CP)
+      const Color(0xFFE8F5E9), // Green very light (CE1)
+      const Color(0xFFFCE4EC), // Pink very light (CE2)
+      const Color(0xFFEDE7F6), // Purple very light (CM1)
+      const Color(0xFFFFEBEE), // Red very light (CM2)
+      // Nouveaux :
+      const Color(0xFFE0F7FA), // Cyan light (6ème)
+      const Color(0xFFE0F2F1), // Teal light (5ème)
+      const Color(0xFFFFF8E1), // Amber light (4ème)
+      const Color(0xFFECEFF1), // Blue Grey light (3ème)
     ];
 
     final List<Color> textColors = [
@@ -156,8 +174,14 @@ class LevelSelectionScreen extends StatelessWidget {
       Colors.pink[800]!,
       Colors.purple[800]!,
       Colors.red[800]!,
+      // Nouveaux :
+      Colors.cyan[800]!,
+      Colors.teal[800]!,
+      Colors.orange[800]!,
+      Colors.blueGrey[800]!,
     ];
 
+    // 4. AJOUT DES ICÔNES POUR LES NOUVEAUX NIVEAUX
     final List<IconData> icons = [
       Icons.child_care,
       Icons.emoji_people,
@@ -165,6 +189,11 @@ class LevelSelectionScreen extends StatelessWidget {
       Icons.psychology,
       Icons.emoji_objects,
       Icons.workspace_premium,
+      // Nouveaux :
+      Icons.menu_book,       // 6ème (Livre)
+      Icons.calculate,       // 5ème (Calculatrice)
+      Icons.architecture,    // 4ème (Géométrie/Equerre)
+      Icons.history_edu,     // 3ème (Diplôme/Brevet)
     ];
 
     return GestureDetector(

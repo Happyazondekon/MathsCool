@@ -136,12 +136,15 @@ class ThemeBadge extends StatelessWidget {
           ),
           child: Text(
             theme,
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: obtained ? themeColors['dark'] : Colors.grey[700],
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               fontFamily: 'Comic Sans MS',
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (obtained)
@@ -157,49 +160,54 @@ class ThemeBadge extends StatelessWidget {
     );
   }
 
+  // Helper pour créer le texte du badge afin d'éviter la répétition
+  Widget _buildBadgeText(String text, {double fontSize = 26}) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
+        color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
+      ),
+    );
+  }
+
   Widget _getBadgeContent(String theme) {
-    // Utiliser des emojis ou des icônes selon votre préférence
     switch (theme.toLowerCase()) {
+    // --- PRIMAIRE ---
       case 'addition':
-        return Text(
-          '➕',
-          style: TextStyle(
-            fontSize: 28,
-            color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
-          ),
-        );
+        return _buildBadgeText('➕', fontSize: 28);
       case 'soustraction':
-        return Text(
-          '➖',
-          style: TextStyle(
-            fontSize: 28,
-            color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
-          ),
-        );
+        return _buildBadgeText('➖', fontSize: 28);
       case 'multiplication':
-        return Text(
-          '✖️',
-          style: TextStyle(
-            fontSize: 28,
-            color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
-          ),
-        );
+        return _buildBadgeText('✖️', fontSize: 28);
       case 'division':
-        return Text(
-          '➗',
-          style: TextStyle(
-            fontSize: 28,
-            color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
-          ),
-        );
+        return _buildBadgeText('➗', fontSize: 28);
       case 'géométrie':
-        return Text(
-          '📐',
-          style: TextStyle(
-            fontSize: 28,
-            color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
-          ),
+        return _buildBadgeText('📐', fontSize: 28);
+
+    // --- COLLÈGE (Nouveaux) ---
+      case 'nombres relatifs':
+        return _buildBadgeText('±');
+      case 'fractions':
+        return _buildBadgeText('½');
+      case 'algèbre':
+        return _buildBadgeText('x=y', fontSize: 22);
+      case 'puissances':
+        return _buildBadgeText('x²');
+      case 'théorèmes':
+        return Icon(
+          Icons.change_history,
+          size: 30,
+          color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
         );
+      case 'statistiques':
+        return Icon(
+          Icons.bar_chart,
+          size: 30,
+          color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
+        );
+
       default:
         return Icon(
           Icons.star,
@@ -211,6 +219,7 @@ class ThemeBadge extends StatelessWidget {
 
   Map<String, Color> _getBadgeThemeColors(String theme) {
     switch (theme.toLowerCase()) {
+    // --- PRIMAIRE ---
       case 'addition':
         return {'light': Colors.green[300]!, 'dark': Colors.green[700]!};
       case 'soustraction':
@@ -221,6 +230,27 @@ class ThemeBadge extends StatelessWidget {
         return {'light': Colors.orange[300]!, 'dark': Colors.orange[700]!};
       case 'géométrie':
         return {'light': Colors.purple[300]!, 'dark': Colors.purple[700]!};
+
+    // --- COLLÈGE (Nouveaux) ---
+      case 'nombres relatifs':
+        return {'light': Colors.indigo[200]!, 'dark': Colors.indigo[800]!};
+      case 'fractions':
+        return {'light': Colors.teal[200]!, 'dark': Colors.teal[800]!};
+      case 'algèbre':
+        return {
+          'light': Colors.deepOrange[200]!,
+          'dark': Colors.deepOrange[800]!
+        };
+      case 'puissances':
+        return {
+          'light': Colors.purpleAccent[100]!,
+          'dark': Colors.purple[800]!
+        };
+      case 'théorèmes':
+        return {'light': Colors.brown[300]!, 'dark': Colors.brown[700]!};
+      case 'statistiques':
+        return {'light': Colors.blueGrey[200]!, 'dark': Colors.blueGrey[700]!};
+
       default:
         return {'light': Colors.teal[300]!, 'dark': Colors.teal[700]!};
     }

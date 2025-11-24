@@ -253,11 +253,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               ),
 
                               // Avatar avec bordure festive
+                              // Avatar avec bordure festive
                               GestureDetector(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                                ).then((_) => _loadSavedAvatar()),
+                                onTap: () async {
+                                  // 1. On attend le retour de la page profil
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                                  );
+
+                                  // 2. Une fois revenu, on exécute ces actions :
+                                  if (mounted) {
+                                    // Recharger l'avatar (votre logique existante)
+                                    await _loadSavedAvatar();
+
+                                    // IMPORTANT : Recharger les infos utilisateur Firebase pour avoir le nouveau nom
+                                    await authService.reloadUser();
+
+                                    // IMPORTANT : Forcer la reconstruction de l'écran pour afficher le nouveau texte
+                                    setState(() {});
+                                  }
+                                },
                                 child: AnimatedScale(
                                   scale: _isPressed ? 0.9 : 1.0,
                                   duration: const Duration(milliseconds: 200),

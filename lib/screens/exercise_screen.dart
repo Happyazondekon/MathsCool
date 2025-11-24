@@ -36,10 +36,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   late final ProgressService _progressService;
   bool _isSaving = false;
 
+  // Helper pour savoir si on est au collège
+  bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(widget.level);
+
   @override
   void initState() {
     super.initState();
     _progressService = ProgressService();
+    // Sécurité : Si la liste est null, on met une liste vide pour éviter le crash
     _exercises = staticExercises[widget.level]?[widget.theme] ?? [];
 
     _animationController = AnimationController(
@@ -55,7 +59,10 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       curve: Curves.elasticOut,
     ));
 
-    _animationController.forward();
+    // Ne lancer l'animation que s'il y a des exercices
+    if (_exercises.isNotEmpty) {
+      _animationController.forward();
+    }
   }
 
   @override
@@ -65,7 +72,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   }
 
   void _answerQuestion(int selectedIndex) async {
-    if (_isSaving) return; // Empêcher les clics multiples
+    if (_isSaving) return;
 
     final user = Provider.of<AppUser?>(context, listen: false);
     if (user == null) return;
@@ -77,14 +84,18 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       _isSaving = true;
       if (isCorrect) {
         _score++;
-        _feedbackMessage = "Bravo ! 🥳 C'est correct 🎉";
+        // Message adapté selon l'âge
+        _feedbackMessage = isCollege
+            ? "Excellent ! Réponse correcte ✅"
+            : "Bravo ! 🥳 C'est correct 🎉";
       } else {
-        _feedbackMessage = "Essaie encore ! 😊 Tu peux le faire 💪";
+        _feedbackMessage = isCollege
+            ? "Incorrect. Retente ta chance ! 💪"
+            : "Essaie encore ! 😊 Tu peux le faire 💪";
       }
       _showFeedback = true;
     });
 
-    // Sauvegarder dans Firestore
     try {
       await _progressService.updateResult(
         user.uid,
@@ -94,18 +105,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       );
     } catch (e) {
       print('Erreur lors de la sauvegarde: $e');
-      // Afficher un message d'erreur si nécessaire
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erreur lors de la sauvegarde. Réessayez.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
 
-    // Attendre 2 secondes puis passer à la question suivante
     await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {
@@ -143,6 +144,38 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 1. GESTION DU CAS "PAS D'EXERCICES"
+    if (_exercises.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.christ,
+          title: Text(widget.theme),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.construction, size: 60, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              const Text(
+                "Exercices bientôt disponibles !",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Le professeur prépare les sujets de ${widget.theme}",
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -250,6 +283,11 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   Widget _buildExerciseScreen() {
     final exercise = _exercises[_currentIndex];
+
+    // 2. DÉTECTION DE LA LONGUEUR DES RÉPONSES
+    // Si une réponse fait plus de 15 caractères, on passe en mode liste verticale
+    bool useListView = exercise.options.any((option) => option.length > 15);
+
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -262,6 +300,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
+            // Barre de progression (étoiles)
             Container(
               height: 18,
               width: double.infinity,
@@ -301,6 +340,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               ),
             ),
             const SizedBox(height: 24),
+
+            // Numéro de question
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               decoration: BoxDecoration(
@@ -334,7 +375,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20), // Réduit un peu l'espace
+
+            // Carte de la question
             Hero(
               tag: 'question_card',
               child: Container(
@@ -367,7 +410,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                     Text(
                       exercise.question,
                       style: TextStyle(
-                        fontSize: 26,
+                        fontSize: isCollege && exercise.question.length > 50 ? 20 : 26, // Taille adaptative
                         fontWeight: FontWeight.bold,
                         color: AppColors.christ,
                         height: 1.3,
@@ -378,9 +421,21 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
+
+            // Grille ou Liste des réponses
             Expanded(
-              child: GridView.builder(
+              child: useListView
+                  ? ListView.builder( // Mode liste pour les longues réponses (Algèbre/Collège)
+                itemCount: exercise.options.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: _buildOptionButton(index, exercise, isList: true),
+                  );
+                },
+              )
+                  : GridView.builder( // Mode grille pour les réponses courtes (Primaire)
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 1.3,
@@ -400,7 +455,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     );
   }
 
-  Widget _buildOptionButton(int index, Exercise exercise) {
+  Widget _buildOptionButton(int index, Exercise exercise, {bool isList = false}) {
     final colors = [
       const Color(0xFFFF7043),
       const Color(0xDBA30E0E),
@@ -413,6 +468,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     return GestureDetector(
       onTap: _isSaving ? null : () => _answerQuestion(index),
       child: Container(
+        height: isList ? 70 : null, // Hauteur fixe en mode liste
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -438,14 +494,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Text(
               exercise.options[index],
-              style: const TextStyle(
-                fontSize: 22,
+              style: TextStyle(
+                fontSize: isList ? 18 : 22, // Texte plus petit en mode liste
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                shadows: [
+                shadows: const [
                   Shadow(
                     color: Colors.black26,
                     blurRadius: 2,
@@ -454,6 +510,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
@@ -462,7 +520,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   }
 
   Widget _buildFeedbackOverlay() {
-    final isCorrect = _feedbackMessage.contains("Bravo");
+    final isCorrect = _feedbackMessage.contains("Bravo") || _feedbackMessage.contains("correcte");
 
     return Container(
       color: Colors.black.withOpacity(0.5),
@@ -536,6 +594,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final bool isMathKid = percentage >= 100.0;
     final bool isOnRightTrack = percentage >= 50.0 && percentage < 100.0;
 
+    // 3. VOCABULAIRE ADAPTÉ (MathKid vs Expert)
+    String titleText;
+    if (isCollege) {
+      titleText = isMathKid ? '🎉 Tu es un Expert ! 🎉' : (isOnRightTrack ? '🌟 Bien joué ! 🌟' : '🙂 Courage !');
+    } else {
+      titleText = isMathKid ? '🎉 Tu es un Mathkid! 🎉' : (isOnRightTrack ? '🌟 Tu es sur la bonne voie! 🌟' : '🙂 Presque un Mathkid!');
+    }
+
     return SingleChildScrollView(
       child: Container(
         width: double.infinity,
@@ -584,11 +650,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               child: Column(
                 children: [
                   Text(
-                    isMathKid
-                        ? '🎉 Tu es un Mathkid! 🎉'
-                        : isOnRightTrack
-                        ? '🌟 Tu es sur la bonne voie! 🌟'
-                        : '🙂 Presque un Mathkid!',
+                    titleText,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -676,6 +738,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       ),
                     ),
                   ],
+                  // Le reste reste identique
                   if (percentage < 50.0) ...[
                     Container(
                       width: double.infinity,
@@ -684,7 +747,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         onPressed: _goToManual,
                         icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 18),
                         label: const Text(
-                          'Consulter le Manuel MathKid',
+                          'Consulter le Manuel',
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
@@ -779,7 +842,8 @@ class _MathBackgroundPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.1)
       ..style = PaintingStyle.fill;
 
-    final mathSymbols = ['+', '-', '×', '÷', '=', '%', '√'];
+    // Ajout de symboles du collège
+    final mathSymbols = ['+', '-', '×', '÷', '=', '%', '√', 'x', 'y', 'π'];
     final random = Random();
 
     for (int i = 0; i < 30; i++) {

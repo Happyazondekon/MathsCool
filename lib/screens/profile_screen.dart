@@ -1,22 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mathscool/screens/help_screen.dart';
-import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mathscool/auth/auth_service.dart';
+import 'package:mathscool/screens/help_screen.dart';
+import 'package:mathscool/screens/home_screen.dart';
+import 'package:mathscool/screens/notification_settings_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
 import 'package:mathscool/utils/colors.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
-
-import 'home_screen.dart';
-import 'notification_settings_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,40 +21,63 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _displayNameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  // Contrôleurs
+  final _displayNameController = TextEditingController();
+  final _schoolController = TextEditingController();
+  final _bioController = TextEditingController();
+
+  String? _selectedLevel;
+
   bool _isEditing = false;
   bool _isUpdating = false;
+
   String? _selectedAvatar;
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
+
+  // Clés de sauvegarde SharedPreferences
   static const String _avatarPrefsKey = 'user_avatar_path';
+  static const String _schoolPrefsKey = 'user_school';
+  static const String _levelPrefsKey = 'user_level';
+  static const String _bioPrefsKey = 'user_bio';
+
+  // Liste des niveaux disponibles
+  final List<String> _levels = [
+    'CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2',
+    '6ème', '5ème', '4ème', '3ème'
+  ];
 
   @override
   void initState() {
     super.initState();
-    _loadSavedAvatar();
-  }
-
-  // Méthode pour charger l'avatar sauvegardé
-  Future<void> _loadSavedAvatar() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedAvatar = prefs.getString(_avatarPrefsKey);
-
-    if (savedAvatar != null && mounted) {
-      setState(() {
-        _selectedAvatar = savedAvatar;
-      });
-    }
+    _loadSavedData();
   }
 
   @override
   void dispose() {
     _displayNameController.dispose();
+    _schoolController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
-  // Méthode de mise à jour simplifiée
+  // Chargement des données locales
+  Future<void> _loadSavedData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    if (mounted) {
+      setState(() {
+        _selectedAvatar = prefs.getString(_avatarPrefsKey);
+        // École par défaut = MathsCool
+        _schoolController.text = prefs.getString(_schoolPrefsKey) ?? 'MathsCool';
+        _bioController.text = prefs.getString(_bioPrefsKey) ?? '';
+        _selectedLevel = prefs.getString(_levelPrefsKey);
+      });
+    }
+  }
+
   Future<void> _updateProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -69,23 +87,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final authService = Provider.of<AuthService>(context, listen: false);
       final prefs = await SharedPreferences.getInstance();
 
-      String? avatarPath;
-
-      // 1. Gérer l'avatar
+      // 1. GESTION AVATAR
       if (_imageFile != null) {
-        // Sauvegarder l'image en base64 dans SharedPreferences
-        final base64Image = await _saveImageLocally(_imageFile!);
-        if (base64Image != null) {
-          avatarPath = 'base64:$base64Image';
-          await prefs.setString(_avatarPrefsKey, avatarPath);
-        }
+        final bytes = await _imageFile!.readAsBytes();
+        final base64Image = base64Encode(bytes);
+        final avatarPath = 'base64:$base64Image';
+        await prefs.setString(_avatarPrefsKey, avatarPath);
+        setState(() => _selectedAvatar = avatarPath);
       } else if (_selectedAvatar != null) {
-        // Utiliser l'avatar prédéfini
-        avatarPath = _selectedAvatar;
         await prefs.setString(_avatarPrefsKey, _selectedAvatar!);
       }
 
-      // 2. Mettre à jour le nom d'affichage dans Firebase Auth
+      // 2. GESTION INFOS SUP
+      await prefs.setString(_schoolPrefsKey, _schoolController.text.trim());
+      await prefs.setString(_bioPrefsKey, _bioController.text.trim());
+      if (_selectedLevel != null) {
+        await prefs.setString(_levelPrefsKey, _selectedLevel!);
+      }
+
+      // 3. GESTION DU NOM
       if (_displayNameController.text.trim().isNotEmpty) {
         try {
           await authService.updateUserProfile(
@@ -94,245 +114,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
           );
           await authService.reloadUser();
         } catch (e) {
-          if (kDebugMode) {
-            print('Error updating display name: $e');
-          }
+          if (kDebugMode) print('Error updating display name: $e');
         }
       }
 
-      // 3. Mettre à jour l'état local
+      // 4. UI FEEDBACK
       if (mounted) {
-        setState(() {
-          _isEditing = false;
-        });
-
+        setState(() => _isEditing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil mis à jour avec succès')),
+          const SnackBar(
+            content: Text('Carte scolaire mise à jour ! 🎅'),
+            backgroundColor: Colors.green,
+          ),
         );
-
-        if (Navigator.canPop(context)) {
-          Navigator.pop(context);
-        }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Global profile update error: $e');
-      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la mise à jour: $e')),
+          SnackBar(content: Text('Erreur: $e')),
         );
       }
     } finally {
-      if (mounted) {
-        setState(() => _isUpdating = false);
-      }
+      if (mounted) setState(() => _isUpdating = false);
     }
   }
 
-
-
-  // Version améliorée avec compression et meilleure gestion
-  Future<String> _uploadImage(File imageFile) async {
-    try {
-      if (kDebugMode) {
-        print('Starting image upload...');
-      }
-
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final uid = authService.currentUser?.uid;
-
-      if (uid == null) {
-        throw 'Utilisateur non connecté';
-      }
-
-      // Compresser l'image avant l'upload
-      File? compressedFile;
-      try {
-        // Importer image package si nécessaire
-        final bytes = await imageFile.readAsBytes();
-        if (kDebugMode) {
-          print('Image size before: ${bytes.length} bytes');
-        }
-
-        // Si l'image est trop grande, on la compresse
-        if (bytes.length > 500000) { // > 500KB
-          // Utiliser image_picker pour redimensionner
-          final XFile? compressedImage = await _picker.pickImage(
-            source: ImageSource.gallery,
-            maxWidth: 800,
-            maxHeight: 800,
-            imageQuality: 70,
-          );
-
-          if (compressedImage != null) {
-            compressedFile = File(compressedImage.path);
-            if (kDebugMode) {
-              print('Image compressed');
-            }
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Compression error (using original): $e');
-        }
-      }
-
-      final fileToUpload = compressedFile ?? imageFile;
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final destination = 'users/$uid/profile/$fileName';
-
-      if (kDebugMode) {
-        print('Uploading to: $destination');
-      }
-
-      final ref = FirebaseStorage.instance.ref().child(destination);
-
-      // Metadata pour optimiser
-      final metadata = SettableMetadata(
-        contentType: 'image/jpeg',
-        customMetadata: {'uploaded-by': uid},
-      );
-
-      final uploadTask = ref.putFile(fileToUpload, metadata);
-
-      // Écouter la progression
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        double progress = snapshot.bytesTransferred / snapshot.totalBytes;
-        if (kDebugMode) {
-          print('Upload progress: ${(progress * 100).toStringAsFixed(0)}%');
-        }
-      });
-
-      // Attendre la fin de l'upload avec un timeout plus long
-      final snapshot = await uploadTask.timeout(
-        const Duration(minutes: 2),
-        onTimeout: () {
-          throw 'Le téléchargement prend trop de temps. Vérifiez votre connexion.';
-        },
-      );
-
-      final downloadURL = await snapshot.ref.getDownloadURL();
-
-      if (kDebugMode) {
-        print('Upload successful! URL: $downloadURL');
-      }
-
-      return downloadURL;
-    } on FirebaseException catch (e) {
-      if (kDebugMode) {
-        print('Firebase error uploading image: ${e.code} - ${e.message}');
-      }
-
-      // Messages d'erreur plus explicites
-      switch (e.code) {
-        case 'unauthorized':
-          throw 'Permission refusée. Vérifiez les règles Firebase Storage.';
-        case 'canceled':
-          throw 'Téléchargement annulé';
-        case 'unknown':
-          throw 'Erreur réseau. Vérifiez votre connexion internet.';
-        default:
-          throw 'Erreur Firebase: ${e.message ?? e.code}';
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error uploading image: $e');
-      }
-      rethrow;
-    }
-  }
-
-  // Méthode améliorée pour sélectionner une image
-  // Méthode simplifiée pour sélectionner une image
   Future<void> _pickImage() async {
-    try {
-      final pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 70,
-      );
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 70,
+    );
 
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-          _selectedAvatar = null;
-        });
-
-        if (kDebugMode) {
-          print('Image selected: ${pickedFile.path}');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error picking image: $e');
-      }
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de la sélection de l\'image')),
-        );
-      }
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+        _selectedAvatar = null;
+      });
     }
-  }
-
-// Méthode pour sauvegarder l'image localement
-  Future<String?> _saveImageLocally(File imageFile) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      // Lire les bytes de l'image
-      final bytes = await imageFile.readAsBytes();
-
-      // Convertir en base64
-      final base64Image = base64Encode(bytes);
-
-      // Sauvegarder dans SharedPreferences
-      await prefs.setString('user_avatar_base64', base64Image);
-
-      if (kDebugMode) {
-        print('Image saved locally, size: ${bytes.length} bytes');
-      }
-
-      return base64Image;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error saving image locally: $e');
-      }
-      return null;
-    }
-  }
-
-  void _selectAvatar(String avatarPath) {
-    setState(() {
-      _selectedAvatar = avatarPath;
-      _imageFile = null;
-    });
   }
 
   void _showAvatarSelectionDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choisir un avatar'),
+        title: const Text('Choisis ta photo', style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
         content: SizedBox(
           width: double.maxFinite,
           height: 300,
           child: GridView.count(
             crossAxisCount: 2,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
             children: [
               for (int i = 1; i <= 4; i++)
                 GestureDetector(
                   onTap: () {
-                    _selectAvatar('assets/avatars/avatar$i.png');
+                    setState(() {
+                      _selectedAvatar = 'assets/avatars/avatar$i.png';
+                      _imageFile = null;
+                    });
                     Navigator.pop(context);
                   },
-                  child: Card(
-                    elevation: 5,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.asset('assets/avatars/avatar$i.png'),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.red, width: 2), // Rouge Noël
+                      borderRadius: BorderRadius.circular(10),
                     ),
+                    child: Image.asset('assets/avatars/avatar$i.png'),
                   ),
                 ),
               GestureDetector(
@@ -340,13 +190,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.pop(context);
                   _pickImage();
                 },
-                child: Card(
-                  elevation: 5,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.green[50], // Vert pâle Noël
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Icon(Icons.add_photo_alternate, size: 40),
-                      Text('Galerie', textAlign: TextAlign.center),
+                      Icon(Icons.add_a_photo, size: 30, color: Colors.green),
+                      Text('Galerie', style: TextStyle(fontFamily: 'ComicNeue')),
                     ],
                   ),
                 ),
@@ -363,46 +216,66 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authService = Provider.of<AuthService>(context);
     final currentUser = authService.currentUser;
 
-    if (currentUser == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    if (currentUser == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
 
     final displayName = currentUser.displayName ?? 'MathKid';
     final email = currentUser.email ?? '';
-    final photoURL = currentUser.photoURL;
 
-    if (_displayNameController.text.isEmpty && !_isEditing) {
+    if (!_isEditing && _displayNameController.text.isEmpty) {
       _displayNameController.text = displayName;
     }
 
     return Scaffold(
       body: Stack(
         children: [
+          // Fond dégradé Noël
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [AppColors.christ, Colors.white],
               ),
             ),
+          ),
+          // Éléments décoratifs Noël
+          Positioned(
+            top: 50,
+            right: 20,
+            child: Icon(Icons.star, color: Colors.yellow[700], size: 30),
+          ),
+          Positioned(
+            top: 100,
+            left: 10,
+            child: Icon(Icons.ac_unit, color: Colors.blue[50], size: 25),
+          ),
+          Positioned(
+            bottom: 150,
+            right: 30,
+            child: Icon(Icons.card_giftcard, color: Colors.red[300], size: 28),
           ),
           SafeArea(
             child: Column(
               children: [
                 _buildHeader(context, authService),
                 Expanded(
-                  child: ListView(
+                  child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16.0),
-                    children: [
-                      _buildUserInfo(displayName, email, photoURL),
-                      const SizedBox(height: 20),
-                      _buildProgressCard(context),
-                      const SizedBox(height: 20),
-                      _buildAccountActions(context),
-                    ],
+                    child: Column(
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 400),
+                          transitionBuilder: (child, animation) {
+                            return ScaleTransition(scale: animation, child: child);
+                          },
+                          child: _isEditing
+                              ? _buildEditForm()
+                              : _buildSchoolIDCard(displayName, email),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildMenuOptions(context),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -413,178 +286,489 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, AuthService authService) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.christ,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+  // --- CARTE SCOLAIRE THÈME NOËL ---
+  Widget _buildSchoolIDCard(String name, String email) {
+    final now = DateTime.now();
+    final studentId = email.hashCode.abs().toString().substring(0, 6);
+
+    return Stack(
+      children: [
+        Container(
+          key: const ValueKey('card'),
+          width: double.infinity,
+          height: 520,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+                spreadRadius: 2,
+              ),
+            ],
           ),
-          const Text(
-            'Mon Profil',
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+          child: Column(
+            children: [
+              // HEADER - Bandeau supérieur Noël
+              Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade400, Colors.green.shade600],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    // Motif de Noël
+                    Positioned(
+                      right: -30,
+                      top: -30,
+                      child: Icon(Icons.star, color: Colors.yellow[100]!.withOpacity(0.3), size: 80),
+                    ),
+                    Positioned(
+                      left: -20,
+                      bottom: -20,
+                      child: Icon(Icons.ac_unit, color: Colors.blue[50]!.withOpacity(0.3), size: 60),
+                    ),
+                    // Contenu du header
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Logo école avec bordure Noël
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.green, width: 2),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.red.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Image.asset(
+                              'assets/images/logo.png',
+                              height: 40,
+                              width: 40,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.calculate_rounded,
+                                color: Colors.red,
+                                size: 40,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Nom de l'école
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  'MathsCool',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'ComicNeue',
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'CARTE D\'ÉLÈVE - JOYEUX NOËL !',
+                                  style: TextStyle(
+                                    color: Colors.yellow[100],
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Année scolaire
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.yellow.withOpacity(0.5)),
+                            ),
+                            child: Text(
+                              '${now.year}-${now.year + 1}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // CORPS DE LA CARTE
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      // Photo et informations principales
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Photo d'identité avec bordure Noël
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.red, width: 3), // Rouge Noël
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Container(
+                                width: 100,
+                                height: 120,
+                                color: Colors.green[50], // Fond vert pâle
+                                child: _buildAvatarImage(isRectangle: true),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          // Informations élève
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                _buildInfoRow('NOM', name.toUpperCase()),
+                                const SizedBox(height: 12),
+                                _buildInfoRow('CLASSE', _selectedLevel ?? 'Non défini'),
+                                const SizedBox(height: 12),
+                                _buildInfoRow('N° ÉLÈVE', studentId),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Séparateur avec icône Noël
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: Colors.green[300], thickness: 2)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: Icon(Icons.star, color: Colors.yellow[700], size: 20),
+                          ),
+                          Expanded(child: Divider(color: Colors.green[300], thickness: 2)),
+                        ],
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Informations supplémentaires
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Colors.red[50]!, Colors.green[50]!],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red[100]!),
+                        ),
+                        child: Column(
+                          children: [
+                            _buildDetailRow(
+                              Icons.home_work_outlined,
+                              'Établissement',
+                              _schoolController.text.isNotEmpty ? _schoolController.text : 'MathsCool',
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDetailRow(
+                              Icons.favorite_outline,
+                              'Devise de Noël',
+                              _bioController.text.isNotEmpty ? _bioController.text : 'Joyeuses Mathématiques ! 🎄',
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // FOOTER - Bande décorative Noël
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade400, Colors.green.shade600],
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    bottomRight: Radius.circular(16),
+                  ),
+                ),
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              try {
-                await authService.signOut(); // Déconnexion
-                Navigator.pop(context); // Retourne au wrapper
-              } catch (e) {
-                if (kDebugMode) {
-                  print('Error during logout: $e');
-                }
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur lors de la déconnexion : $e')),
-                );
-              }
-            },
+        ),
+
+        // Bouton crayon en haut à droite
+        Positioned(
+          top: 130,
+          right: 95,
+          child: GestureDetector(
+            onTap: () => setState(() => _isEditing = true),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+                border: Border.all(color: Colors.white, width: 2),
+              ),
+              child: const Icon(
+                Icons.edit,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
-  // Widget pour afficher l'avatar (à utiliser dans _buildUserInfo)
-  Widget _buildAvatarImage() {
-    ImageProvider? profileImage;
-
-    if (_imageFile != null) {
-      // Image temporaire sélectionnée
-      profileImage = FileImage(_imageFile!);
-    } else if (_selectedAvatar != null) {
-      if (_selectedAvatar!.startsWith('base64:')) {
-        // Image base64 sauvegardée
-        try {
-          final base64String = _selectedAvatar!.substring(7); // Enlever "base64:"
-          final bytes = base64Decode(base64String);
-          profileImage = MemoryImage(bytes);
-        } catch (e) {
-          if (kDebugMode) {
-            print('Error decoding base64 image: $e');
-          }
-          profileImage = const AssetImage('assets/avatars/avatar1.png');
-        }
-      } else if (_selectedAvatar!.startsWith('assets/')) {
-        // Avatar prédéfini
-        profileImage = AssetImage(_selectedAvatar!);
-      } else if (_selectedAvatar!.startsWith('http')) {
-        // URL (si jamais vous décidez de garder les anciennes images)
-        profileImage = NetworkImage(_selectedAvatar!);
-      }
-    } else {
-      // Avatar par défaut
-      profileImage = const AssetImage('assets/avatars/avatar1.png');
-    }
-
-    return CircleAvatar(
-      radius: 50,
-      backgroundImage: profileImage,
+  Widget _buildInfoRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.green[800],
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.red[700],
+            fontFamily: 'ComicNeue',
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 
-// Version simplifiée de _buildUserInfo
-  Widget _buildUserInfo(String displayName, String email, String? photoURL) {
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(icon, size: 18, color: Colors.red),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.green[800],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red[700],
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- FORMULAIRE D'ÉDITION THÈME NOËL ---
+  Widget _buildEditForm() {
     return Card(
-      elevation: 5,
+      key: const ValueKey('form'),
+      elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      color: Colors.green[50],
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                alignment: Alignment.bottomRight,
+              Row(
                 children: [
-                  _buildAvatarImage(), // Utiliser le nouveau widget
-                  if (_isEditing)
-                    GestureDetector(
-                      onTap: _showAvatarSelectionDialog,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                          color: AppColors.christ,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                  Icon(Icons.edit, color: Colors.red),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Modifier mes informations',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ComicNeue',
+                      color: Colors.red,
                     ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 10),
-              if (_isEditing)
-                TextFormField(
-                  controller: _displayNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nom d\'utilisateur',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un nom d\'utilisateur';
-                    }
-                    return null;
-                  },
-                )
-              else
-                Text(
-                  displayName,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              const SizedBox(height: 5),
-              Text(
-                email,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 15),
-              if (_isEditing)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              const SizedBox(height: 20),
+
+              Center(
+                child: Stack(
                   children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
+                    _buildAvatarImage(radius: 50),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: _showAvatarSelectionDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                        ),
                       ),
-                      onPressed: _isUpdating
-                          ? null
-                          : () => setState(() => _isEditing = false),
-                      child: const Text('Annuler'),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondary,
-                      ),
-                      onPressed: _isUpdating ? null : _updateProfile,
-                      child: _isUpdating
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text('Enregistrer'),
                     ),
                   ],
-                )
-              else
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Modifier le profil'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                  ),
-                  onPressed: () => setState(() => _isEditing = true),
                 ),
+              ),
+              const SizedBox(height: 24),
+
+              TextFormField(
+                controller: _displayNameController,
+                decoration: _inputDecoration('Ton Prénom / Pseudo', Icons.person_outline),
+                validator: (v) => v!.isEmpty ? 'Dis-nous comment tu t\'appelles !' : null,
+              ),
+              const SizedBox(height: 16),
+
+              DropdownButtonFormField<String>(
+                value: _selectedLevel,
+                decoration: _inputDecoration('Ta Classe', Icons.school_outlined),
+                items: _levels.map((level) => DropdownMenuItem(
+                  value: level,
+                  child: Text(level),
+                )).toList(),
+                onChanged: (val) => setState(() => _selectedLevel = val),
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _schoolController,
+                decoration: _inputDecoration('Ton École', Icons.location_city_outlined).copyWith(
+                  helperText: 'Par défaut: MathsCool',
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _bioController,
+                maxLength: 40,
+                decoration: _inputDecoration('Ta devise ou Hobby', Icons.favorite_outline).copyWith(
+                  helperText: 'Ex: J\'adore les cadeaux de Noël !',
+                ),
+              ),
+
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => setState(() => _isEditing = false),
+                      icon: const Icon(Icons.close, size: 18),
+                      label: const Text('Annuler'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: _isUpdating ? null : _updateProfile,
+                      icon: _isUpdating
+                          ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                          : const Icon(Icons.check, size: 18),
+                      label: const Text('Sauvegarder'),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
@@ -592,75 +776,159 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProgressCard(BuildContext context) {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: ListTile(
-        leading: const Icon(Icons.bar_chart, color: AppColors.christ),
-        title: const Text(
-          'Voir ma progression',
-          style: TextStyle(fontWeight: FontWeight.bold),
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: Colors.red),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.green[300]!),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.green[300]!),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.red, width: 2),
+      ),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    );
+  }
+
+  Widget _buildAvatarImage({double? radius, bool isRectangle = false}) {
+    ImageProvider? image;
+
+    if (_imageFile != null) {
+      image = FileImage(_imageFile!);
+    } else if (_selectedAvatar != null) {
+      if (_selectedAvatar!.startsWith('base64:')) {
+        try {
+          final base64String = _selectedAvatar!.substring(7);
+          final bytes = base64Decode(base64String);
+          image = MemoryImage(bytes);
+        } catch (e) {
+          image = const AssetImage('assets/avatars/avatar1.png');
+        }
+      } else if (_selectedAvatar!.startsWith('assets/')) {
+        image = AssetImage(_selectedAvatar!);
+      } else {
+        image = const AssetImage('assets/avatars/avatar1.png');
+      }
+    } else {
+      image = const AssetImage('assets/avatars/avatar1.png');
+    }
+
+    if (isRectangle) {
+      return Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: image,
+            fit: BoxFit.cover,
+          ),
         ),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ProgressScreen()),
-          );
-        },
+      );
+    }
+
+    return CircleAvatar(
+      radius: radius ?? 40,
+      backgroundImage: image,
+      backgroundColor: Colors.green[100],
+    );
+  }
+
+  Widget _buildMenuOptions(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    return Column(
+      children: [
+        _buildMenuCard(
+          'Voir ma progression',
+          Icons.bar_chart_rounded,
+          Colors.red, // Rouge Noël
+              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProgressScreen())),
+        ),
+        const SizedBox(height: 10),
+        _buildMenuCard(
+          'Centre d\'aide',
+          Icons.help_outline_rounded,
+          Colors.green, // Vert Noël
+              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpScreen())),
+        ),
+        const SizedBox(height: 10),
+        _buildMenuCard(
+          'Mes Rappels',
+          Icons.notifications_active_outlined,
+          Colors.orange, // Orange Noël
+              () => Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationSettingsScreen(userName: _displayNameController.text))),
+        ),
+        const SizedBox(height: 10),
+        _buildMenuCard(
+          'Retour accueil',
+          Icons.home_rounded,
+          Colors.red, // Rouge Noël
+              () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      color: Colors.green[50], // Fond vert pâle Noël
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: 'ComicNeue',
+            fontSize: 16,
+            color: Colors.green[900],
+          ),
+        ),
+        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.red),
+        onTap: onTap,
       ),
     );
   }
 
-  Widget _buildAccountActions(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
-    final displayName = authService.currentUser?.displayName ?? 'MathKid';
-
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Column(
+  Widget _buildHeader(BuildContext context, AuthService authService) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Aide
-          ListTile(
-            leading: const Icon(Icons.help, color: AppColors.christ),
-            title: const Text('Aide'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HelpScreen(),
-                ),
-              );
-            },
+          IconButton(
+            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+            onPressed: () => Navigator.pop(context),
           ),
-          // Mes Rappels
-          ListTile(
-            leading: const Icon(Icons.notifications, color: AppColors.christ),
-            title: const Text('Mes Rappels'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NotificationSettingsScreen(
-                    userName: displayName,
-                  ),
-                ),
-              );
-            },
+          const Text(
+            'Ma Carte Scolaire 🎄',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'ComicNeue',
+            ),
           ),
-          // Retourner à l'accueil
-          ListTile(
-            leading: const Icon(Icons.home, color: AppColors.christ),
-            title: const Text('Retourner à l\'accueil'),
-            onTap: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const HomeScreen(),
-                ),
-                    (route) => false,
-              );
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 26),
+            onPressed: () async {
+              await authService.signOut();
+              if (mounted) Navigator.pop(context);
             },
           ),
         ],

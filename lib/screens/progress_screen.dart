@@ -71,6 +71,28 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     }
   }
 
+  // Méthode utilitaire pour déterminer le numéro affiché sur le badge
+  String _getLevelNumberForTheme(String theme) {
+    switch (theme.toLowerCase()) {
+    // Primaire
+      case 'addition': return '1';
+      case 'soustraction': return '2';
+      case 'multiplication': return '3';
+      case 'division': return '4';
+      case 'géométrie': return '5';
+
+    // Collège
+      case 'nombres relatifs': return '6';
+      case 'fractions': return '7';
+      case 'algèbre': return '8';
+      case 'puissances': return '9';
+      case 'théorèmes': return '10';
+      case 'statistiques': return '11';
+
+      default: return '?';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -321,7 +343,9 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: earnedBadges == totalBadges ? Colors.green.shade700 : Colors.grey.shade600,
+                    color: earnedBadges == totalBadges
+                        ? Colors.green.shade700
+                        : Colors.grey.shade600,
                     fontFamily: 'ComicNeue',
                   ),
                   textAlign: TextAlign.center,
@@ -347,7 +371,10 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         tween: Tween<double>(begin: 0.0, end: 1.0),
                         duration: Duration(
                           milliseconds: 500 +
-                              (_userProgress!.progressByCategory.keys.toList().indexOf(entry.key) * 200),
+                              (_userProgress!.progressByCategory.keys
+                                  .toList()
+                                  .indexOf(entry.key) *
+                                  200),
                         ),
                         curve: Curves.elasticOut,
                         builder: (context, animationValue, child) {
@@ -355,10 +382,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                             scale: animationValue,
                             child: ThemeBadge(
                               theme: entry.key,
-                              level: entry.key == 'Addition' ? '1' :
-                              entry.key == 'Soustraction' ? '2' :
-                              entry.key == 'Multiplication' ? '3' :
-                              entry.key == 'Division' ? '4' : '5',
+                              // Utilisation de la nouvelle méthode helper ici
+                              level: _getLevelNumberForTheme(entry.key),
                               obtained: earned,
                               progress: entry.value,
                             ),
@@ -533,7 +558,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: !showGradeProgress ? AppColors.christ : Colors.white,
-                  foregroundColor: !showGradeProgress ? Colors.white : Colors.grey[700],
+                  foregroundColor:
+                  !showGradeProgress ? Colors.white : Colors.grey[700],
                   elevation: !showGradeProgress ? 2 : 0,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const RoundedRectangleBorder(
@@ -549,7 +575,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     Icon(
                       Icons.category,
                       size: 18,
-                      color: !showGradeProgress ? Colors.white : Colors.grey[700],
+                      color:
+                      !showGradeProgress ? Colors.white : Colors.grey[700],
                     ),
                     const SizedBox(width: 6),
                     const Text(
@@ -568,8 +595,10 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: showGradeProgress ? AppColors.christ : Colors.white,
-                  foregroundColor: showGradeProgress ? Colors.white : Colors.grey[700],
+                  backgroundColor:
+                  showGradeProgress ? AppColors.christ : Colors.white,
+                  foregroundColor:
+                  showGradeProgress ? Colors.white : Colors.grey[700],
                   elevation: showGradeProgress ? 2 : 0,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: const RoundedRectangleBorder(
@@ -585,7 +614,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     Icon(
                       Icons.school,
                       size: 18,
-                      color: showGradeProgress ? Colors.white : Colors.grey[700],
+                      color:
+                      showGradeProgress ? Colors.white : Colors.grey[700],
                     ),
                     const SizedBox(width: 6),
                     const Text(

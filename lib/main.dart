@@ -10,7 +10,8 @@ import 'package:mathscool/auth/screens/forgot_password_screen.dart';
 import 'package:mathscool/auth/screens/email_verification_screen.dart';
 import 'package:mathscool/services/user_service.dart';
 import 'package:mathscool/services/notification_service.dart';
-import 'package:mathscool/services/progress_service.dart'; // NOUVEAU
+import 'package:mathscool/services/progress_service.dart';
+import 'package:mathscool/services/lives_service.dart'; // NOUVEAU : Import du service de vies
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,10 @@ void main() async {
         ),
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => UserService()),
-        Provider(create: (_) => ProgressService()), // NOUVEAU: Service de progression
+        Provider(create: (_) => ProgressService()),
+
+        ChangeNotifierProvider(create: (_) => LivesService()),
+
         Provider.value(value: notificationService),
       ],
       child: const MathsCoolApp(),

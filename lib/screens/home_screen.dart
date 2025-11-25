@@ -2,15 +2,21 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:mathscool/auth/auth_service.dart';
-import 'package:mathscool/screens/level_selection.dart';
-import 'package:mathscool/screens/profile_screen.dart';
-import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'notification_settings_screen.dart';
+import 'package:mathscool/auth/auth_service.dart';
+import 'package:mathscool/models/user_model.dart';
+import 'package:mathscool/screens/level_selection.dart';
+import 'package:mathscool/screens/profile_screen.dart';
+import 'package:mathscool/screens/notification_settings_screen.dart';
+import 'package:mathscool/screens/store_screen.dart'; // Import Boutique
+import 'package:mathscool/utils/colors.dart';
+
+// Nouveaux imports pour le système de vies
+import 'package:mathscool/services/lives_service.dart';
+import 'package:mathscool/widgets/lives_display.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,9 +51,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
     // Chargement de l'avatar depuis les SharedPreferences
     _loadSavedAvatar();
+
+    // --- NOUVEAU : Chargement des vies au démarrage ---
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final user = Provider.of<AppUser?>(context, listen: false);
+      if (user != null) {
+        Provider.of<LivesService>(context, listen: false).loadLives(user.uid);
+      }
+    });
   }
 
-  // Remplacez la méthode _loadSavedAvatar existante
   Future<void> _loadSavedAvatar() async {
     final prefs = await SharedPreferences.getInstance();
     final savedAvatar = prefs.getString(_avatarPrefsKey);
@@ -84,12 +97,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             animation: _backgroundAnimation,
             builder: (context, child) {
               return Container(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xDBA30E0E), // Bleu nuit de Noël
+                      Color(0xDBA30E0E), // Bleu nuit de Noël (Rouge foncé ici selon ton code)
                       Color(0xDBD12C2C),
                       Color(0xDBD15959),
                       Color(0xFFE8F4F8), // Blanc neigeux
@@ -186,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       TextSpan(
                                         text: 'Cool',
                                         style: TextStyle(
-                                          color: Color(0xFFFFD700), // Or
+                                          color: const Color(0xFFFFD700), // Or
                                           fontStyle: FontStyle.italic,
                                           shadows: [
                                             Shadow(
@@ -202,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 ),
                               ),
                               // Petit bonnet de Noël sur le logo
-                              Positioned(
+                              const Positioned(
                                 top: -15,
                                 right: -5,
                                 child: Text(
@@ -215,6 +228,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                           Row(
                             children: [
+                              // J'ai retiré LivesDisplay d'ici
+
                               // Bouton notifications avec thème de Noël
                               GestureDetector(
                                 onTap: () => Navigator.push(
@@ -279,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   child: Container(
                                     padding: const EdgeInsets.all(3),
                                     decoration: BoxDecoration(
-                                      gradient: LinearGradient(
+                                      gradient: const LinearGradient(
                                         colors: [
                                           Colors.red,
                                           Colors.green,
@@ -297,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     ),
                                     child: Container(
                                       padding: const EdgeInsets.all(3),
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                       ),
@@ -325,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.elasticOut,
                       child: Container(
-                        margin: const EdgeInsets.only(top: 5, bottom: 15),
+                        margin: const EdgeInsets.only(top: 5, bottom: 5), // Réduit le bottom margin
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -354,6 +369,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         ),
                       ),
                     ),
+
+                    // --- NOUVEAU EMPLACEMENT DES VIES ---
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: LivesDisplay(showTimer: true),
+                    ),
+                    const SizedBox(height: 10),
 
                     // Contenu principal
                     SizedBox(
@@ -397,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget _buildSnowflake(Size screenSize, int index) {
     final random = Random(index);
     final left = random.nextDouble() * screenSize.width;
-    final animationDelay = random.nextInt(3000);
+    // final animationDelay = random.nextInt(3000); // Non utilisé mais gardé pour ref
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: -50.0, end: screenSize.height + 50),
@@ -470,7 +492,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: Container(
               width: size * 0.2,
               height: size,
-              color: Color(0xFFFFD700),
+              color: const Color(0xFFFFD700),
             ),
           ),
           // Ruban horizontal
@@ -478,7 +500,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: Container(
               width: size,
               height: size * 0.2,
-              color: Color(0xDBD15959),
+              color: const Color(0xDBD15959),
             ),
           ),
           // Nœud
@@ -488,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: Container(
               width: size * 0.4,
               height: size * 0.4,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Color(0xFFFFD700),
                 shape: BoxShape.circle,
               ),
@@ -501,12 +523,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   // Fonction pour déterminer quelle image de profil afficher
   ImageProvider _getProfileImage(String? photoURL) {
-    // Priorité 1: Avatar sauvegardé localement
     if (_avatarPath != null) {
       if (_avatarPath!.startsWith('base64:')) {
-        // Image base64 sauvegardée
         try {
-          final base64String = _avatarPath!.substring(7); // Enlever "base64:"
+          final base64String = _avatarPath!.substring(7);
           final bytes = base64Decode(base64String);
           return MemoryImage(bytes);
         } catch (e) {
@@ -514,15 +534,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           return const AssetImage('assets/avatars/avatar1.png');
         }
       } else if (_avatarPath!.startsWith('assets/')) {
-        // Avatar prédéfini
         return AssetImage(_avatarPath!);
       } else if (_avatarPath!.startsWith('http')) {
-        // URL network
         return NetworkImage(_avatarPath!);
       }
     }
 
-    // Priorité 2: Photo URL de Firebase Auth
     if (photoURL != null) {
       if (photoURL.startsWith('assets/')) {
         return AssetImage(photoURL);
@@ -531,7 +548,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       }
     }
 
-    // Par défaut: avatar 1
     return const AssetImage('assets/avatars/avatar1.png');
   }
 }
@@ -588,7 +604,20 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
     ));
   }
 
-  void _toggleButton() {
+  void _toggleButton() async {
+    // --- NOUVEAU : Vérification des vies avant l'animation ---
+    final user = Provider.of<AppUser?>(context, listen: false);
+    final livesService = Provider.of<LivesService>(context, listen: false);
+
+    if (user != null) {
+      final canPlay = await livesService.canPlay(user.uid);
+      if (!canPlay) {
+        _showNoLivesDialog();
+        return; // Arrête tout si pas de vies
+      }
+    }
+
+    // Si on a des vies, on continue l'animation normale
     if (_isClosed) {
       _animationController.reverse();
     } else {
@@ -608,6 +637,60 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
     setState(() {
       _isClosed = !_isClosed;
     });
+  }
+
+  // --- NOUVEAU : Dialogue "Plus de vies" ---
+  void _showNoLivesDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.favorite_border, color: Colors.red),
+            SizedBox(width: 10),
+            Text("Plus de vies !", style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Tu as besoin de repos ou d'un coup de pouce ! 💖",
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Attends qu'elles se rechargent ou visite la boutique.",
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Plus tard", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.christ,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StoreScreen()),
+              );
+            },
+            child: const Text("Recharger ⚡"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -683,7 +766,7 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
                     // Contenu principal
                     Center(
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,   // 🔥 solution overflow
+                        mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           AnimatedContainer(
@@ -780,7 +863,7 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
     final paint = Paint()
       ..style = PaintingStyle.fill;
 
-    final seedValue = 42;
+    const seedValue = 42;
     final random = Random(seedValue);
 
     // Symboles mathématiques avec couleurs de Noël
@@ -788,7 +871,7 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
       Colors.red.withOpacity(0.1),
       Colors.green.withOpacity(0.1),
       Colors.white.withOpacity(0.08),
-      Color(0xFFFFD700).withOpacity(0.1),
+      const Color(0xFFFFD700).withOpacity(0.1),
     ];
 
     for (int i = 0; i < 30; i++) {
@@ -825,8 +908,8 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
   // Dessiner une étoile
   void _drawStar(Canvas canvas, Offset center, double radius, Paint paint) {
     final path = Path();
-    final points = 5;
-    final angle = (2 * pi) / points;
+    const points = 5;
+    const angle = (2 * pi) / points;
 
     for (int i = 0; i < points * 2; i++) {
       final r = i.isEven ? radius : radius * 0.5;

@@ -18,6 +18,9 @@ class NotificationService {
   static const String _customNotificationsKey = 'custom_notifications';
   static const String _lastNotificationKey = 'last_notification_time';
 
+  // --- NOUVEAU : ID constant pour la notif de vies ---
+  static const int _livesRefillNotificationId = 8888;
+
   // Messages motivationnels pour les enfants
   final List<String> _motivationalMessages = [
     "Il est temps de faire des mathématiques magiques ! ✨",
@@ -102,8 +105,6 @@ class NotificationService {
 
         if (result.isDenied || result.isPermanentlyDenied) {
           print("Permission pour les alarmes exactes refusée.");
-          // Optionnel: rediriger vers les paramètres
-          // await openAppSettings();
           return false;
         }
       }
@@ -120,7 +121,6 @@ class NotificationService {
   void _onNotificationTapped(NotificationResponse notificationResponse) {
     print('Notification tapped: ${notificationResponse.payload}');
     // Ici vous pouvez ajouter la logique de navigation
-    // Par exemple: naviguer vers une page spécifique de l'app
   }
 
   /// Obtenir le fuseau horaire correct de l'appareil
@@ -137,10 +137,6 @@ class NotificationService {
       }
 
       // Sinon, essayer de trouver un fuseau correspondant
-      final offsetHours = offset.inHours;
-      final offsetMinutes = offset.inMinutes % 60;
-
-      // Chercher un fuseau avec le même offset
       for (final location in tz.timeZoneDatabase.locations.values) {
         final locationTime = tz.TZDateTime.now(location);
         if (locationTime.timeZoneOffset == offset) {
@@ -181,7 +177,7 @@ class NotificationService {
         return false;
       }
 
-      // SOLUTION CORRIGÉE: Utiliser l'heure système puis convertir
+      // Utiliser l'heure système puis convertir
       final now = DateTime.now(); // Heure système locale de l'appareil
       var scheduledDateTime = DateTime(
         now.year,
@@ -247,16 +243,6 @@ class NotificationService {
       // Sauvegarder la notification personnalisée
       await _saveCustomNotification(id, hour, minute, isRepeating, customMessage);
 
-      // Debug: Afficher les informations pour vérification
-      print('═══ NOTIFICATION PROGRAMMÉE ═══');
-      print('Heure système: ${DateTime.now()}');
-      print('Heure programmée (système): $scheduledDateTime');
-      print('Heure programmée (TZ): $scheduledDate');
-      print('Fuseau utilisé: ${deviceTimeZone.name}');
-      print('ID: $id, Répétitive: $isRepeating');
-      print('Message: $message');
-      print('═══════════════════════════════');
-
       return true;
 
     } catch (e) {
@@ -270,8 +256,7 @@ class NotificationService {
     final notificationStatus = await Permission.notification.status;
     final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
 
-    return notificationStatus.isGranted &&
-        (exactAlarmStatus.isGranted);
+    return notificationStatus.isGranted && (exactAlarmStatus.isGranted);
   }
 
   /// Sauvegarder une notification personnalisée
@@ -600,7 +585,6 @@ class NotificationService {
               return true;
             }
           } catch (e) {
-            // Si on ne peut pas parser le timestamp, supprimer la notification
             cleanedCount++;
             return true;
           }
@@ -616,5 +600,87 @@ class NotificationService {
       print('Erreur lors du nettoyage: $e');
       return 0;
     }
+  }
+
+  // ==========================================
+  // --- NOUVELLES FONCTIONNALITÉS POUR LES VIES ---
+  // ==========================================
+
+  /// Programmer une notification quand les vies sont rechargées
+  Future<bool> scheduleLivesRefilledNotification({
+    required String userName,
+    required Duration timeRemaining,
+  }) async {
+    try {
+      if (!await areNotificationsEnabled()) {
+        print('Notifications désactivées, impossible de programmer le rappel de vies');
+        return false;
+      }
+
+      if (!await _hasRequiredPermissions()) {
+        print('Permissions manquantes pour le rappel de vies');
+        return false;
+      }
+
+      // Calculer l'heure exacte de la fin du rechargement
+      final now = DateTime.now();
+      final scheduledDateTime = now.add(timeRemaining);
+
+      // Convertir en TZDateTime avec le bon fuseau
+      final deviceTimeZone = _getDeviceTimeZone();
+      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
+
+      // Configuration spécifique pour les vies (Couleur Rose/Rouge)
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'mathscool_lives', // Canal spécifique
+        'Vies Rechargées',
+        channelDescription: 'Notifications quand les vies sont complètes',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'baseline_calculate_white_36',
+        color: Color(0xFFE91E63), // Rose/Rouge
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        sound: 'default',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.active,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      // Programmer la notification
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _livesRefillNotificationId,
+        "Vies au max ! ❤️",
+        "Hey $userName, tes vies sont rechargées ! Viens jouer ! 🎮",
+        scheduledDate,
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        payload: 'mathscool_lives_refill',
+      );
+
+      print('Notification de vies programmée pour : $scheduledDate');
+      return true;
+
+    } catch (e) {
+      print('Erreur lors de la programmation de la notification de vies : $e');
+      return false;
+    }
+  }
+
+  /// Annuler la notification de vies (à appeler si l'utilisateur ouvre l'app avant la fin)
+  Future<void> cancelLivesRefilledNotification() async {
+    await cancelNotification(_livesRefillNotificationId);
   }
 }

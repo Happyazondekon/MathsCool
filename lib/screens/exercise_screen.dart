@@ -2,13 +2,24 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+
+// Models & Data
 import 'package:mathscool/models/exercise_model.dart';
 import 'package:mathscool/data/static_exercises.dart';
-import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/models/user_model.dart';
+
+// Services
+import 'package:mathscool/services/progress_service.dart';
+import 'package:mathscool/services/lives_service.dart'; // NOUVEAU
+
+// Screens
 import 'package:mathscool/screens/help_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
-import 'package:mathscool/services/progress_service.dart';
-import 'package:mathscool/models/user_model.dart';
+import 'package:mathscool/screens/store_screen.dart'; // NOUVEAU
+
+// Utils & Widgets
+import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/widgets/lives_display.dart'; // NOUVEAU
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -63,6 +74,19 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     if (_exercises.isNotEmpty) {
       _animationController.forward();
     }
+
+    // --- NOUVEAU : Vérification des vies au démarrage (Sécurité supplémentaire) ---
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final user = Provider.of<AppUser?>(context, listen: false);
+      final livesService = Provider.of<LivesService>(context, listen: false);
+
+      if (user != null) {
+        final canPlay = await livesService.canPlay(user.uid);
+        if (!canPlay) {
+          _showNoLivesDialog();
+        }
+      }
+    });
   }
 
   @override
@@ -80,20 +104,38 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final exercise = _exercises[_currentIndex];
     final isCorrect = selectedIndex == exercise.correctAnswer;
 
-    setState(() {
-      _isSaving = true;
-      if (isCorrect) {
+    // Récupération du service de vies
+    final livesService = Provider.of<LivesService>(context, listen: false);
+
+    // --- LOGIQUE VIES ET SCORE ---
+    if (isCorrect) {
+      // Réponse correcte
+      setState(() {
         _score++;
-        // Message adapté selon l'âge
         _feedbackMessage = isCollege
             ? "Excellent ! Réponse correcte ✅"
             : "Bravo ! 🥳 C'est correct 🎉";
-      } else {
-        _feedbackMessage = isCollege
-            ? "Incorrect. Retente ta chance ! 💪"
-            : "Essaie encore ! 😊 Tu peux le faire 💪";
+        _showFeedback = true;
+      });
+    } else {
+      // Réponse incorrecte : On tente de retirer une vie
+      bool stillHasLives = await livesService.loseLife(user.uid);
+
+      if (!stillHasLives) {
+        // Cas critique : Plus de vies (le service renvoie false si impossible de jouer)
+        _showNoLivesDialog();
+        return; // On arrête tout ici, pas de feedback classique, direct le blocage
       }
-      _showFeedback = true;
+
+      // Si on a encore des vies mais qu'on s'est trompé
+      setState(() {
+        _feedbackMessage = "Oups ! Tu perds une vie 💔";
+        _showFeedback = true;
+      });
+    }
+
+    setState(() {
+      _isSaving = true;
     });
 
     try {
@@ -122,6 +164,73 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         }
       });
     }
+  }
+
+  // --- NOUVEAU : Dialogue Game Over / Plus de vies ---
+  void _showNoLivesDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Empêche de fermer en cliquant à côté
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.broken_image, color: Colors.red),
+            SizedBox(width: 10),
+            Text("Aïe ! Plus de vies 💔", style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Tu as utilisé toutes tes vies pour le moment.",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            Text(
+              "Tu peux attendre qu'elles se rechargent ou en récupérer tout de suite !",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme dialogue
+              Navigator.of(context).pop(); // Retour Accueil
+            },
+            child: const Text("Quitter", style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.christ,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop(); // Ferme dialogue
+              // Redirection Boutique
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StoreScreen()),
+              );
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.flash_on, size: 18),
+                SizedBox(width: 8),
+                Text("Recharger"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _goToManual() {
@@ -250,24 +359,31 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
+
+          // --- NOUVEAU : Affichage des vies dans le header ---
+          const LivesDisplay(showTimer: false),
+
+          const SizedBox(width: 12),
+
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end, // Alignement à droite pour équilibrer
               children: [
                 Text(
                   widget.theme,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontSize: 24,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     letterSpacing: 0.5,
                   ),
                 ),
                 Text(
-                  '${widget.level} • Score: $_score/${_exercises.length}',
+                  '${widget.level} • $_score/${_exercises.length}',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.9),
                   ),
@@ -275,7 +391,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               ],
             ),
           ),
-          const SizedBox(width: 48),
         ],
       ),
     );
@@ -285,7 +400,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final exercise = _exercises[_currentIndex];
 
     // 2. DÉTECTION DE LA LONGUEUR DES RÉPONSES
-    // Si une réponse fait plus de 15 caractères, on passe en mode liste verticale
     bool useListView = exercise.options.any((option) => option.length > 15);
 
     return AnimatedBuilder(
@@ -375,7 +489,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ],
               ),
             ),
-            const SizedBox(height: 20), // Réduit un peu l'espace
+            const SizedBox(height: 20),
 
             // Carte de la question
             Hero(
@@ -412,11 +526,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       text: buildMathText(
                         exercise.question,
                         fontSize: isCollege && exercise.question.length > 50 ? 20 : 26,
-                        color: AppColors.christ,   // 🎯 couleur des questions
+                        color: AppColors.christ,
                       ),
                     )
-
-
                   ],
                 ),
               ),
@@ -426,7 +538,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             // Grille ou Liste des réponses
             Expanded(
               child: useListView
-                  ? ListView.builder( // Mode liste pour les longues réponses (Algèbre/Collège)
+                  ? ListView.builder(
                 itemCount: exercise.options.length,
                 itemBuilder: (context, index) {
                   return Padding(
@@ -435,7 +547,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   );
                 },
               )
-                  : GridView.builder( // Mode grille pour les réponses courtes (Primaire)
+                  : GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 1.3,
@@ -468,7 +580,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     return GestureDetector(
       onTap: _isSaving ? null : () => _answerQuestion(index),
       child: Container(
-        height: isList ? 70 : null, // Hauteur fixe en mode liste
+        height: isList ? 70 : null,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -499,7 +611,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               textAlign: TextAlign.center,
               text: buildMathText(
                 exercise.options[index],
-                color: Colors.white,   // 🎯 réponses en blanc
+                color: Colors.white,
               ),
             ),
           ),
@@ -538,7 +650,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ),
               ],
               border: Border.all(
-                color: isCorrect ? Colors.green : Colors.orange,
+                color: isCorrect ? Colors.green : Colors.red, // Rouge si perdu vie
                 width: 4,
               ),
             ),
@@ -550,13 +662,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   decoration: BoxDecoration(
                     color: isCorrect
                         ? Colors.green.withOpacity(0.2)
-                        : Colors.orange.withOpacity(0.2),
+                        : Colors.red.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    isCorrect ? Icons.celebration : Icons.emoji_objects,
+                    isCorrect ? Icons.celebration : Icons.favorite_border, // Cœur brisé si erreur
                     size: 60,
-                    color: isCorrect ? Colors.green : Colors.orange,
+                    color: isCorrect ? Colors.green : Colors.red,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -565,7 +677,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: isCorrect ? Colors.green : Colors.orange,
+                    color: isCorrect ? Colors.green : Colors.red,
                     height: 1.3,
                   ),
                   textAlign: TextAlign.center,
@@ -583,7 +695,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final bool isMathKid = percentage >= 100.0;
     final bool isOnRightTrack = percentage >= 50.0 && percentage < 100.0;
 
-    // 3. VOCABULAIRE ADAPTÉ (MathKid vs Expert)
     String titleText;
     if (isCollege) {
       titleText = isMathKid ? '🎉 Tu es un Expert ! 🎉' : (isOnRightTrack ? '🌟 Bien joué ! 🌟' : '🙂 Courage !');
@@ -727,7 +838,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       ),
                     ),
                   ],
-                  // Le reste reste identique
                   if (percentage < 50.0) ...[
                     Container(
                       width: double.infinity,
@@ -877,7 +987,7 @@ class _MathBackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-/// Convertit un texte contenant ^ en exposants
+
 InlineSpan buildMathText(
     String input, {
       double fontSize = 22,
@@ -942,4 +1052,3 @@ InlineSpan buildMathText(
 
   return TextSpan(children: spans);
 }
-

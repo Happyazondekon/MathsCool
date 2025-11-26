@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
-import 'package:in_app_purchase/in_app_purchase.dart'; // IMPORTANT pour ProductDetails
+import 'package:in_app_purchase/in_app_purchase.dart';
 
+import '../models/lives_model.dart';
 import '../services/billing_service.dart';
 import '../services/lives_service.dart';
 import '../models/user_model.dart';
-import '../models/lives_model.dart'; // IMPORTANT pour LivesData
 import '../utils/colors.dart';
 
 class StoreScreen extends StatefulWidget {
@@ -45,12 +45,19 @@ class _StoreScreenState extends State<StoreScreen> {
     final user = Provider.of<AppUser?>(context, listen: false);
     if (user == null) return;
 
-    // Recharger les vies via le service
     final livesService = Provider.of<LivesService>(context, listen: false);
-    livesService.refillLives(user.uid);
+
+    // --- ADAPTATION : Distinction entre recharge et illimité ---
+    if (productId == BillingService.UNLIMITED_LIVES_WEEK_ID) {
+      // Cas 1 : Semaine illimitée
+      livesService.activateUnlimitedWeek(user.uid);
+    } else {
+      // Cas 2 : Recharge simple (par défaut ou si ID correspond à refill)
+      livesService.refillLives(user.uid);
+    }
 
     // Afficher confirmation
-    _showSuccessDialog();
+    _showSuccessDialog(isUnlimited: productId == BillingService.UNLIMITED_LIVES_WEEK_ID);
   }
 
   void _handlePurchaseError(String error) {
@@ -63,7 +70,7 @@ class _StoreScreenState extends State<StoreScreen> {
     );
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog({bool isUnlimited = false}) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -81,20 +88,22 @@ class _StoreScreenState extends State<StoreScreen> {
               },
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Vies rechargées ! 🎉',
+            Text(
+              isUnlimited ? 'Semaine Illimitée ! ♾️' : 'Vies rechargées ! 🎉',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'ComicNeue',
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Tu peux continuer à jouer !',
+            Text(
+              isUnlimited
+                  ? 'Profite de 7 jours sans perdre de vies !'
+                  : 'Tu peux continuer à jouer !',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ],
         ),
@@ -203,20 +212,24 @@ class _StoreScreenState extends State<StoreScreen> {
   Widget _buildLivesStatus(LivesData? livesData) {
     if (livesData == null) return const SizedBox.shrink();
 
-    // Utilisation de la constante statique MAX_LIVES correctement
     final int maxLives = LivesData.MAX_LIVES;
     final int currentLives = livesData.availableLives;
+
+    // --- ADAPTATION : Vérification de l'illimité ---
+    final bool isUnlimited = livesData.isUnlimited;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.pink.shade100, Colors.red.shade100],
+          colors: isUnlimited
+              ? [Colors.purple.shade100, Colors.deepPurple.shade100] // Couleur spéciale si illimité
+              : [Colors.pink.shade100, Colors.red.shade100],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.red.withOpacity(0.2),
+            color: isUnlimited ? Colors.purple.withOpacity(0.2) : Colors.red.withOpacity(0.2),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -231,8 +244,8 @@ class _StoreScreenState extends State<StoreScreen> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.favorite,
-              color: Colors.red.shade400,
+              isUnlimited ? Icons.all_inclusive : Icons.favorite,
+              color: isUnlimited ? Colors.purple : Colors.red.shade400,
               size: 32,
             ),
           ),
@@ -251,14 +264,17 @@ class _StoreScreenState extends State<StoreScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$currentLives/$maxLives disponibles',
+                  isUnlimited
+                      ? 'Vies Illimitées ♾️'
+                      : '$currentLives/$maxLives disponibles',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red.shade700,
+                    color: isUnlimited ? Colors.purple.shade700 : Colors.red.shade700,
                   ),
                 ),
-                if (currentLives < maxLives)
+                // On n'affiche le timer que si PAS illimité et PAS plein
+                if (!isUnlimited && currentLives < maxLives)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
@@ -266,6 +282,18 @@ class _StoreScreenState extends State<StoreScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade700,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                if (isUnlimited)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4.0),
+                    child: Text(
+                      'Profite bien !',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.purple.shade700,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -282,7 +310,6 @@ class _StoreScreenState extends State<StoreScreen> {
     // Récupérer la liste des produits depuis le service de facturation
     final List<ProductDetails> products = _billingService.products;
 
-    // Si la liste est vide, afficher un message et un bouton recharger pour debug
     if (products.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(20),
@@ -337,6 +364,9 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   Widget _buildProductCard(ProductDetails product) {
+    // Détecter si c'est l'offre illimitée pour changer l'icône/couleur
+    final bool isUnlimitedOffer = product.id == BillingService.UNLIMITED_LIVES_WEEK_ID;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -355,12 +385,12 @@ class _StoreScreenState extends State<StoreScreen> {
         leading: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.red.shade50,
+            color: isUnlimitedOffer ? Colors.purple.shade50 : Colors.red.shade50,
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.favorite,
-            color: Colors.red.shade400,
+            isUnlimitedOffer ? Icons.all_inclusive : Icons.favorite,
+            color: isUnlimitedOffer ? Colors.purple : Colors.red.shade400,
             size: 28,
           ),
         ),
@@ -381,7 +411,7 @@ class _StoreScreenState extends State<StoreScreen> {
         trailing: ElevatedButton(
           onPressed: () => _billingService.buyProduct(product.id),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.christ,
+            backgroundColor: isUnlimitedOffer ? Colors.purple : AppColors.christ,
             foregroundColor: Colors.white,
             elevation: 2,
             shape: RoundedRectangleBorder(
@@ -429,10 +459,10 @@ class _StoreScreenState extends State<StoreScreen> {
           ),
           const SizedBox(height: 12),
           ...[
-            '❤️ Tu as 5 vies au maximum',
+            '❤️ Tu as ${LivesData.MAX_LIVES} vies au maximum',
             '❌ Chaque réponse incorrecte = -1 vie',
-            '⏱️ Chaque vie se régénère en 5 minutes',
-            '🎁 Tu peux acheter des vies instantanément',
+            '⏱️ Chaque vie se régénère en ${LivesData.REGENERATION_TIME.inMinutes} minutes',
+            '🎁 Achète des vies ou passe en mode illimité !',
           ].map((text) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(

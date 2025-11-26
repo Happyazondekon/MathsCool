@@ -11,7 +11,7 @@ class BillingService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
 
-  // IDs des produits (À DÉFINIR dans Google Play Console)
+  // IDs des produits (Exactement ceux de Google Play Console)
   static const String REFILL_LIVES_ID = 'refill_lives_1';
   static const String UNLIMITED_LIVES_WEEK_ID = 'unlimited_lives_week';
 
@@ -95,11 +95,17 @@ class BillingService {
 
       final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
 
-      // Lancer l'achat
-      await _iap.buyConsumable(
-        purchaseParam: purchaseParam,
-        autoConsume: true, // Important pour les consommables
-      );
+      // --- DISTINCTION CONSOMMABLE / NON-CONSOMMABLE ---
+      if (productId == UNLIMITED_LIVES_WEEK_ID) {
+        // Cas 1 : Abonnement (On ne consomme pas)
+        await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+      } else {
+        // Cas 2 : Consommable (Recharge de vies)
+        await _iap.buyConsumable(
+          purchaseParam: purchaseParam,
+          autoConsume: true, // On consomme immédiatement
+        );
+      }
 
       if (kDebugMode) print('🛒 Achat lancé: ${product.title}');
     } catch (e) {
@@ -114,20 +120,17 @@ class BillingService {
       if (kDebugMode) print('📨 Achat reçu: ${purchase.productID} - ${purchase.status}');
 
       if (purchase.status == PurchaseStatus.pending) {
-        // Achat en cours (afficher loading)
-        if (kDebugMode) print('⏳ Achat en attente...');
+        // Achat en cours...
       } else if (purchase.status == PurchaseStatus.purchased ||
           purchase.status == PurchaseStatus.restored) {
         // Achat réussi
         _handleSuccessfulPurchase(purchase);
       } else if (purchase.status == PurchaseStatus.error) {
-        // Erreur
         final error = purchase.error?.message ?? 'Erreur inconnue';
         if (kDebugMode) print('❌ Erreur achat: $error');
         onPurchaseError?.call(error);
       }
 
-      // IMPORTANT: Finaliser l'achat
       if (purchase.pendingCompletePurchase) {
         _iap.completePurchase(purchase);
       }
@@ -138,28 +141,14 @@ class BillingService {
   void _handleSuccessfulPurchase(PurchaseDetails purchase) {
     if (kDebugMode) print('✅ Achat réussi: ${purchase.productID}');
 
-    // Appeler le callback de succès
     onPurchaseSuccess?.call(purchase.productID);
 
-    // Vérifier la signature Android (sécurité)
     if (purchase is GooglePlayPurchaseDetails) {
-      final verified = _verifyPurchase(purchase);
-      if (!verified) {
-        if (kDebugMode) print('⚠️ Signature invalide');
-        return;
-      }
+      // Vérification signature (optionnel en dev)
     }
   }
 
-  /// Vérifier la signature d'achat (basique)
-  bool _verifyPurchase(GooglePlayPurchaseDetails purchase) {
-    // TODO: Implémenter la vérification serveur pour la production
-    // Pour l'instant, on accepte tous les achats en dev
-    return purchase.billingClientPurchase.isAcknowledged ||
-        purchase.status == PurchaseStatus.purchased;
-  }
-
-  /// Restaurer les achats (pour abonnements)
+  /// Restaurer les achats
   Future<void> restorePurchases() async {
     try {
       await _iap.restorePurchases();
@@ -170,7 +159,6 @@ class BillingService {
     }
   }
 
-  /// Nettoyer les ressources
   void dispose() {
     _subscription?.cancel();
   }

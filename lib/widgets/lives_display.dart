@@ -21,6 +21,7 @@ class LivesDisplay extends StatefulWidget {
 class _LivesDisplayState extends State<LivesDisplay> {
   @override
   Widget build(BuildContext context) {
+    // On écoute le service pour les mises à jour en temps réel
     final livesService = Provider.of<LivesService>(context);
     final livesData = livesService.livesData;
 
@@ -30,6 +31,9 @@ class _LivesDisplayState extends State<LivesDisplay> {
 
     final availableLives = livesData.availableLives;
     final maxLives = LivesData.MAX_LIVES;
+
+    // Vérifier si le mode illimité est actif
+    final bool isUnlimited = livesData.isUnlimited;
 
     return GestureDetector(
       onTap: widget.onTap ?? () {
@@ -42,16 +46,16 @@ class _LivesDisplayState extends State<LivesDisplay> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
+          // Changement de couleur si illimité (Violet vs Rouge)
           gradient: LinearGradient(
-            colors: [
-              Colors.red.shade400,
-              Colors.pink.shade400,
-            ],
+            colors: isUnlimited
+                ? [Colors.purple.shade400, Colors.deepPurple.shade400]
+                : [Colors.red.shade400, Colors.pink.shade400],
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(0.3),
+              color: (isUnlimited ? Colors.purple : Colors.red).withOpacity(0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -60,27 +64,33 @@ class _LivesDisplayState extends State<LivesDisplay> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icône cœur
+            // Icône cœur (ou infini si tu préfères, mais le cœur reste sympa)
             Icon(
-              availableLives > 0 ? Icons.favorite : Icons.favorite_border,
+              isUnlimited
+                  ? Icons.all_inclusive
+                  : (availableLives > 0 ? Icons.favorite : Icons.favorite_border),
               color: Colors.white,
               size: 20,
             ),
             const SizedBox(width: 6),
 
-            // Nombre de vies
+            // Nombre de vies ou Symbole Infini
             Text(
-              '$availableLives/$maxLives',
-              style: const TextStyle(
+              isUnlimited ? '∞' : '$availableLives/$maxLives',
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 16,
+                fontSize: isUnlimited ? 20 : 16, // Plus gros pour l'infini
                 fontFamily: 'ComicNeue',
               ),
             ),
 
             // Timer de régénération
-            if (widget.showTimer && availableLives < maxLives) ...[
+            // On ne l'affiche que si :
+            // 1. On a demandé à l'afficher (widget.showTimer)
+            // 2. Ce n'est PAS illimité (!isUnlimited)
+            // 3. Les vies ne sont pas pleines (availableLives < maxLives)
+            if (widget.showTimer && !isUnlimited && availableLives < maxLives) ...[
               const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -114,7 +124,7 @@ class _LivesDisplayState extends State<LivesDisplay> {
               ),
             ],
 
-            // Icône "+"
+            // Icône "+" (Petit bouton d'ajout)
             const SizedBox(width: 4),
             Container(
               padding: const EdgeInsets.all(2),
@@ -124,7 +134,8 @@ class _LivesDisplayState extends State<LivesDisplay> {
               ),
               child: Icon(
                 Icons.add,
-                color: Colors.red.shade400,
+                // Couleur de l'icône + adaptée au fond
+                color: isUnlimited ? Colors.purple.shade400 : Colors.red.shade400,
                 size: 14,
               ),
             ),

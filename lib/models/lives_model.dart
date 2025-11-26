@@ -2,25 +2,36 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LivesData {
   final int currentLives;       // Vies stockées
-  final DateTime lastLossTime;  // Date de référence
-  final int totalLivesBought;
+  final DateTime lastLossTime;  // Date de référence pour la régénération
+  final int totalLivesBought;   // Stats (optionnel)
+  final DateTime? unlimitedUntil; // NOUVEAU : Date de fin de l'illimité
 
-  static const int MAX_LIVES = 5; // Tu peux mettre 4 ici si tu préfères comme dit plus tôt
-  // CHANGEMENT ICI : 5 minutes au lieu de 10
+  static const int MAX_LIVES = 5;
   static const Duration REGENERATION_TIME = Duration(minutes: 5);
 
   LivesData({
     required this.currentLives,
     required this.lastLossTime,
     this.totalLivesBought = 0,
+    this.unlimitedUntil, // NOUVEAU
   });
+
+  // NOUVEAU : Vérifie si la période de vies illimitées est active
+  bool get isUnlimited {
+    if (unlimitedUntil == null) return false;
+    return unlimitedUntil!.isAfter(DateTime.now());
+  }
 
   // Calcul dynamique pour l'affichage
   int get availableLives {
+    // Si illimité, on a toujours le max de vies
+    if (isUnlimited) return MAX_LIVES;
+
     if (currentLives >= MAX_LIVES) return MAX_LIVES;
 
     final now = DateTime.now();
     final timeSinceLoss = now.difference(lastLossTime);
+
     // Protection contre les dates futures ou incohérentes
     if (timeSinceLoss.isNegative) return currentLives;
 
@@ -31,7 +42,8 @@ class LivesData {
 
   // Temps restant avant la prochaine vie
   Duration get timeUntilNextLife {
-    if (availableLives >= MAX_LIVES) return Duration.zero;
+    // Si illimité ou vies pleines, pas de timer
+    if (isUnlimited || availableLives >= MAX_LIVES) return Duration.zero;
 
     final now = DateTime.now();
     final timeSinceLoss = now.difference(lastLossTime);
@@ -46,8 +58,11 @@ class LivesData {
 
   bool get canPlay => availableLives > 0;
 
-  // NOUVELLE MÉTHODE : Pour mettre à jour l'objet proprement après régénération
+  // Pour mettre à jour l'objet proprement après régénération
   LivesData regenerate() {
+    // Si illimité, pas besoin de recalculer la régénération
+    if (isUnlimited) return this;
+
     if (availableLives == currentLives) return this; // Rien à changer
 
     final now = DateTime.now();
@@ -78,22 +93,29 @@ class LivesData {
     return LivesData(
       currentLives: MAX_LIVES,
       lastLossTime: DateTime.now(),
+      unlimitedUntil: null,
     );
   }
 
+  // Conversion vers Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'currentLives': currentLives,
       'lastLossTime': Timestamp.fromDate(lastLossTime),
       'totalLivesBought': totalLivesBought,
+      // On convertit le DateTime en Timestamp Firestore si il existe
+      'unlimitedUntil': unlimitedUntil != null ? Timestamp.fromDate(unlimitedUntil!) : null,
     };
   }
 
+  // Création depuis Firestore
   factory LivesData.fromFirestore(Map<String, dynamic> data) {
     return LivesData(
       currentLives: data['currentLives'] as int? ?? MAX_LIVES,
       lastLossTime: (data['lastLossTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       totalLivesBought: data['totalLivesBought'] as int? ?? 0,
+      // On récupère le Timestamp et on le convertit en DateTime
+      unlimitedUntil: (data['unlimitedUntil'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -101,11 +123,13 @@ class LivesData {
     int? currentLives,
     DateTime? lastLossTime,
     int? totalLivesBought,
+    DateTime? unlimitedUntil,
   }) {
     return LivesData(
       currentLives: currentLives ?? this.currentLives,
       lastLossTime: lastLossTime ?? this.lastLossTime,
       totalLivesBought: totalLivesBought ?? this.totalLivesBought,
+      unlimitedUntil: unlimitedUntil ?? this.unlimitedUntil,
     );
   }
 }

@@ -10,16 +10,19 @@ import 'package:mathscool/models/user_model.dart';
 
 // Services
 import 'package:mathscool/services/progress_service.dart';
-import 'package:mathscool/services/lives_service.dart'; // NOUVEAU
+import 'package:mathscool/services/lives_service.dart';
+import 'package:mathscool/services/achievement_service.dart';
+import 'package:mathscool/models/achievement_model.dart';
 
 // Screens
 import 'package:mathscool/screens/help_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
-import 'package:mathscool/screens/store_screen.dart'; // NOUVEAU
+import 'package:mathscool/screens/store_screen.dart';
+import 'package:mathscool/screens/achievements_screen.dart';
 
 // Utils & Widgets
 import 'package:mathscool/utils/colors.dart';
-import 'package:mathscool/widgets/lives_display.dart'; // NOUVEAU
+import 'package:mathscool/widgets/lives_display.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -51,9 +54,11 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(widget.level);
 
   @override
+  @override
   void initState() {
     super.initState();
     _progressService = ProgressService();
+
     // Sécurité : Si la liste est null, on met une liste vide pour éviter le crash
     _exercises = staticExercises[widget.level]?[widget.theme] ?? [];
 
@@ -75,12 +80,21 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       _animationController.forward();
     }
 
-    // --- NOUVEAU : Vérification des vies au démarrage (Sécurité supplémentaire) ---
+    // --- CHARGEMENT DES DONNÉES UTILISATEUR ---
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = Provider.of<AppUser?>(context, listen: false);
       final livesService = Provider.of<LivesService>(context, listen: false);
 
+      // NOUVEAU : Récupération du service d'achievements
+      final achievementService = Provider.of<AchievementService>(context, listen: false);
+
       if (user != null) {
+        // 1. Initialiser et charger les achievements de l'utilisateur
+        // C'est CRUCIAL pour que updateProgress ne travaille pas sur du vide
+        await achievementService.initialize();
+        await achievementService.loadUserAchievements(user.uid);
+
+        // 2. Vérification des vies (Sécurité supplémentaire)
         final canPlay = await livesService.canPlay(user.uid);
         if (!canPlay) {
           _showNoLivesDialog();
@@ -107,7 +121,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     // Récupération du service de vies
     final livesService = Provider.of<LivesService>(context, listen: false);
 
-    // --- LOGIQUE VIES ET SCORE ---
+    // LOGIQUE VIES ET SCORE
     if (isCorrect) {
       // Réponse correcte
       setState(() {
@@ -145,6 +159,34 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         selectedIndex,
         exercise.correctAnswer,
       );
+
+      // NOUVEAU : Mettre à jour les achievements
+      final achievementService = Provider.of<AchievementService>(context, listen: false);
+
+      // Achievement: exercice résolu
+      List<Achievement> newAchievements = await achievementService.updateProgress(
+        userId: user.uid,
+        type: AchievementType.exercisesCompleted,
+        incrementBy: 1,
+        level: widget.level,
+      );
+
+      // Si réponse correcte : vérifier score parfait sur le thème
+      if (isCorrect && _score == _exercises.length) {
+        final perfectAchievements = await achievementService.updateProgress(
+          userId: user.uid,
+          type: AchievementType.perfectScore,
+          incrementBy: 1,
+          level: widget.level,
+        );
+        newAchievements.addAll(perfectAchievements);
+      }
+
+      // Afficher notification si nouveau achievement débloqué
+      if (newAchievements.isNotEmpty && mounted) {
+        _showAchievementUnlockedSnackbar(newAchievements);
+      }
+
     } catch (e) {
       print('Erreur lors de la sauvegarde: $e');
     }
@@ -166,7 +208,53 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     }
   }
 
-  // --- NOUVEAU : Dialogue Game Over / Plus de vies ---
+  // NOUVEAU : Notification d'achievement débloqué
+  void _showAchievementUnlockedSnackbar(List<Achievement> achievements) {
+    for (var achievement in achievements) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Text(achievement.icon, style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      '🎉 Achievement débloqué !',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '${achievement.name} (+${achievement.livesReward} vies)',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 3),
+          action: SnackBarAction(
+            label: 'Voir',
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AchievementsScreen()),
+              );
+            },
+          ),
+        ),
+      );
+    }
+  }
+
+  // Dialogue Game Over / Plus de vies
   void _showNoLivesDialog() {
     showDialog(
       context: context,
@@ -190,7 +278,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             SizedBox(height: 16),
             Text(
-              "Tu peux attendre qu'elles se rechargent ou en récupérer tout de suite !",
+              "Tu peux attendre qu'elles se recharges ou en récupérer tout de suite !",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
@@ -361,7 +449,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           ),
           const SizedBox(width: 12),
 
-          // --- NOUVEAU : Affichage des vies dans le header ---
+          // Affichage des vies dans le header
           const LivesDisplay(showTimer: false),
 
           const SizedBox(width: 12),

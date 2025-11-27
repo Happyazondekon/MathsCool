@@ -18,6 +18,9 @@ import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/widgets/lives_display.dart';
 
+import '../services/achievement_service.dart';
+import 'achievements_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -229,6 +232,75 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           Row(
                             children: [
                               // J'ai retiré LivesDisplay d'ici
+                              // Bouton Achievements avec badge
+                              Consumer<AchievementService>(
+                                builder: (context, achievementService, _) {
+                                  final unclaimedCount = achievementService.getUnclaimedAchievements().length;
+
+                                  return Stack(
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const AchievementsScreen()),
+                                        ),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          margin: const EdgeInsets.only(right: 12),
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                Colors.orange.shade400.withOpacity(0.8),
+                                                Colors.yellow.shade400.withOpacity(0.8),
+                                              ],
+                                            ),
+                                            shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.orange.withOpacity(0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Icon(
+                                            Icons.emoji_events,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                      if (unclaimedCount > 0)
+                                        Positioned(
+                                          top: 0,
+                                          right: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                              border: Border.all(color: Colors.white, width: 2),
+                                            ),
+                                            constraints: const BoxConstraints(
+                                              minWidth: 20,
+                                              minHeight: 20,
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                '$unclaimedCount',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
+                              ),
 
                               // Bouton notifications avec thème de Noël
                               GestureDetector(

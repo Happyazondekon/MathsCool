@@ -60,6 +60,24 @@ class LivesService extends ChangeNotifier {
     }
   }
 
+  Future<void> addLivesFromAchievement(String userId, int lives) async {
+    if (_livesData == null) await loadLives(userId);
+
+    // Ajouter les vies directement (sans limite de max)
+    _livesData = _livesData!.copyWith(
+      currentLives: (_livesData!.currentLives + lives).clamp(0, LivesData.MAX_LIVES + 10), // Peut dépasser un peu le max
+      lastLossTime: DateTime.now(),
+    );
+
+    await _saveLives(userId, _livesData!);
+    notifyListeners();
+
+    // Si on arrive au max, annuler les notifications
+    if (_livesData!.currentLives >= LivesData.MAX_LIVES) {
+      await NotificationService().cancelLivesRefilledNotification();
+    }
+  }
+
   // Méthode interne de sauvegarde
   Future<void> _saveLives(String userId, LivesData data) async {
     try {

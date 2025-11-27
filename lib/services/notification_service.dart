@@ -18,10 +18,12 @@ class NotificationService {
   static const String _customNotificationsKey = 'custom_notifications';
   static const String _lastNotificationKey = 'last_notification_time';
 
-  // --- NOUVEAU : ID constant pour la notif de vies ---
+  // ID pour la notif de vies
   static const int _livesRefillNotificationId = 8888;
+  // --- NOUVEAU : ID pour le rappel d'achievements ---
+  static const int _achievementReminderId = 9001;
 
-  // Messages motivationnels pour les enfants
+  // Messages motivationnels classiques
   final List<String> _motivationalMessages = [
     "Il est temps de faire des mathématiques magiques ! ✨",
     "Tes amis les chiffres t'attendent ! 🔢",
@@ -42,18 +44,23 @@ class NotificationService {
     "Prêt(e) pour ta session d'apprentissage ? 💫"
   ];
 
+  // --- NOUVEAU : Messages spécifiques pour les Achievements ---
+  final List<String> _achievementMessages = [
+    "🏆 Psst... Un nouveau trophée t'attend peut-être !",
+    "🥇 Viens débloquer ton prochain badge Expert !",
+    "🚀 Tu es proche du but ! Viens progresser dans tes succès.",
+    "🔥 Garde le rythme ! De nouvelles récompenses sont disponibles.",
+    "👑 Deviens le Roi de la catégorie aujourd'hui !",
+    "🎯 Objectif en vue : Viens compléter tes missions !",
+    "🌟 Tes badges se sentent seuls... Viens en gagner d'autres !",
+    "💪 Montre-nous tes talents et gagne des vies !",
+  ];
+
   /// Initialisation du service de notifications
   Future<void> initialize() async {
     try {
       // Initialiser les fuseaux horaires
       tz.initializeTimeZones();
-
-      // Debug des fuseaux horaires
-      final String currentTimeZone = DateTime.now().timeZoneName;
-      final String currentOffset = DateTime.now().timeZoneOffset.toString();
-      print('Fuseau horaire de l\'appareil: $currentTimeZone');
-      print('Offset système: $currentOffset');
-      print('Fuseau timezone package: ${tz.local}');
 
       // Configuration Android
       const AndroidInitializationSettings initializationSettingsAndroid =
@@ -91,25 +98,18 @@ class NotificationService {
   /// Demander les permissions nécessaires
   Future<bool> _requestPermissions() async {
     try {
-      // Permission pour les notifications
       final notificationStatus = await Permission.notification.request();
 
       if (notificationStatus.isDenied || notificationStatus.isPermanentlyDenied) {
-        print("Permission pour les notifications refusée.");
         return false;
       }
 
-      // Permission spécifique Android 12+ pour les alarmes exactes
       if (await Permission.scheduleExactAlarm.isDenied) {
         final result = await Permission.scheduleExactAlarm.request();
-
         if (result.isDenied || result.isPermanentlyDenied) {
-          print("Permission pour les alarmes exactes refusée.");
           return false;
         }
       }
-
-      print("Toutes les permissions nécessaires sont accordées.");
       return true;
     } catch (e) {
       print('Erreur lors de la demande de permissions: $e');
@@ -117,45 +117,111 @@ class NotificationService {
     }
   }
 
-  /// Gérer le tap sur la notification
   void _onNotificationTapped(NotificationResponse notificationResponse) {
     print('Notification tapped: ${notificationResponse.payload}');
-    // Ici vous pouvez ajouter la logique de navigation
   }
 
-  /// Obtenir le fuseau horaire correct de l'appareil
   tz.Location _getDeviceTimeZone() {
     try {
-      // Récupérer l'offset système actuel
       final now = DateTime.now();
       final offset = now.timeZoneOffset;
-
-      // Si l'offset correspond à tz.local, l'utiliser
       final localNow = tz.TZDateTime.now(tz.local);
       if (localNow.timeZoneOffset == offset) {
         return tz.local;
       }
-
-      // Sinon, essayer de trouver un fuseau correspondant
       for (final location in tz.timeZoneDatabase.locations.values) {
         final locationTime = tz.TZDateTime.now(location);
         if (locationTime.timeZoneOffset == offset) {
-          print('Fuseau trouvé: ${location.name}');
           return location;
         }
       }
-
-      // Fallback: utiliser tz.local
-      print('Utilisation du fuseau par défaut: ${tz.local}');
       return tz.local;
-
     } catch (e) {
-      print('Erreur lors de la détection du fuseau horaire: $e');
       return tz.local;
     }
   }
 
-  /// Programmer une notification personnalisée
+  // --- NOUVEAU : Programmer un rappel quotidien pour les achievements ---
+  Future<bool> scheduleDailyAchievementReminder() async {
+    try {
+      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
+        return false;
+      }
+
+      // Configuration de l'heure : 17h30 (Heure idéale après l'école/devoirs)
+      // Vous pouvez changer l'heure ici (hour: 17, minute: 30)
+      final now = DateTime.now();
+      var scheduledDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        17, // 17h
+        30, // 30min
+      );
+
+      // Si l'heure est passée, on commence demain
+      if (scheduledDateTime.isBefore(now)) {
+        scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
+      }
+
+      final deviceTimeZone = _getDeviceTimeZone();
+      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'mathscool_achievements', // Canal dédié
+        'Rappels de Trophées',
+        channelDescription: 'Rappels pour débloquer les succès et badges',
+        importance: Importance.defaultImportance,
+        priority: Priority.defaultPriority,
+        icon: 'baseline_calculate_white_36',
+        color: Color(0xFFFFD700), // Couleur Or pour les trophées
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        sound: 'default',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      // Utilisation de zonedSchedule avec DateTimeComponents.time
+      // Cela fait répéter la notification chaque jour à la même heure
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _achievementReminderId,
+        "Nouveaux succès disponibles ! 🏆",
+        _getRandomAchievementMessage(), // Message aléatoire
+        scheduledDate,
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Répétition quotidienne
+        payload: 'mathscool_achievement_reminder',
+      );
+
+      print('Rappel quotidien d\'achievements programmé pour : $scheduledDate');
+      return true;
+
+    } catch (e) {
+      print('Erreur lors de la programmation du rappel d\'achievements : $e');
+      return false;
+    }
+  }
+
+  String _getRandomAchievementMessage() {
+    final random = Random();
+    return _achievementMessages[random.nextInt(_achievementMessages.length)];
+  }
+
+  /// Programmer une notification personnalisée (CODE EXISTANT CONSERVÉ)
   Future<bool> scheduleCustomNotification({
     required String userName,
     required int hour,
@@ -165,20 +231,11 @@ class NotificationService {
     String? customMessage,
   }) async {
     try {
-      // Vérifier si les notifications sont activées
-      if (!await areNotificationsEnabled()) {
-        print('Notifications désactivées');
+      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
         return false;
       }
 
-      // Vérifier les permissions
-      if (!await _hasRequiredPermissions()) {
-        print('Permissions insuffisantes');
-        return false;
-      }
-
-      // Utiliser l'heure système puis convertir
-      final now = DateTime.now(); // Heure système locale de l'appareil
+      final now = DateTime.now();
       var scheduledDateTime = DateTime(
         now.year,
         now.month,
@@ -187,18 +244,14 @@ class NotificationService {
         minute,
       );
 
-      // Si l'heure est déjà passée aujourd'hui, programmer pour demain
       if (scheduledDateTime.isBefore(now)) {
         scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
       }
 
-      // Convertir en TZDateTime en utilisant le fuseau de l'appareil
       final deviceTimeZone = _getDeviceTimeZone();
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
-
       final message = customMessage ?? _getRandomMotivationalMessage();
 
-      // Configuration des détails de notification
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'mathscool_custom',
         'Sessions personnalisées',
@@ -210,23 +263,13 @@ class NotificationService {
         enableLights: true,
         enableVibration: true,
         playSound: true,
-        channelShowBadge: true,
-      );
-
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        sound: 'default',
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        badgeNumber: 1,
       );
 
       const NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
-        iOS: iosDetails,
+        iOS: DarwinNotificationDetails(),
       );
 
-      // Programmer la notification
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         "Hey $userName! 📚",
@@ -240,26 +283,21 @@ class NotificationService {
         payload: 'mathscool_custom_session',
       );
 
-      // Sauvegarder la notification personnalisée
       await _saveCustomNotification(id, hour, minute, isRepeating, customMessage);
-
       return true;
 
     } catch (e) {
-      print('Erreur lors de la programmation de la notification: $e');
+      print('Erreur programmation custom: $e');
       return false;
     }
   }
 
-  /// Vérifier si les permissions requises sont accordées
   Future<bool> _hasRequiredPermissions() async {
     final notificationStatus = await Permission.notification.status;
     final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
-
     return notificationStatus.isGranted && (exactAlarmStatus.isGranted);
   }
 
-  /// Sauvegarder une notification personnalisée
   Future<void> _saveCustomNotification(
       int id,
       int hour,
@@ -282,18 +320,15 @@ class NotificationService {
 
       customNotifications.add(_encodeNotification(notificationData));
       await prefs.setStringList(_customNotificationsKey, customNotifications);
-      print('Notification sauvegardée: ID $id à ${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}');
     } catch (e) {
-      print('Erreur lors de la sauvegarde: $e');
+      print('Erreur sauvegarde: $e');
     }
   }
 
-  /// Encoder les données de notification
   String _encodeNotification(Map<String, String> data) {
     return data.entries.map((e) => '${e.key}:${e.value.replaceAll(':', '|')}').join(',');
   }
 
-  /// Décoder les données de notification
   Map<String, String> _decodeNotification(String encoded) {
     try {
       final pairs = encoded.split(',');
@@ -309,55 +344,40 @@ class NotificationService {
         }).where((entry) => entry.key.isNotEmpty),
       );
     } catch (e) {
-      print('Erreur lors du décodage: $e');
       return {};
     }
   }
 
-  /// Obtenir toutes les notifications personnalisées
   Future<List<Map<String, String>>> getCustomNotifications() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final encoded = prefs.getStringList(_customNotificationsKey) ?? [];
       return encoded.map((e) => _decodeNotification(e)).where((map) => map.isNotEmpty).toList();
     } catch (e) {
-      print('Erreur lors de la récupération des notifications: $e');
       return [];
     }
   }
 
-  /// Supprimer une notification personnalisée
   Future<bool> removeCustomNotification(int id) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final notifications = prefs.getStringList(_customNotificationsKey) ?? [];
-
-      final initialLength = notifications.length;
       notifications.removeWhere((encoded) {
         final data = _decodeNotification(encoded);
         return data['id'] == id.toString();
       });
-
       await prefs.setStringList(_customNotificationsKey, notifications);
       await _flutterLocalNotificationsPlugin.cancel(id);
-
-      final removed = initialLength > notifications.length;
-      print('Notification ID $id ${removed ? 'supprimée' : 'non trouvée'}');
-      return removed;
+      return true;
     } catch (e) {
-      print('Erreur lors de la suppression: $e');
       return false;
     }
   }
 
-  /// Restaurer toutes les notifications personnalisées (à appeler au démarrage)
   Future<int> restoreCustomNotifications(String userName) async {
     try {
       final notifications = await getCustomNotifications();
       int restoredCount = 0;
-
-      print('Restauration de ${notifications.length} notifications...');
-
       for (final notification in notifications) {
         try {
           final success = await scheduleCustomNotification(
@@ -368,125 +388,85 @@ class NotificationService {
             isRepeating: notification['isRepeating'] == 'true',
             customMessage: notification['message'],
           );
-
           if (success) restoredCount++;
         } catch (e) {
-          print('Erreur lors de la restauration de la notification ${notification['id']}: $e');
+          print('Erreur restauration notif ${notification['id']}: $e');
         }
       }
-
-      print('$restoredCount notifications restaurées sur ${notifications.length}');
       return restoredCount;
     } catch (e) {
-      print('Erreur lors de la restauration: $e');
       return 0;
     }
   }
 
-  /// Obtenir un message motivationnel aléatoire
   String _getRandomMotivationalMessage() {
     final random = Random();
     return _motivationalMessages[random.nextInt(_motivationalMessages.length)];
   }
 
-  /// Activer/Désactiver les notifications
   Future<void> setNotificationsEnabled(bool enabled) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_notificationEnabledKey, enabled);
-
       if (!enabled) {
         await cancelAllNotifications();
-        print('Toutes les notifications ont été désactivées et annulées');
-      } else {
-        print('Notifications activées');
       }
     } catch (e) {
-      print('Erreur lors du changement d\'état des notifications: $e');
+      print('Erreur enable/disable: $e');
     }
   }
 
-  /// Vérifier si les notifications sont activées
   Future<bool> areNotificationsEnabled() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_notificationEnabledKey) ?? true;
     } catch (e) {
-      print('Erreur lors de la vérification de l\'état: $e');
-      return true; // Par défaut activé
+      return true;
     }
   }
 
-  /// Annuler toutes les notifications
   Future<void> cancelAllNotifications() async {
-    try {
-      await _flutterLocalNotificationsPlugin.cancelAll();
-      print('Toutes les notifications ont été annulées');
-    } catch (e) {
-      print('Erreur lors de l\'annulation: $e');
-    }
+    await _flutterLocalNotificationsPlugin.cancelAll();
   }
 
-  /// Annuler une notification spécifique
   Future<void> cancelNotification(int id) async {
-    try {
-      await _flutterLocalNotificationsPlugin.cancel(id);
-      print('Notification ID $id annulée');
-    } catch (e) {
-      print('Erreur lors de l\'annulation de la notification $id: $e');
-    }
+    await _flutterLocalNotificationsPlugin.cancel(id);
   }
 
-  /// Obtenir les notifications en attente
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
-    try {
-      final pending = await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
-      print('${pending.length} notifications en attente');
-      return pending;
-    } catch (e) {
-      print('Erreur lors de la récupération des notifications en attente: $e');
-      return [];
-    }
+    return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 
-  /// Enregistrer le timestamp de la dernière notification
   Future<void> _saveLastNotificationTime() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(_lastNotificationKey, DateTime.now().millisecondsSinceEpoch);
     } catch (e) {
-      print('Erreur lors de la sauvegarde du timestamp: $e');
+      print('Erreur save timestamp: $e');
     }
   }
 
-  /// Obtenir le timestamp de la dernière notification
   Future<DateTime?> getLastNotificationTime() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final timestamp = prefs.getInt(_lastNotificationKey);
       return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
     } catch (e) {
-      print('Erreur lors de la récupération du timestamp: $e');
       return null;
     }
   }
 
-  /// Vérifier si il faut envoyer une notification maintenant
   Future<bool> shouldSendNotificationNow() async {
     try {
       final lastTime = await getLastNotificationTime();
       if (lastTime == null) return true;
-
       final now = DateTime.now();
-      final difference = now.difference(lastTime);
-      return difference.inHours >= 12;
+      return now.difference(lastTime).inHours >= 12;
     } catch (e) {
-      print('Erreur lors de la vérification: $e');
       return true;
     }
   }
 
-  /// Envoyer une notification immédiate
   Future<bool> sendImmediateNotification({
     required String userName,
     required String title,
@@ -494,56 +474,33 @@ class NotificationService {
     int? id,
   }) async {
     try {
-      if (!await areNotificationsEnabled()) {
-        return false;
-      }
+      if (!await areNotificationsEnabled()) return false;
 
       final notificationId = id ?? Random().nextInt(10000);
-
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
         'mathscool_immediate',
         'Notifications immédiates',
-        channelDescription: 'Notifications envoyées immédiatement',
         importance: Importance.high,
         priority: Priority.high,
         icon: 'baseline_calculate_white_36',
         color: Color(0xFF34A853),
-        enableLights: true,
-        enableVibration: true,
-        playSound: true,
-      );
-
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        sound: 'default',
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      );
-
-      const NotificationDetails platformDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
       );
 
       await _flutterLocalNotificationsPlugin.show(
         notificationId,
         title,
         message,
-        platformDetails,
+        const NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
         payload: 'mathscool_immediate',
       );
 
       await _saveLastNotificationTime();
-      print('Notification immédiate envoyée: $title');
       return true;
-
     } catch (e) {
-      print('Erreur lors de l\'envoi de la notification immédiate: $e');
       return false;
     }
   }
 
-  /// Obtenir des statistiques sur les notifications
   Future<Map<String, dynamic>> getNotificationStats() async {
     try {
       final customNotifications = await getCustomNotifications();
@@ -559,18 +516,14 @@ class NotificationService {
         'permissions': await _hasRequiredPermissions(),
       };
     } catch (e) {
-      print('Erreur lors de la récupération des statistiques: $e');
       return {};
     }
   }
 
-  /// Nettoyer les anciennes notifications (utilitaire de maintenance)
   Future<int> cleanupOldNotifications() async {
     try {
-      final notifications = await getCustomNotifications();
       final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
       int cleanedCount = 0;
-
       final prefs = await SharedPreferences.getInstance();
       final customNotifications = prefs.getStringList(_customNotificationsKey) ?? [];
 
@@ -593,77 +546,46 @@ class NotificationService {
       });
 
       await prefs.setStringList(_customNotificationsKey, customNotifications);
-      print('$cleanedCount anciennes notifications nettoyées');
       return cleanedCount;
-
     } catch (e) {
-      print('Erreur lors du nettoyage: $e');
       return 0;
     }
   }
 
-  // ==========================================
-  // --- NOUVELLES FONCTIONNALITÉS POUR LES VIES ---
-  // ==========================================
-
-  /// Programmer une notification quand les vies sont rechargées
+  /// Programmer une notification quand les vies sont rechargées (CODE EXISTANT)
   Future<bool> scheduleLivesRefilledNotification({
     required String userName,
     required Duration timeRemaining,
   }) async {
     try {
-      if (!await areNotificationsEnabled()) {
-        print('Notifications désactivées, impossible de programmer le rappel de vies');
+      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
         return false;
       }
 
-      if (!await _hasRequiredPermissions()) {
-        print('Permissions manquantes pour le rappel de vies');
-        return false;
-      }
-
-      // Calculer l'heure exacte de la fin du rechargement
       final now = DateTime.now();
       final scheduledDateTime = now.add(timeRemaining);
-
-      // Convertir en TZDateTime avec le bon fuseau
       final deviceTimeZone = _getDeviceTimeZone();
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
-      // Configuration spécifique pour les vies (Couleur Rose/Rouge)
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'mathscool_lives', // Canal spécifique
+        'mathscool_lives',
         'Vies Rechargées',
         channelDescription: 'Notifications quand les vies sont complètes',
         importance: Importance.high,
         priority: Priority.high,
         icon: 'baseline_calculate_white_36',
-        color: Color(0xFFE91E63), // Rose/Rouge
+        color: Color(0xFFE91E63),
         enableLights: true,
         enableVibration: true,
         playSound: true,
       );
 
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        sound: 'default',
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-        interruptionLevel: InterruptionLevel.active,
-      );
-
-      const NotificationDetails platformDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
-      // Programmer la notification
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         _livesRefillNotificationId,
         "Vies au max ! ❤️",
         "Hey $userName, tes vies sont rechargées ! Viens jouer ! 🎮",
         scheduledDate,
-        platformDetails,
+        const NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
@@ -672,14 +594,13 @@ class NotificationService {
 
       print('Notification de vies programmée pour : $scheduledDate');
       return true;
-
     } catch (e) {
-      print('Erreur lors de la programmation de la notification de vies : $e');
+      print('Erreur programmation vies: $e');
       return false;
     }
   }
 
-  /// Annuler la notification de vies (à appeler si l'utilisateur ouvre l'app avant la fin)
+  /// Annuler la notification de vies
   Future<void> cancelLivesRefilledNotification() async {
     await cancelNotification(_livesRefillNotificationId);
   }

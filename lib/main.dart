@@ -12,8 +12,9 @@ import 'package:mathscool/services/user_service.dart';
 import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/services/progress_service.dart';
 import 'package:mathscool/services/lives_service.dart';
+import 'package:mathscool/services/achievement_service.dart';
 
-// --- NOUVEAU : Imports pour le Kill Switch ---
+// Imports pour le Kill Switch
 import 'package:mathscool/services/remote_config_service.dart';
 import 'package:mathscool/screens/update_required_screen.dart';
 
@@ -27,7 +28,7 @@ void main() async {
   final notificationService = NotificationService();
   await notificationService.initialize();
 
-  // --- NOUVEAU : Initialiser Remote Config et vérifier la version ---
+  // Initialiser Remote Config et vérifier la version
   final remoteConfig = RemoteConfigService();
   await remoteConfig.initialize();
 
@@ -45,9 +46,9 @@ void main() async {
         Provider(create: (_) => UserService()),
         Provider(create: (_) => ProgressService()),
         ChangeNotifierProvider(create: (_) => LivesService()),
+        ChangeNotifierProvider(create: (_) => AchievementService()),
         Provider.value(value: notificationService),
       ],
-      // On passe le statut de mise à jour à l'application
       child: MathsCoolApp(showUpdateScreen: updateRequired),
     ),
   );
@@ -122,7 +123,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         return const EmailVerificationScreen();
       }
 
-      // Programmer les notifications de manière asynchrone
+      // Programmer les notifications de manière asynchrone une fois connecté
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scheduleNotificationsForUser(user, notificationService);
       });
@@ -151,7 +152,14 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
     try {
       final userName = user.displayName ?? 'MathKid';
-      print('Notifications programmées pour $userName');
+
+      // 1. Restaurer les notifications personnalisées existantes (si l'utilisateur en avait configuré)
+      await notificationService.restoreCustomNotifications(userName);
+
+      // 2. Programmer le rappel quotidien pour les achievements (17h30 par défaut)
+      await notificationService.scheduleDailyAchievementReminder();
+
+      print('Notifications (Rappels & Achievements) programmées pour $userName');
     } catch (e) {
       print('Erreur lors de la programmation des notifications: $e');
     }

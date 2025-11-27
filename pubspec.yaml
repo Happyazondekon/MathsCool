@@ -1,7 +1,7 @@
 name: mathscool
 description: Une application éducative pour les enfants
 
-version: 2.1.0+8
+version: 2.1.1+9
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -30,6 +30,8 @@ dependencies:
   firebase_messaging: ^14.7.0
   permission_handler: ^12.0.0+1
   in_app_purchase: ^3.1.13
+  firebase_remote_config: ^4.3.0
+  package_info_plus: ^9.0.0
 
 
 

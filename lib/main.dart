@@ -11,7 +11,11 @@ import 'package:mathscool/auth/screens/email_verification_screen.dart';
 import 'package:mathscool/services/user_service.dart';
 import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/services/progress_service.dart';
-import 'package:mathscool/services/lives_service.dart'; // NOUVEAU : Import du service de vies
+import 'package:mathscool/services/lives_service.dart';
+
+// --- NOUVEAU : Imports pour le Kill Switch ---
+import 'package:mathscool/services/remote_config_service.dart';
+import 'package:mathscool/screens/update_required_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +27,13 @@ void main() async {
   final notificationService = NotificationService();
   await notificationService.initialize();
 
+  // --- NOUVEAU : Initialiser Remote Config et vérifier la version ---
+  final remoteConfig = RemoteConfigService();
+  await remoteConfig.initialize();
+
+  // Vérifier si une mise à jour est requise AVANT de lancer l'app
+  final bool updateRequired = await remoteConfig.isUpdateRequired();
+
   runApp(
     MultiProvider(
       providers: [
@@ -33,18 +44,22 @@ void main() async {
         Provider(create: (_) => AuthService()),
         Provider(create: (_) => UserService()),
         Provider(create: (_) => ProgressService()),
-
         ChangeNotifierProvider(create: (_) => LivesService()),
-
         Provider.value(value: notificationService),
       ],
-      child: const MathsCoolApp(),
+      // On passe le statut de mise à jour à l'application
+      child: MathsCoolApp(showUpdateScreen: updateRequired),
     ),
   );
 }
 
 class MathsCoolApp extends StatelessWidget {
-  const MathsCoolApp({super.key});
+  final bool showUpdateScreen; // Variable pour savoir si on doit bloquer
+
+  const MathsCoolApp({
+    super.key,
+    this.showUpdateScreen = false, // Par défaut à false
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +71,8 @@ class MathsCoolApp extends StatelessWidget {
         fontFamily: 'ComicNeue',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const AuthWrapper(),
+      // LOGIQUE : Si update requise -> Écran de blocage, Sinon -> Flux normal (Auth)
+      home: showUpdateScreen ? const UpdateRequiredScreen() : const AuthWrapper(),
       routes: {
         '/home': (context) => const HomeScreen(),
       },

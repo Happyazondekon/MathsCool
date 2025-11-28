@@ -14,6 +14,8 @@ class BillingService {
   // IDs des produits (Exactement ceux de Google Play Console)
   static const String REFILL_LIVES_ID = 'refill_lives_1';
   static const String UNLIMITED_LIVES_WEEK_ID = 'unlimited_lives_week';
+  static const String CHATBOT_SUBSCRIPTION_MONTHLY = 'chatbot_subscription_monthly';
+  static const String CHATBOT_SUBSCRIPTION_YEARLY = 'chatbot_subscription_yearly';
 
   List<ProductDetails> _products = [];
   List<ProductDetails> get products => _products;
@@ -59,6 +61,8 @@ class BillingService {
       const productIds = <String>{
         REFILL_LIVES_ID,
         UNLIMITED_LIVES_WEEK_ID,
+        CHATBOT_SUBSCRIPTION_MONTHLY,
+        CHATBOT_SUBSCRIPTION_YEARLY,
       };
 
       final ProductDetailsResponse response = await _iap.queryProductDetails(productIds);
@@ -95,17 +99,24 @@ class BillingService {
 
       final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
 
-      // --- DISTINCTION CONSOMMABLE / NON-CONSOMMABLE ---
-      if (productId == UNLIMITED_LIVES_WEEK_ID) {
-        // Cas 1 : Abonnement (On ne consomme pas)
+      // --- CORRECTION ICI : Ajouter les abonnements Chatbot à la liste des non-consommables ---
+      if (productId == UNLIMITED_LIVES_WEEK_ID ||
+          productId == CHATBOT_SUBSCRIPTION_MONTHLY ||
+          productId == CHATBOT_SUBSCRIPTION_YEARLY) {
+
+        // Cas 1 : Abonnements (Vies illimitées OU Chatbot) -> Non Consommable
+        // NOTE: buyNonConsumable gère correctement les abonnements récurrents Google Play
         await _iap.buyNonConsumable(purchaseParam: purchaseParam);
+
       } else {
-        // Cas 2 : Consommable (Recharge de vies)
+
+        // Cas 2 : Consommables (Recharge de vies uniquement) -> Consommable
         await _iap.buyConsumable(
           purchaseParam: purchaseParam,
           autoConsume: true, // On consomme immédiatement
         );
       }
+      // -------------------------------------------------------------------------------------
 
       if (kDebugMode) print('🛒 Achat lancé: ${product.title}');
     } catch (e) {

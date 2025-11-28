@@ -19,6 +19,7 @@ import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/widgets/lives_display.dart';
 
 import '../services/achievement_service.dart';
+import '../widgets/chatbot_floating_button.dart';
 import 'achievements_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -481,6 +482,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
               ),
             ),
+          ),Positioned(
+            bottom: 20,
+            right: 20,
+            child: const ChatbotFloatingButton(),
           ),
         ],
       ),

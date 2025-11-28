@@ -24,6 +24,8 @@ import 'package:mathscool/screens/achievements_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/widgets/lives_display.dart';
 
+import '../widgets/chatbot_floating_button.dart';
+
 class ExerciseScreen extends StatefulWidget {
   final String level;
   final String theme;
@@ -53,7 +55,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   // Helper pour savoir si on est au collège
   bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(widget.level);
 
-  @override
   @override
   void initState() {
     super.initState();
@@ -254,69 +255,123 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     }
   }
 
-  // Dialogue Game Over / Plus de vies
+  // Dialogue Game Over / Plus de vies - REDESIGN COMPLET
   void _showNoLivesDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // Empêche de fermer en cliquant à côté
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.broken_image, color: Colors.red),
-            SizedBox(width: 10),
-            Text("Aïe ! Plus de vies 💔", style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Tu as utilisé toutes tes vies pour le moment.",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16),
-            ),
-            SizedBox(height: 16),
-            Text(
-              "Tu peux attendre qu'elles se recharges ou en récupérer tout de suite !",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Ferme dialogue
-              Navigator.of(context).pop(); // Retour Accueil
-            },
-            child: const Text("Quitter", style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.christ,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            ),
-            onPressed: () {
-              Navigator.of(context).pop(); // Ferme dialogue
-              // Redirection Boutique
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StoreScreen()),
-              );
-            },
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.flash_on, size: 18),
-                SizedBox(width: 8),
-                Text("Recharger"),
-              ],
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.red.shade50, Colors.white],
             ),
           ),
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: const Text("💔", style: TextStyle(fontSize: 40)),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                "Aïe ! Plus de vies 💔",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'ComicNeue',
+                  color: Color(0xFFD32F2F),
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "Tu as utilisé toutes tes vies pour le moment.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Tu peux attendre qu'elles se rechargent ou en récupérer tout de suite !",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text(
+                        "Quitter",
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontFamily: 'ComicNeue',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFD32F2F),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 5,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const StoreScreen()),
+                        );
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.flash_on, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            "Recharger",
+                            style: TextStyle(
+                              fontFamily: 'ComicNeue',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -341,33 +396,98 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 1. GESTION DU CAS "PAS D'EXERCICES"
+    // 1. GESTION DU CAS "PAS D'EXERCICES" - REDESIGN
     if (_exercises.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.christ,
-          title: Text(widget.theme),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFF6B6B),
+                Color(0xFFD32F2F),
+                Colors.red,
+              ],
+            ),
           ),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.construction, size: 60, color: Colors.grey[400]),
-              const SizedBox(height: 16),
-              const Text(
-                "Exercices bientôt disponibles !",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Le professeur prépare les sujets de ${widget.theme}",
-                style: const TextStyle(color: Colors.grey),
-              ),
-            ],
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(30),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.orange.shade300,
+                                  Colors.yellow.shade500,
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.6),
+                                  blurRadius: 30,
+                                  spreadRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: const Text("🔧", style: TextStyle(fontSize: 80)),
+                          ),
+                          const SizedBox(height: 30),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  "Exercices en préparation ! 🚧",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'ComicNeue',
+                                    color: Color(0xFFD32F2F),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  "Le professeur prépare les sujets de ${widget.theme}",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'ComicNeue',
+                                    color: Colors.black87,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -377,11 +497,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xDBD12C2C),
-              Color(0xDBA30E0E),
+              Color(0xFFFF6B6B),
+              Color(0xFFD32F2F),
+              Colors.red,
             ],
           ),
         ),
@@ -413,25 +534,37 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   ),
                 ),
               ),
+            // Bouton flottant du chatbot
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: const ChatbotFloatingButton(),
+            ),
           ],
         ),
       ),
     );
   }
 
+  // HEADER REDESIGN
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.christ.withOpacity(0.85),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withOpacity(0.2),
+            Colors.white.withOpacity(0.1),
+          ],
+        ),
         borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(30),
+          bottom: Radius.circular(25),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -439,11 +572,18 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.3),
               shape: BoxShape.circle,
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
+              icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFFD32F2F)),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -456,7 +596,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end, // Alignement à droite pour équilibrer
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
                   widget.theme,
@@ -465,7 +605,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    letterSpacing: 0.5,
+                    fontFamily: 'ComicNeue',
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(1, 2),
+                      ),
+                    ],
                   ),
                 ),
                 Text(
@@ -474,6 +621,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.white.withOpacity(0.9),
+                    fontFamily: 'ComicNeue',
                   ),
                 ),
               ],
@@ -486,8 +634,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   Widget _buildExerciseScreen() {
     final exercise = _exercises[_currentIndex];
-
-    // 2. DÉTECTION DE LA LONGUEUR DES RÉPONSES
     bool useListView = exercise.options.any((option) => option.length > 15);
 
     return AnimatedBuilder(
@@ -502,9 +648,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Barre de progression (étoiles)
+            // Barre de progression (étoiles) - REDESIGN
             Container(
-              height: 18,
+              height: 22,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.3),
@@ -526,12 +672,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                             margin: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
                               color: index <= _currentIndex
-                                  ? AppColors.accent
+                                  ? Colors.yellow.shade400
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: index < _currentIndex
-                                ? const Icon(Icons.star, color: Colors.yellow, size: 12)
+                                ? const Icon(Icons.star, color: Colors.white, size: 14)
                                 : null,
                           ),
                         ),
@@ -543,35 +689,42 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             const SizedBox(height: 24),
 
-            // Numéro de question
+            // Numéro de question - REDESIGN
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 5,
-                    offset: const Offset(0, 3),
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.orange.shade300,
+                    Colors.yellow.shade500,
+                  ],
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.emoji_events,
                     size: 24,
-                    color: AppColors.secondary,
+                    color: Colors.white,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Question ${_currentIndex + 1}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.secondary,
+                      color: Colors.white,
+                      fontFamily: 'ComicNeue',
                     ),
                   ),
                 ],
@@ -579,7 +732,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             const SizedBox(height: 20),
 
-            // Carte de la question
+            // Carte de la question - REDESIGN COMPLET
             Hero(
               tag: 'question_card',
               child: Container(
@@ -590,23 +743,37 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 15,
-                      spreadRadius: 1,
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
                   ],
                   border: Border.all(
-                    color: AppColors.christ.withOpacity(0.5),
+                    color: Colors.white.withOpacity(0.3),
                     width: 3,
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white,
+                      Colors.grey.shade50,
+                    ],
                   ),
                 ),
                 child: Column(
                   children: [
-                    const Icon(
-                      Icons.lightbulb_outline,
-                      size: 40,
-                      color: Color(0xFFFFC107),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.yellow.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.lightbulb_outline,
+                        size: 40,
+                        color: Color(0xFFFFC107),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     RichText(
@@ -614,7 +781,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       text: buildMathText(
                         exercise.question,
                         fontSize: isCollege && exercise.question.length > 50 ? 20 : 26,
-                        color: AppColors.christ,
+                        color: Color(0xFFD32F2F),
                       ),
                     )
                   ],
@@ -623,7 +790,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             const SizedBox(height: 20),
 
-            // Grille ou Liste des réponses
+            // Grille ou Liste des réponses - REDESIGN
             Expanded(
               child: useListView
                   ? ListView.builder(
@@ -658,48 +825,58 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   Widget _buildOptionButton(int index, Exercise exercise, {bool isList = false}) {
     final colors = [
       const Color(0xFFFF7043),
-      const Color(0xDBA30E0E),
       const Color(0xFF66BB6A),
-      const Color(0xDBD12C2C),
+      const Color(0xFF42A5F5),
+      const Color(0xFFFFCA28),
     ];
 
     final color = colors[index % colors.length];
 
     return GestureDetector(
       onTap: _isSaving ? null : () => _answerQuestion(index),
-      child: Container(
-        height: isList ? 70 : null,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color,
-              color.withOpacity(0.7),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.4),
-              blurRadius: 8,
-              spreadRadius: 1,
-              offset: const Offset(0, 4),
+      child: TweenAnimationBuilder<double>(
+        duration: const Duration(milliseconds: 300),
+        tween: Tween(begin: 0.95, end: 1.0),
+        builder: (context, value, child) {
+          return Transform.scale(
+            scale: value,
+            child: child,
+          );
+        },
+        child: Container(
+          height: isList ? 70 : null,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                color,
+                Color.lerp(color, Colors.white, 0.2)!,
+              ],
             ),
-          ],
-          border: Border.all(
-            color: Colors.white.withOpacity(0.6),
-            width: 3,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.4),
+                blurRadius: 12,
+                spreadRadius: 2,
+                offset: const Offset(0, 4),
+              ),
+            ],
+            border: Border.all(
+              color: Colors.white.withOpacity(0.8),
+              width: 3,
+            ),
           ),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: buildMathText(
-                exercise.options[index],
-                color: Colors.white,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: buildMathText(
+                  exercise.options[index],
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -708,6 +885,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     );
   }
 
+  // FEEDBACK OVERLAY - REDESIGN COMPLET
   Widget _buildFeedbackOverlay() {
     final isCorrect = _feedbackMessage.contains("Bravo") || _feedbackMessage.contains("correcte");
 
@@ -732,31 +910,37 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  blurRadius: 20,
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 25,
                   offset: const Offset(0, 10),
                 ),
               ],
               border: Border.all(
-                color: isCorrect ? Colors.green : Colors.red, // Rouge si perdu vie
+                color: isCorrect ? Colors.green : Colors.red,
                 width: 4,
+              ),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isCorrect
+                    ? [Colors.green.shade50, Colors.white]
+                    : [Colors.red.shade50, Colors.white],
               ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: isCorrect
                         ? Colors.green.withOpacity(0.2)
                         : Colors.red.withOpacity(0.2),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    isCorrect ? Icons.celebration : Icons.favorite_border, // Cœur brisé si erreur
-                    size: 60,
-                    color: isCorrect ? Colors.green : Colors.red,
+                  child: Text(
+                    isCorrect ? "🎉" : "💔",
+                    style: const TextStyle(fontSize: 50),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -767,6 +951,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                     fontWeight: FontWeight.bold,
                     color: isCorrect ? Colors.green : Colors.red,
                     height: 1.3,
+                    fontFamily: 'ComicNeue',
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -778,6 +963,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     );
   }
 
+  // RESULTS SCREEN - REDESIGN COMPLET
   Widget _buildResultsScreen() {
     final double percentage = (_score / _exercises.length) * 100.0;
     final bool isMathKid = percentage >= 100.0;
@@ -798,126 +984,146 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 180,
-              height: 180,
+              width: 200,
+              height: 200,
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 15,
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
                     spreadRadius: 5,
                     offset: const Offset(0, 10),
                   ),
                 ],
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.orange.shade300,
+                    Colors.yellow.shade500,
+                  ],
+                ),
               ),
-              child: Lottie.asset(
-                isMathKid || isOnRightTrack
-                    ? 'assets/animations/success.json'
-                    : 'assets/animations/encouragement.json',
-                width: 160,
-                height: 160,
-                fit: BoxFit.contain,
+              child: Center(
+                child: Lottie.asset(
+                  isMathKid || isOnRightTrack
+                      ? 'assets/animations/success.json'
+                      : 'assets/animations/encouragement.json',
+                  width: 180,
+                  height: 180,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
                 ],
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white,
+                    Colors.grey.shade50,
+                  ],
+                ),
               ),
               child: Column(
                 children: [
                   Text(
                     titleText,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: isMathKid
-                          ? AppColors.christ
+                          ? Color(0xFFD32F2F)
                           : isOnRightTrack
                           ? Colors.green
                           : Colors.orange,
+                      fontFamily: 'ComicNeue',
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
                   Text(
                     isMathKid
-                        ? 'Parfait! Tu maîtrises parfaitement!'
+                        ? 'Parfait! Tu maîtrises parfaitement! 🎯'
                         : isOnRightTrack
-                        ? 'Excellent travail! Continue comme ça!'
-                        : 'N\'hésite pas à consulter notre manuel pour t\'améliorer!',
+                        ? 'Excellent travail! Continue comme ça! 💪'
+                        : 'N\'hésite pas à consulter notre manuel pour t\'améliorer! 📚',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black54,
+                      fontFamily: 'ComicNeue',
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   Container(
-                    height: 18,
-                    width: 180,
+                    height: 20,
+                    width: 200,
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(9),
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Stack(
                       children: [
                         Container(
-                          height: 18,
-                          width: 180 * (_score / _exercises.length.toDouble()),
+                          height: 20,
+                          width: 200 * (_score / _exercises.length.toDouble()),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isMathKid
-                                  ? [AppColors.christ, AppColors.secondary]
+                                  ? [Color(0xFFD32F2F), Colors.red.shade400]
                                   : isOnRightTrack
                                   ? [Colors.green, Colors.lightGreen]
                                   : [Colors.orange, Colors.deepOrange],
                             ),
-                            borderRadius: BorderRadius.circular(9),
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   Text(
-                    '${percentage.toInt()}% correct',
+                    '${percentage.toInt()}% correct • $_score/${_exercises.length}',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey,
+                      fontFamily: 'ComicNeue',
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   if (percentage >= 50.0) ...[
                     Container(
                       width: double.infinity,
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ElevatedButton.icon(
                         onPressed: _goToProgress,
-                        icon: const Icon(Icons.trending_up, color: Colors.white, size: 18),
+                        icon: const Icon(Icons.trending_up, color: Colors.white, size: 20),
                         label: const Text(
                           'Voir ma progression',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            fontFamily: 'ComicNeue',
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF9C27B0),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -932,18 +1138,19 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       margin: const EdgeInsets.only(bottom: 12),
                       child: ElevatedButton.icon(
                         onPressed: _goToManual,
-                        icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 18),
+                        icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 20),
                         label: const Text(
                           'Consulter le Manuel',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
+                            fontFamily: 'ComicNeue',
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4CAF50),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -960,18 +1167,19 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          icon: const Icon(Icons.home_rounded, color: Colors.white, size: 18),
+                          icon: const Icon(Icons.home_rounded, color: Colors.white, size: 20),
                           label: const Text(
                             'Retour',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
+                              fontFamily: 'ComicNeue',
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.christ,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            backgroundColor: Color(0xFFD32F2F),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -990,18 +1198,19 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                               _animationController.forward();
                             });
                           },
-                          icon: const Icon(Icons.replay_rounded, color: Colors.white, size: 18),
+                          icon: const Icon(Icons.replay_rounded, color: Colors.white, size: 20),
                           label: const Text(
                             'Rejouer',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
+                              fontFamily: 'ComicNeue',
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            backgroundColor: Colors.orange.shade600,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -1048,6 +1257,7 @@ class _MathBackgroundPainter extends CustomPainter {
               color: Colors.white.withOpacity(0.15),
               fontSize: symbolSize,
               fontWeight: FontWeight.bold,
+              fontFamily: 'ComicNeue',
             ),
           ),
           textDirection: TextDirection.ltr,
@@ -1062,6 +1272,7 @@ class _MathBackgroundPainter extends CustomPainter {
               color: Colors.white.withOpacity(0.15),
               fontSize: symbolSize,
               fontWeight: FontWeight.bold,
+              fontFamily: 'ComicNeue',
             ),
           ),
           textDirection: TextDirection.ltr,
@@ -1117,6 +1328,7 @@ InlineSpan buildMathText(
                 fontSize: fontSize * 0.65,
                 fontWeight: FontWeight.bold,
                 color: color,
+                fontFamily: 'ComicNeue',
               ),
             ),
           ),
@@ -1132,6 +1344,7 @@ InlineSpan buildMathText(
             fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: color,
+            fontFamily: 'ComicNeue',
           ),
         ),
       );

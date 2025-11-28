@@ -3,10 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-import '../models/lives_model.dart';
 import '../services/billing_service.dart';
+import '../services/chatbot_service.dart';
 import '../services/lives_service.dart';
 import '../models/user_model.dart';
+import '../models/lives_model.dart';
 import '../utils/colors.dart';
 
 class StoreScreen extends StatefulWidget {
@@ -16,14 +17,25 @@ class StoreScreen extends StatefulWidget {
   State<StoreScreen> createState() => _StoreScreenState();
 }
 
-class _StoreScreenState extends State<StoreScreen> {
+class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStateMixin {
   final BillingService _billingService = BillingService();
+  late AnimationController _animController;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _animController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    )..forward();
     _setupBilling();
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   Future<void> _setupBilling() async {
@@ -31,11 +43,9 @@ class _StoreScreenState extends State<StoreScreen> {
 
     await _billingService.initialize();
 
-    // Configurer les callbacks
     _billingService.onPurchaseSuccess = _handlePurchaseSuccess;
     _billingService.onPurchaseError = _handlePurchaseError;
 
-    // Forcer la reconstruction pour afficher les produits chargés
     if (mounted) {
       setState(() => _isLoading = false);
     }
@@ -46,438 +56,585 @@ class _StoreScreenState extends State<StoreScreen> {
     if (user == null) return;
 
     final livesService = Provider.of<LivesService>(context, listen: false);
+    // NOUVEAU : On récupère le service du chatbot
+    final chatbotService = Provider.of<ChatbotService>(context, listen: false);
 
-    // --- ADAPTATION : Distinction entre recharge et illimité ---
+    // Gestion des différents types d'achats
     if (productId == BillingService.UNLIMITED_LIVES_WEEK_ID) {
-      // Cas 1 : Semaine illimitée
       livesService.activateUnlimitedWeek(user.uid);
-    } else {
-      // Cas 2 : Recharge simple (par défaut ou si ID correspond à refill)
-      livesService.refillLives(user.uid);
+      _showSuccessDialog(type: 'unlimited');
     }
-
-    // Afficher confirmation
-    _showSuccessDialog(isUnlimited: productId == BillingService.UNLIMITED_LIVES_WEEK_ID);
+    else if (productId == BillingService.REFILL_LIVES_ID) {
+      livesService.refillLives(user.uid);
+      _showSuccessDialog(type: 'refill');
+    }
+    // --- LOGIQUE CHATBOT AJOUTÉE ---
+    else if (productId == BillingService.CHATBOT_SUBSCRIPTION_MONTHLY) {
+      // Activation pour 30 jours
+      chatbotService.activateSubscription(user.uid, const Duration(days: 30));
+      _showSuccessDialog(type: 'chatbot');
+    }
+    else if (productId == BillingService.CHATBOT_SUBSCRIPTION_YEARLY) {
+      // Activation pour 365 jours
+      chatbotService.activateSubscription(user.uid, const Duration(days: 365));
+      _showSuccessDialog(type: 'chatbot');
+    }
   }
 
   void _handlePurchaseError(String error) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Erreur: $error'),
-        backgroundColor: Colors.red,
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Oups: $error')),
+          ],
+        ),
+        backgroundColor: Colors.red.shade400,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 
-  void _showSuccessDialog({bool isUnlimited = false}) {
+  void _showSuccessDialog({required String type}) {
+    String title;
+    String message;
+    Color color;
+
+    switch (type) {
+      case 'unlimited':
+        title = 'Semaine Illimitée ! ♾️';
+        message = 'Profite de 7 jours sans perdre de vies !';
+        color = Colors.purple;
+        break;
+      case 'chatbot':
+        title = 'Assistant Activé ! 🤖';
+        message = 'MathKid est prêt à t\'aider !';
+        color = Colors.blue;
+        break;
+      default:
+        title = 'Vies rechargées ! 🎉';
+        message = 'Tu es prêt à reprendre l\'aventure !';
+        color = Colors.green;
+    }
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Lottie.asset(
-              'assets/animations/success.json',
-              width: 150,
-              height: 150,
-              repeat: false,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.check_circle, size: 80, color: Colors.green);
-              },
-            ),
-            const SizedBox(height: 16),
-            Text(
-              isUnlimited ? 'Semaine Illimitée ! ♾️' : 'Vies rechargées ! 🎉',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'ComicNeue',
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Lottie.asset(
+                'assets/animations/success.json',
+                width: 150,
+                height: 150,
+                repeat: false,
+                errorBuilder: (_, __, ___) => Icon(Icons.check_circle, size: 80, color: color),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isUnlimited
-                  ? 'Profite de 7 jours sans perdre de vies !'
-                  : 'Tu peux continuer à jouer !',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Super !'),
+              const SizedBox(height: 16),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'ComicNeue',
+                  color: color,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: color,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  elevation: 5,
+                ),
+                child: const Text(
+                  'Super !',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'ComicNeue'),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Utilisation de watch pour mettre à jour l'interface quand les vies changent
     final livesService = Provider.of<LivesService>(context);
     final livesData = livesService.livesData;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Fond dégradé
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [AppColors.christ, Colors.white],
-              ),
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFF9A9E), // Rose doux
+              Color(0xFFFECFEF), // Rose très pâle
+              Colors.white,
+            ],
           ),
-
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-
-                if (_isLoading)
-                  const Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(color: Colors.white),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        children: [
-                          _buildLivesStatus(livesData),
-                          const SizedBox(height: 24),
-                          _buildProductsList(),
-                          const SizedBox(height: 24),
-                          _buildInfoCard(),
-                        ],
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator(color: AppColors.christ))
+                    : SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      FadeTransition(
+                        opacity: _animController,
+                        child: _buildLivesStatusCard(livesData),
                       ),
-                    ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('💎 Boosters & Vies'),
+                      const SizedBox(height: 12),
+                      _buildProductsList(),
+                      const SizedBox(height: 24),
+                      _buildInfoCard(),
+                    ],
                   ),
-              ],
-            ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.christ,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2))
+              ],
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_rounded, color: AppColors.christ),
+              onPressed: () => Navigator.pop(context),
+            ),
           ),
           const Expanded(
             child: Text(
-              'Boutique 🎁',
+              'Boutique Magique ✨',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'ComicNeue',
+                shadows: [
+                  Shadow(color: Colors.black12, offset: Offset(1, 2), blurRadius: 4),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 48), // Pour équilibrer l'icône de retour
+          const SizedBox(width: 48), // Balance layout
         ],
       ),
     );
   }
 
-  Widget _buildLivesStatus(LivesData? livesData) {
+  Widget _buildLivesStatusCard(LivesData? livesData) {
     if (livesData == null) return const SizedBox.shrink();
 
+    final bool isUnlimited = livesData.isUnlimited;
     final int maxLives = LivesData.MAX_LIVES;
     final int currentLives = livesData.availableLives;
 
-    // --- ADAPTATION : Vérification de l'illimité ---
-    final bool isUnlimited = livesData.isUnlimited;
-
     return Container(
-      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isUnlimited
-              ? [Colors.purple.shade100, Colors.deepPurple.shade100] // Couleur spéciale si illimité
-              : [Colors.pink.shade100, Colors.red.shade100],
+              ? [const Color(0xFF9C27B0), const Color(0xFFE040FB)] // Violet vibrant
+              : [const Color(0xFFFF5252), const Color(0xFFFF8A80)], // Rouge vibrant
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: isUnlimited ? Colors.purple.withOpacity(0.2) : Colors.red.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: (isUnlimited ? Colors.purple : Colors.red).withOpacity(0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isUnlimited ? Icons.all_inclusive : Icons.favorite,
-              color: isUnlimited ? Colors.purple : Colors.red.shade400,
-              size: 32,
+              isUnlimited ? Icons.all_inclusive_rounded : Icons.favorite_rounded,
+              color: Colors.white,
+              size: 48,
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Tes Vies',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'ComicNeue',
+          const SizedBox(height: 16),
+          Text(
+            isUnlimited ? 'Vies Illimitées !' : 'Mes Vies',
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'ComicNeue',
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (!isUnlimited)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(maxLives, (index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Icon(
+                    index < currentLives ? Icons.favorite : Icons.favorite_border,
+                    color: Colors.white,
+                    size: 28,
                   ),
+                );
+              }),
+            ),
+          if (!isUnlimited && currentLives < maxLives)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  isUnlimited
-                      ? 'Vies Illimitées ♾️'
-                      : '$currentLives/$maxLives disponibles',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isUnlimited ? Colors.purple.shade700 : Colors.red.shade700,
-                  ),
-                ),
-                // On n'affiche le timer que si PAS illimité et PAS plein
-                if (!isUnlimited && currentLives < maxLives)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.timer_outlined, color: Colors.white, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
                       'Prochaine vie: ${Provider.of<LivesService>(context).getFormattedTimeUntilNextLife()}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                        fontStyle: FontStyle.italic,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'ComicNeue',
                       ),
                     ),
-                  ),
-                if (isUnlimited)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: Text(
-                      'Profite bien !',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.purple.shade700,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-              ],
+                  ],
+                ),
+              ),
             ),
-          ),
+          if (isUnlimited)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                "Tu es invincible cette semaine ! 🦸",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'ComicNeue',
+                  fontSize: 16,
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade800,
+          fontFamily: 'ComicNeue',
+        ),
       ),
     );
   }
 
   Widget _buildProductsList() {
-    // Récupérer la liste des produits depuis le service de facturation
-    final List<ProductDetails> products = _billingService.products;
+    final products = _billingService.products;
 
     if (products.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(30),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.8),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
           children: [
-            const Icon(Icons.shopping_bag_outlined, size: 50, color: Colors.grey),
+            Icon(Icons.storefront_outlined, size: 50, color: Colors.grey.shade400),
             const SizedBox(height: 10),
-            const Text(
-              'Aucun produit disponible',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              'La boutique est vide...',
+              style: TextStyle(color: Colors.grey.shade600, fontFamily: 'ComicNeue'),
             ),
-            const SizedBox(height: 5),
-            const Text(
-              'Vérifie ta connexion ou la configuration Google Play.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-            const SizedBox(height: 10),
-            TextButton.icon(
+            TextButton(
               onPressed: _setupBilling,
-              icon: const Icon(Icons.refresh),
-              label: const Text("Réessayer"),
+              child: const Text('Réessayer'),
             )
           ],
         ),
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Acheter des vies',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-            fontFamily: 'ComicNeue',
-            shadows: [
-              Shadow(color: Colors.black26, blurRadius: 2, offset: Offset(1, 1))
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        ...products.map((product) => _buildProductCard(product)),
-      ],
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: products.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        // Animation d'entrée pour chaque carte
+        return TweenAnimationBuilder<double>(
+          duration: Duration(milliseconds: 400 + (index * 100)),
+          tween: Tween(begin: 0.0, end: 1.0),
+          curve: Curves.easeOutBack,
+          builder: (context, value, child) {
+            return Transform.scale(scale: value, child: child);
+          },
+          child: _buildProductCard(products[index]),
+        );
+      },
     );
   }
 
   Widget _buildProductCard(ProductDetails product) {
-    // Détecter si c'est l'offre illimitée pour changer l'icône/couleur
-    final bool isUnlimitedOffer = product.id == BillingService.UNLIMITED_LIVES_WEEK_ID;
+    // Déterminer le style en fonction de l'ID du produit
+    bool isUnlimited = product.id == BillingService.UNLIMITED_LIVES_WEEK_ID;
+    bool isChatbot = product.id.contains('chatbot');
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: Container(
-          padding: const EdgeInsets.all(12),
+    // Configuration visuelle par défaut (Recharge)
+    List<Color> gradientColors = [const Color(0xFFFF7043), const Color(0xFFFFAB91)];
+    IconData icon = Icons.favorite_rounded;
+    String badgeText = "Populaire 🔥";
+    bool showBadge = false;
+
+    if (isUnlimited) {
+      gradientColors = [const Color(0xFF7B1FA2), const Color(0xFFBA68C8)];
+      icon = Icons.all_inclusive;
+      badgeText = "Meilleure Offre 🌟";
+      showBadge = true;
+    } else if (isChatbot) {
+      gradientColors = [const Color(0xFF2196F3), const Color(0xFF64B5F6)];
+      icon = Icons.smart_toy_rounded;
+      badgeText = "Nouveau 🤖";
+      showBadge = true;
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
           decoration: BoxDecoration(
-            color: isUnlimitedOffer ? Colors.purple.shade50 : Colors.red.shade50,
-            shape: BoxShape.circle,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors[0].withOpacity(0.15),
+                blurRadius: 15,
+                offset: const Offset(0, 5),
+              ),
+            ],
           ),
-          child: Icon(
-            isUnlimitedOffer ? Icons.all_inclusive : Icons.favorite,
-            color: isUnlimitedOffer ? Colors.purple : Colors.red.shade400,
-            size: 28,
-          ),
-        ),
-        title: Text(
-          product.title.replaceAll('(MathsCool)', ''), // Nettoyage du nom
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-            fontFamily: 'ComicNeue',
-          ),
-        ),
-        subtitle: Text(
-          product.description,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 14),
-        ),
-        trailing: ElevatedButton(
-          onPressed: () => _billingService.buyProduct(product.id),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: isUnlimitedOffer ? Colors.purple : AppColors.christ,
-            foregroundColor: Colors.white,
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _billingService.buyProduct(product.id),
+              borderRadius: BorderRadius.circular(25),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    // Icône du produit
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: gradientColors,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: gradientColors[0].withOpacity(0.4),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 32),
+                    ),
+                    const SizedBox(width: 16),
+                    // Détails
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            product.title.replaceAll('(MathsCool)', '').trim(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'ComicNeue',
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            product.description,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                              fontFamily: 'ComicNeue',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Prix
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Text(
+                        product.price,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: gradientColors[0],
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          ),
-          child: Text(
-            product.price,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
           ),
         ),
-      ),
+        if (showBadge)
+          Positioned(
+            top: -10,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Colors.orange, Colors.orangeAccent]),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(color: Colors.orange.withOpacity(0.4), blurRadius: 4, offset: const Offset(0, 2))
+                ],
+              ),
+              child: Text(
+                badgeText,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
   Widget _buildInfoCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.blue.shade200),
+        color: const Color(0xFFE3F2FD), // Bleu très pâle
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: const Color(0xFFBBDEFB)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: [
-              Icon(Icons.info_outline, color: Colors.blue.shade600),
-              const SizedBox(width: 8),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.lightbulb_rounded, color: Color(0xFF1976D2)),
+              SizedBox(width: 8),
               Text(
-                'Comment ça marche ?',
+                'Bon à savoir',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue.shade700,
+                  color: Color(0xFF1565C0),
                   fontFamily: 'ComicNeue',
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          ...[
-            '❤️ Tu as ${LivesData.MAX_LIVES} vies au maximum',
-            '❌ Chaque réponse incorrecte = -1 vie',
-            '⏱️ Chaque vie se régénère en ${LivesData.REGENERATION_TIME.inMinutes} minutes',
-            '🎁 Achète des vies ou passe en mode illimité !',
-          ].map((text) => Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    text,
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ),
-              ],
+          const SizedBox(height: 16),
+          _buildInfoRow('❤️', 'Max ${LivesData.MAX_LIVES} vies stockées'),
+          _buildInfoRow('⏱️', '1 vie rechargée toutes les ${LivesData.REGENERATION_TIME.inMinutes} min'),
+          _buildInfoRow('♾️', 'Mode illimité = Aucune perte de vie !'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String emoji, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue.shade900,
+                fontFamily: 'ComicNeue',
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mathscool/services/chatbot_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
@@ -47,6 +48,7 @@ void main() async {
         Provider(create: (_) => ProgressService()),
         ChangeNotifierProvider(create: (_) => LivesService()),
         ChangeNotifierProvider(create: (_) => AchievementService()),
+        Provider(create: (_) => ChatbotService()),
         Provider.value(value: notificationService),
       ],
       child: MathsCoolApp(showUpdateScreen: updateRequired),

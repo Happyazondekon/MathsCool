@@ -278,4 +278,94 @@ class AchievementService extends ChangeNotifier {
       return achievements;
     });
   }
+
+  // Ajouter après la méthode updateProgress existante :
+
+  /// Mise à jour spécifique pour le mode infini
+  Future<List<Achievement>> updateInfiniteModeProgress({
+    required String userId,
+    int exercisesCompleted = 1,
+  }) async {
+    return await updateProgress(
+      userId: userId,
+      type: AchievementType.infiniteMode,
+      incrementBy: exercisesCompleted,
+    );
+  }
+
+  /// Mise à jour pour la maîtrise d'un thème
+  Future<List<Achievement>> updateThemeMastery({
+    required String userId,
+    required String theme,
+    required String level,
+  }) async {
+    // TODO: Tracker les thèmes complétés dans Firestore
+    // Pour l'instant, on incrémente juste le compteur
+    return await updateProgress(
+      userId: userId,
+      type: AchievementType.themeMastery,
+      incrementBy: 1,
+    );
+  }
+
+  /// Mise à jour pour la maîtrise d'un niveau
+  Future<List<Achievement>> updateLevelMastery({
+    required String userId,
+    required String level,
+  }) async {
+    // TODO: Tracker les niveaux complétés dans Firestore
+    return await updateProgress(
+      userId: userId,
+      type: AchievementType.levelMastery,
+      incrementBy: 1,
+    );
+  }
+
+  /// Vérifier les achievements secrets basés sur l'heure/date
+  Future<List<Achievement>> checkTimeBasedAchievements(String userId) async {
+    List<Achievement> unlocked = [];
+    final now = DateTime.now();
+
+    // Oiseau de nuit (minuit - 6h)
+    if (now.hour >= 0 && now.hour < 6) {
+      final nightOwl = await updateProgress(
+        userId: userId,
+        type: AchievementType.exercisesCompleted,
+        incrementBy: 1,
+      );
+      unlocked.addAll(nightOwl.where((a) => a.id == 'night_owl'));
+    }
+
+    // Lève-tôt (5h - 7h)
+    if (now.hour >= 5 && now.hour < 7) {
+      final earlyBird = await updateProgress(
+        userId: userId,
+        type: AchievementType.exercisesCompleted,
+        incrementBy: 1,
+      );
+      unlocked.addAll(earlyBird.where((a) => a.id == 'early_bird'));
+    }
+
+    // Noël (25 décembre)
+    if (now.month == 12 && now.day == 25) {
+      final christmas = await updateProgress(
+        userId: userId,
+        type: AchievementType.exercisesCompleted,
+        incrementBy: 1,
+      );
+      unlocked.addAll(christmas.where((a) => a.id == 'christmas_special'));
+    }
+
+    // Nouvel An (1er janvier)
+    if (now.month == 1 && now.day == 1) {
+      final newYear = await updateProgress(
+        userId: userId,
+        type: AchievementType.exercisesCompleted,
+        incrementBy: 1,
+      );
+      unlocked.addAll(newYear.where((a) => a.id == 'new_year'));
+    }
+
+    return unlocked;
+  }
 }

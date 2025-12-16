@@ -12,6 +12,7 @@ import 'package:mathscool/models/user_model.dart';
 import 'package:mathscool/services/progress_service.dart';
 import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/services/achievement_service.dart';
+import 'package:mathscool/services/hybrid_exercise_service.dart';
 import 'package:mathscool/models/achievement_model.dart';
 
 // Screens
@@ -23,17 +24,21 @@ import 'package:mathscool/screens/achievements_screen.dart';
 // Utils & Widgets
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/widgets/lives_display.dart';
+import 'package:mathscool/widgets/chatbot_floating_button.dart';
+import 'package:mathscool/widgets/connection_status_badge.dart';
 
-import '../widgets/chatbot_floating_button.dart';
+import ' chatbot_screen.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
   final String theme;
+  final bool isInfiniteMode;
 
   const ExerciseScreen({
     super.key,
     required this.level,
     required this.theme,
+    this.isInfiniteMode = false,
   });
 
   @override
@@ -42,7 +47,7 @@ class ExerciseScreen extends StatefulWidget {
 
 class _ExerciseScreenState extends State<ExerciseScreen>
     with SingleTickerProviderStateMixin {
-  late final List<Exercise> _exercises;
+  List<Exercise> _exercises = [];
   int _currentIndex = 0;
   int _score = 0;
   String _feedbackMessage = '';
@@ -51,8 +56,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   late Animation<double> _scaleAnimation;
   late final ProgressService _progressService;
   bool _isSaving = false;
+  bool _isLoadingExercises = true;
+  String? _connectionStatus;
 
-  // Helper pour savoir si on est au collège
   bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(widget.level);
 
   @override
@@ -60,8 +66,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     super.initState();
     _progressService = ProgressService();
 
-    // Sécurité : Si la liste est null, on met une liste vide pour éviter le crash
-    _exercises = staticExercises[widget.level]?[widget.theme] ?? [];
+    _loadExercises();
 
     _animationController = AnimationController(
       vsync: this,
@@ -76,32 +81,70 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       curve: Curves.elasticOut,
     ));
 
-    // Ne lancer l'animation que s'il y a des exercices
-    if (_exercises.isNotEmpty) {
-      _animationController.forward();
-    }
-
-    // --- CHARGEMENT DES DONNÉES UTILISATEUR ---
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = Provider.of<AppUser?>(context, listen: false);
       final livesService = Provider.of<LivesService>(context, listen: false);
-
-      // NOUVEAU : Récupération du service d'achievements
       final achievementService = Provider.of<AchievementService>(context, listen: false);
 
       if (user != null) {
-        // 1. Initialiser et charger les achievements de l'utilisateur
-        // C'est CRUCIAL pour que updateProgress ne travaille pas sur du vide
         await achievementService.initialize();
         await achievementService.loadUserAchievements(user.uid);
 
-        // 2. Vérification des vies (Sécurité supplémentaire)
         final canPlay = await livesService.canPlay(user.uid);
         if (!canPlay) {
           _showNoLivesDialog();
         }
       }
     });
+  }
+
+  Future<void> _loadExercises() async {
+    setState(() => _isLoadingExercises = true);
+
+    try {
+      final hybridService = HybridExerciseService();
+
+      final exerciseCount = widget.isInfiniteMode ? 100 : 20;
+
+      final exercises = await hybridService.getExercises(
+        level: widget.level,
+        theme: widget.theme,
+        count: exerciseCount,
+        forceGenerated: widget.isInfiniteMode,
+      );
+
+      final stats = await hybridService.getExerciseStats(widget.level, widget.theme);
+
+      if (mounted) {
+        setState(() {
+          _exercises = exercises;
+          _isLoadingExercises = false;
+
+          if (widget.isInfiniteMode) {
+            _connectionStatus = stats['hasConnection']
+                ? 'Mode Infini'
+                : '';
+          } else {
+            _connectionStatus = stats['hasConnection']
+                ? ''
+                : 'Mode hors ligne';
+          }
+        });
+
+        if (_exercises.isNotEmpty) {
+          _animationController.forward();
+        }
+      }
+    } catch (e) {
+      print('❌ Erreur chargement exercices: $e');
+      if (mounted) {
+        setState(() {
+          _exercises = [];
+          _isLoadingExercises = false;
+          _connectionStatus = '⚠️ Erreur de chargement';
+        });
+      }
+    }
   }
 
   @override
@@ -119,12 +162,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final exercise = _exercises[_currentIndex];
     final isCorrect = selectedIndex == exercise.correctAnswer;
 
-    // Récupération du service de vies
     final livesService = Provider.of<LivesService>(context, listen: false);
 
-    // LOGIQUE VIES ET SCORE
     if (isCorrect) {
-      // Réponse correcte
       setState(() {
         _score++;
         _feedbackMessage = isCollege
@@ -133,16 +173,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         _showFeedback = true;
       });
     } else {
-      // Réponse incorrecte : On tente de retirer une vie
       bool stillHasLives = await livesService.loseLife(user.uid);
 
       if (!stillHasLives) {
-        // Cas critique : Plus de vies (le service renvoie false si impossible de jouer)
         _showNoLivesDialog();
-        return; // On arrête tout ici, pas de feedback classique, direct le blocage
+        return;
       }
 
-      // Si on a encore des vies mais qu'on s'est trompé
       setState(() {
         _feedbackMessage = "Oups ! Tu perds une vie 💔";
         _showFeedback = true;
@@ -161,18 +198,39 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         exercise.correctAnswer,
       );
 
-      // NOUVEAU : Mettre à jour les achievements
       final achievementService = Provider.of<AchievementService>(context, listen: false);
 
-      // Achievement: exercice résolu
       List<Achievement> newAchievements = await achievementService.updateProgress(
         userId: user.uid,
         type: AchievementType.exercisesCompleted,
         incrementBy: 1,
         level: widget.level,
       );
+      // AJOUTER CES LIGNES :
 
-      // Si réponse correcte : vérifier score parfait sur le thème
+// Si mode infini
+      if (widget.isInfiniteMode) {
+        final infiniteAchievements = await achievementService.updateInfiniteModeProgress(
+          userId: user.uid,
+          exercisesCompleted: 1,
+        );
+        newAchievements.addAll(infiniteAchievements);
+      }
+
+// Vérifier les achievements temporels
+      final timeAchievements = await achievementService.checkTimeBasedAchievements(user.uid);
+      newAchievements.addAll(timeAchievements);
+
+// Si score parfait sur tout le thème (à la fin)
+      if (isCorrect && _currentIndex == _exercises.length - 1 && _score == _exercises.length) {
+        final themeAchievements = await achievementService.updateThemeMastery(
+          userId: user.uid,
+          theme: widget.theme,
+          level: widget.level,
+        );
+        newAchievements.addAll(themeAchievements);
+      }
+
       if (isCorrect && _score == _exercises.length) {
         final perfectAchievements = await achievementService.updateProgress(
           userId: user.uid,
@@ -183,7 +241,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         newAchievements.addAll(perfectAchievements);
       }
 
-      // Afficher notification si nouveau achievement débloqué
       if (newAchievements.isNotEmpty && mounted) {
         _showAchievementUnlockedSnackbar(newAchievements);
       }
@@ -209,7 +266,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     }
   }
 
-  // NOUVEAU : Notification d'achievement débloqué
   void _showAchievementUnlockedSnackbar(List<Achievement> achievements) {
     for (var achievement in achievements) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -255,7 +311,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     }
   }
 
-  // Dialogue Game Over / Plus de vies - REDESIGN COMPLET
   void _showNoLivesDialog() {
     showDialog(
       context: context,
@@ -380,7 +435,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const HelpScreen(),
+        builder: (context) => const ChatbotScreen(userId: '',),
       ),
     );
   }
@@ -396,7 +451,56 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   @override
   Widget build(BuildContext context) {
-    // 1. GESTION DU CAS "PAS D'EXERCICES" - REDESIGN
+    if (_isLoadingExercises) {
+      return Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFF6B6B),
+                Color(0xFFD32F2F),
+                Colors.red,
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          widget.isInfiniteMode
+                              ? 'Génération infinie...'
+                              : 'Préparation des exercices...',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontFamily: 'ComicNeue',
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     if (_exercises.isEmpty) {
       return Scaffold(
         body: Container(
@@ -534,7 +638,18 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   ),
                 ),
               ),
-            // Bouton flottant du chatbot
+            if (_connectionStatus != null)
+              Positioned(
+                top: 120,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ConnectionStatusBadge(
+                    status: _connectionStatus!,
+                    isInfiniteMode: widget.isInfiniteMode,
+                  ),
+                ),
+              ),
             Positioned(
               bottom: 20,
               right: 20,
@@ -546,7 +661,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     );
   }
 
-  // HEADER REDESIGN
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -589,7 +703,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           ),
           const SizedBox(width: 12),
 
-          // Affichage des vies dans le header
           const LivesDisplay(showTimer: false),
 
           const SizedBox(width: 12),
@@ -648,7 +761,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Barre de progression (étoiles) - REDESIGN
             Container(
               height: 22,
               width: double.infinity,
@@ -689,7 +801,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             const SizedBox(height: 24),
 
-            // Numéro de question - REDESIGN
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
@@ -732,7 +843,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             const SizedBox(height: 20),
 
-            // Carte de la question - REDESIGN COMPLET
             Hero(
               tag: 'question_card',
               child: Container(
@@ -790,7 +900,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
             const SizedBox(height: 20),
 
-            // Grille ou Liste des réponses - REDESIGN
             Expanded(
               child: useListView
                   ? ListView.builder(
@@ -1059,7 +1168,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         ? 'Parfait! Tu maîtrises parfaitement! 🎯'
                         : isOnRightTrack
                         ? 'Excellent travail! Continue comme ça! 💪'
-                        : 'N\'hésite pas à consulter notre manuel pour t\'améliorer! 📚',
+                        : 'N\'hésite pas à demander de l\'aide pour t\'améliorer! 📚',
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black54,

@@ -23,242 +23,435 @@ class ThemeBadge extends StatelessWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            // Cercle externe du badge
+            // Cercle externe avec effet glow
             Container(
-              width: 85,
-              height: 85,
+              width: 90,
+              height: 90,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: obtained
                     ? RadialGradient(
-                  colors: [themeColors['light']!, themeColors['dark']!],
+                  colors: [
+                    themeColors['light']!,
+                    themeColors['medium']!,
+                    themeColors['dark']!,
+                  ],
                   center: Alignment.topLeft,
-                  radius: 1.5,
+                  radius: 1.2,
                 )
                     : null,
-                color: obtained ? null : Colors.grey[300],
+                color: obtained ? null : Colors.grey.shade300,
                 boxShadow: obtained
                     ? [
                   BoxShadow(
-                    color: themeColors['dark']!.withOpacity(0.4),
-                    blurRadius: 6,
-                    spreadRadius: 2,
+                    color: themeColors['dark']!.withOpacity(0.5),
+                    blurRadius: 15,
+                    spreadRadius: 3,
+                    offset: const Offset(0, 5),
                   ),
                 ]
-                    : null,
+                    : [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
             ),
 
-            // Cercle interne avec l'icône
+            // Cercle interne blanc
             Container(
-              width: 65,
-              height: 65,
+              width: 70,
+              height: 70,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: obtained ? Colors.white.withOpacity(0.85) : Colors.grey[200],
+                color: obtained ? Colors.white : Colors.grey.shade200,
+                border: Border.all(
+                  color: obtained ? themeColors['medium']! : Colors.grey.shade400,
+                  width: 2,
+                ),
               ),
               child: Center(
                 child: _getBadgeContent(theme),
               ),
             ),
 
-            // Indicateur de progression pour les badges non obtenus
-            if (progress > 0 && !obtained)
-              Positioned(
-                bottom: 5,
-                child: Container(
-                  width: 50,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    color: Colors.white,
+            // Barre de progression circulaire pour badges non obtenus
+            if (!obtained && progress > 0)
+              SizedBox(
+                width: 90,
+                height: 90,
+                child: CircularProgressIndicator(
+                  value: progress,
+                  strokeWidth: 4,
+                  backgroundColor: Colors.transparent,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    _getProgressColor(progress),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        _getProgressColor(progress),
+                ),
+              ),
+
+            // Étoiles pour badges obtenus (effet confetti)
+            if (obtained) ...[
+              Positioned(
+                top: 5,
+                right: 10,
+                child: _buildStar(15),
+              ),
+              Positioned(
+                top: 15,
+                right: 2,
+                child: _buildStar(12),
+              ),
+              Positioned(
+                top: 25,
+                left: 5,
+                child: _buildStar(13),
+              ),
+            ],
+
+            // Badge de niveau
+            if (level.isNotEmpty)
+              Positioned(
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    gradient: obtained
+                        ? LinearGradient(
+                      colors: [themeColors['medium']!, themeColors['dark']!],
+                    )
+                        : null,
+                    color: obtained ? null : Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white,
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                  ),
+                  child: Text(
+                    'Niv.$level',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ComicNeue',
                     ),
                   ),
                 ),
               ),
 
-            // Étoiles pour les badges obtenus
-            if (obtained)
-              ...List.generate(3, (index) {
-                return Positioned(
-                  top: index * 25.0,
-                  right: index * 10.0 - 15.0,
-                  child: Icon(
-                    Icons.star,
-                    size: 15,
-                    color: Colors.yellow[700],
-                  ),
-                );
-              }),
-
-            // Badge de niveau
-            if (level.isNotEmpty)
+            // Icône de verrouillage pour badges non obtenus sans progression
+            if (!obtained && progress == 0)
               Positioned(
-                top: 0,
-                right: 5,
+                bottom: 5,
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: obtained ? themeColors['dark'] : Colors.grey[400],
+                    color: Colors.grey.shade400,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white,
-                      width: 2,
-                    ),
                   ),
-                  child: Text(
-                    level,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Icon(
+                    Icons.lock_rounded,
+                    size: 16,
+                    color: Colors.grey.shade600,
                   ),
                 ),
               ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
+
+        // Nom du thème
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          width: 85,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
-            color: obtained ? themeColors['light'] : Colors.grey[300],
-            borderRadius: BorderRadius.circular(10),
+            gradient: obtained
+                ? LinearGradient(
+              colors: [
+                themeColors['light']!.withOpacity(0.3),
+                themeColors['medium']!.withOpacity(0.3),
+              ],
+            )
+                : null,
+            color: obtained ? null : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: obtained ? themeColors['medium']! : Colors.grey.shade300,
+              width: 1.5,
+            ),
           ),
           child: Text(
             theme,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: obtained ? themeColors['dark'] : Colors.grey[700],
+              color: obtained ? themeColors['dark'] : Colors.grey.shade600,
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Comic Sans MS',
+              fontFamily: 'ComicNeue',
             ),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        const SizedBox(height: 4),
+
+        // Pourcentage
         if (obtained)
-          Text(
-            '${(progress * 100).toInt()}%',
-            style: TextStyle(
-              color: themeColors['dark'],
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [themeColors['medium']!, themeColors['dark']!],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: themeColors['dark']!.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.check_circle_rounded,
+                  size: 12,
+                  color: Colors.white,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${(progress * 100).toInt()}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+              ],
+            ),
+          )
+        else if (progress > 0)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getProgressColor(progress).withOpacity(0.2),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: _getProgressColor(progress),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              '${(progress * 100).toInt()}%',
+              style: TextStyle(
+                color: _getProgressColor(progress),
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'ComicNeue',
+              ),
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              'Verrouillé',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'ComicNeue',
+              ),
             ),
           ),
       ],
     );
   }
 
-  // Helper pour créer le texte du badge afin d'éviter la répétition
+  Widget _buildStar(double size) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.elasticOut,
+      builder: (context, value, child) {
+        return Transform.scale(
+          scale: value.clamp(0.0, 1.0),
+          child: Icon(
+            Icons.star_rounded,
+            size: size,
+            color: Colors.yellow.shade600,
+            shadows: [
+              Shadow(
+                color: Colors.orange.withOpacity(0.5),
+                blurRadius: 4,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildBadgeText(String text, {double fontSize = 26}) {
     return Text(
       text,
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.bold,
-        color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
+        color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey.shade500,
+        fontFamily: 'ComicNeue',
       ),
     );
   }
 
   Widget _getBadgeContent(String theme) {
-    switch (theme.toLowerCase()) {
-    // --- PRIMAIRE ---
-      case 'addition':
-        return _buildBadgeText('➕', fontSize: 28);
-      case 'soustraction':
-        return _buildBadgeText('➖', fontSize: 28);
-      case 'multiplication':
-        return _buildBadgeText('✖️', fontSize: 28);
-      case 'division':
-        return _buildBadgeText('➗', fontSize: 28);
-      case 'géométrie':
-        return _buildBadgeText('📐', fontSize: 28);
+    final iconColor = obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey.shade500;
 
-    // --- COLLÈGE (Nouveaux) ---
+    switch (theme.toLowerCase()) {
+    // PRIMAIRE
+      case 'addition':
+        return _buildBadgeText('➕', fontSize: 32);
+      case 'soustraction':
+        return _buildBadgeText('➖', fontSize: 32);
+      case 'multiplication':
+        return _buildBadgeText('✖️', fontSize: 32);
+      case 'division':
+        return _buildBadgeText('➗', fontSize: 32);
+      case 'géométrie':
+        return _buildBadgeText('📐', fontSize: 32);
+
+    // COLLÈGE
       case 'nombres relatifs':
-        return _buildBadgeText('±');
+        return _buildBadgeText('±', fontSize: 30);
       case 'fractions':
-        return _buildBadgeText('½');
+        return _buildBadgeText('½', fontSize: 30);
       case 'algèbre':
-        return _buildBadgeText('x=y', fontSize: 22);
+        return _buildBadgeText('x=y', fontSize: 20);
       case 'puissances':
-        return _buildBadgeText('x²');
+        return _buildBadgeText('x²', fontSize: 26);
       case 'théorèmes':
         return Icon(
           Icons.change_history,
-          size: 30,
-          color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
+          size: 34,
+          color: iconColor,
         );
       case 'statistiques':
         return Icon(
-          Icons.bar_chart,
-          size: 30,
-          color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
+          Icons.bar_chart_rounded,
+          size: 34,
+          color: iconColor,
         );
 
       default:
         return Icon(
-          Icons.star,
-          size: 35,
-          color: obtained ? _getBadgeThemeColors(theme)['dark'] : Colors.grey,
+          Icons.star_rounded,
+          size: 38,
+          color: iconColor,
         );
     }
   }
 
   Map<String, Color> _getBadgeThemeColors(String theme) {
     switch (theme.toLowerCase()) {
-    // --- PRIMAIRE ---
+    // PRIMAIRE
       case 'addition':
-        return {'light': Colors.green[300]!, 'dark': Colors.green[700]!};
+        return {
+          'light': Colors.green.shade200,
+          'medium': Colors.green.shade400,
+          'dark': Colors.green.shade700,
+        };
       case 'soustraction':
-        return {'light': Colors.red[300]!, 'dark': Colors.red[700]!};
+        return {
+          'light': Colors.red.shade200,
+          'medium': Colors.red.shade400,
+          'dark': Colors.red.shade700,
+        };
       case 'multiplication':
-        return {'light': Colors.blue[300]!, 'dark': Colors.blue[700]!};
+        return {
+          'light': Colors.blue.shade200,
+          'medium': Colors.blue.shade400,
+          'dark': Colors.blue.shade700,
+        };
       case 'division':
-        return {'light': Colors.orange[300]!, 'dark': Colors.orange[700]!};
+        return {
+          'light': Colors.orange.shade200,
+          'medium': Colors.orange.shade400,
+          'dark': Colors.orange.shade700,
+        };
       case 'géométrie':
-        return {'light': Colors.purple[300]!, 'dark': Colors.purple[700]!};
+        return {
+          'light': Colors.purple.shade200,
+          'medium': Colors.purple.shade400,
+          'dark': Colors.purple.shade700,
+        };
 
-    // --- COLLÈGE (Nouveaux) ---
+    // COLLÈGE
       case 'nombres relatifs':
-        return {'light': Colors.indigo[200]!, 'dark': Colors.indigo[800]!};
+        return {
+          'light': Colors.indigo.shade200,
+          'medium': Colors.indigo.shade500,
+          'dark': Colors.indigo.shade800,
+        };
       case 'fractions':
-        return {'light': Colors.teal[200]!, 'dark': Colors.teal[800]!};
+        return {
+          'light': Colors.teal.shade200,
+          'medium': Colors.teal.shade400,
+          'dark': Colors.teal.shade800,
+        };
       case 'algèbre':
         return {
-          'light': Colors.deepOrange[200]!,
-          'dark': Colors.deepOrange[800]!
+          'light': Colors.deepOrange.shade200,
+          'medium': Colors.deepOrange.shade400,
+          'dark': Colors.deepOrange.shade800,
         };
       case 'puissances':
         return {
-          'light': Colors.purpleAccent[100]!,
-          'dark': Colors.purple[800]!
+          'light': Colors.purpleAccent.shade100,
+          'medium': Colors.purple.shade400,
+          'dark': Colors.purple.shade800,
         };
       case 'théorèmes':
-        return {'light': Colors.brown[300]!, 'dark': Colors.brown[700]!};
+        return {
+          'light': Colors.brown.shade200,
+          'medium': Colors.brown.shade400,
+          'dark': Colors.brown.shade700,
+        };
       case 'statistiques':
-        return {'light': Colors.blueGrey[200]!, 'dark': Colors.blueGrey[700]!};
+        return {
+          'light': Colors.blueGrey.shade200,
+          'medium': Colors.blueGrey.shade400,
+          'dark': Colors.blueGrey.shade700,
+        };
 
       default:
-        return {'light': Colors.teal[300]!, 'dark': Colors.teal[700]!};
+        return {
+          'light': Colors.teal.shade200,
+          'medium': Colors.teal.shade400,
+          'dark': Colors.teal.shade700,
+        };
     }
   }
 
   Color _getProgressColor(double value) {
-    if (value < 0.4) return Colors.red[400]!;
-    if (value < 0.7) return Colors.orange[400]!;
-    return Colors.green[400]!;
+    if (value < 0.4) return Colors.red.shade500;
+    if (value < 0.7) return Colors.orange.shade500;
+    return Colors.green.shade500;
   }
 }

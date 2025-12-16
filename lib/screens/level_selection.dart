@@ -4,19 +4,14 @@ import 'package:mathscool/utils/colors.dart';
 
 import '../widgets/theme_selection.dart';
 
-// Assurez-vous que ce fichier existe ou retirez l'import si inutile
-// import '../widgets/theme_selection.dart';
-
 class LevelSelectionScreen extends StatelessWidget {
   const LevelSelectionScreen({super.key});
 
-  // 1. AJOUT DES NIVEAUX ICI
   final List<String> levels = const [
     'CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2',
     '6ème', '5ème', '4ème', '3ème'
   ];
 
-  // 2. AJOUT DES DESCRIPTIONS CORRESPONDANTES
   final List<String> descriptions = const [
     'Pour les débutants',
     'Premiers calculs',
@@ -33,70 +28,60 @@ class LevelSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Fond avec motif mathématique
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.christ,
-                  Color.lerp(AppColors.christ, Colors.red, 0.3)!,
-                  Color.lerp(AppColors.christ, Colors.red, 0.6)!,
-                  Colors.red,
-                ],
-                stops: const [0.0, 0.3, 0.6, 1.0],
-              ),
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFF6B6B),
+              Color(0xFFD32F2F),
+              Colors.red,
+            ],
           ),
-
-          // Contenu principal
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: GridView.builder(
-                      padding: const EdgeInsets.only(top: 10, bottom: 20),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 0.8,
-                      ),
-                      itemCount: levels.length,
-                      itemBuilder: (context, index) {
-                        return _buildLevelCard(context, index);
-                      },
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.85,
                     ),
+                    itemCount: levels.length,
+                    itemBuilder: (context, index) {
+                      return _buildLevelCard(context, index);
+                    },
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: AppColors.christ,
-        borderRadius: const BorderRadius.vertical(
-          bottom: Radius.circular(30),
-        ),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -105,7 +90,7 @@ class LevelSelectionScreen extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
                 onPressed: () => Navigator.pop(context),
               ),
               const Expanded(
@@ -113,33 +98,49 @@ class LevelSelectionScreen extends StatelessWidget {
                   'Choisis ton niveau',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Color(0xFFD32F2F),
+                    fontFamily: 'ComicNeue',
                   ),
                 ),
               ),
               const SizedBox(width: 48),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [Colors.orange.shade300, Colors.yellow.shade400],
+              ),
+              borderRadius: BorderRadius.circular(15),
             ),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.lightbulb, color: AppColors.accent),
-                SizedBox(width: 8),
-                Expanded(
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.lightbulb_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
                   child: Text(
                     'Choisis le niveau qui correspond à ta classe',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ComicNeue',
                     ),
                   ),
                 ),
@@ -152,110 +153,192 @@ class LevelSelectionScreen extends StatelessWidget {
   }
 
   Widget _buildLevelCard(BuildContext context, int index) {
-    // 3. AJOUT DES COULEURS POUR LES NOUVEAUX NIVEAUX
-    final List<Color> cardColors = [
-      const Color(0xFFFFF3E0), // Amber very light (CI)
-      const Color(0xFFE3F2FD), // Blue very light (CP)
-      const Color(0xFFE8F5E9), // Green very light (CE1)
-      const Color(0xFFFCE4EC), // Pink very light (CE2)
-      const Color(0xFFEDE7F6), // Purple very light (CM1)
-      const Color(0xFFFFEBEE), // Red very light (CM2)
-      // Nouveaux :
-      const Color(0xFFE0F7FA), // Cyan light (6ème)
-      const Color(0xFFE0F2F1), // Teal light (5ème)
-      const Color(0xFFFFF8E1), // Amber light (4ème)
-      const Color(0xFFECEFF1), // Blue Grey light (3ème)
+    final List<List<Color>> gradientColors = [
+      [Colors.amber.shade300, Colors.amber.shade500],           // CI
+      [Colors.blue.shade300, Colors.blue.shade500],             // CP
+      [Colors.green.shade300, Colors.green.shade500],           // CE1
+      [Colors.pink.shade300, Colors.pink.shade500],             // CE2
+      [Colors.purple.shade300, Colors.purple.shade500],         // CM1
+      [Colors.red.shade300, Colors.red.shade500],               // CM2
+      [Colors.cyan.shade300, Colors.cyan.shade500],             // 6ème
+      [Colors.teal.shade300, Colors.teal.shade500],             // 5ème
+      [Colors.orange.shade300, Colors.orange.shade500],         // 4ème
+      [Colors.blueGrey.shade300, Colors.blueGrey.shade500],     // 3ème
     ];
 
-    final List<Color> textColors = [
-      Colors.amber[800]!,
-      Colors.blue[800]!,
-      Colors.green[800]!,
-      Colors.pink[800]!,
-      Colors.purple[800]!,
-      Colors.red[800]!,
-      // Nouveaux :
-      Colors.cyan[800]!,
-      Colors.teal[800]!,
-      Colors.orange[800]!,
-      Colors.blueGrey[800]!,
-    ];
-
-    // 4. AJOUT DES ICÔNES POUR LES NOUVEAUX NIVEAUX
     final List<IconData> icons = [
-      Icons.child_care,
-      Icons.emoji_people,
-      Icons.school,
-      Icons.psychology,
-      Icons.emoji_objects,
-      Icons.workspace_premium,
-      // Nouveaux :
-      Icons.menu_book,       // 6ème (Livre)
-      Icons.calculate,       // 5ème (Calculatrice)
-      Icons.architecture,    // 4ème (Géométrie/Equerre)
-      Icons.history_edu,     // 3ème (Diplôme/Brevet)
+      Icons.child_care_rounded,
+      Icons.emoji_people_rounded,
+      Icons.school_rounded,
+      Icons.psychology_rounded,
+      Icons.emoji_objects_rounded,
+      Icons.workspace_premium_rounded,
+      Icons.menu_book_rounded,
+      Icons.calculate_rounded,
+      Icons.architecture_rounded,
+      Icons.history_edu_rounded,
     ];
 
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ThemeSelectionScreen(level: levels[index]),
+    // Badge pour les niveaux collège
+    final bool isCollege = index >= 6;
+
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + (index * 80)),
+      curve: Curves.easeOutBack,
+      builder: (context, double value, child) {
+        return Transform.scale(
+          scale: value.clamp(0.0, 1.0),
+          child: Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: child,
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: cardColors[index],
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: textColors[index].withOpacity(0.3),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ThemeSelectionScreen(level: levels[index]),
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: textColors[index].withOpacity(0.3),
-                    blurRadius: 8,
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors[index],
+            ),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors[index][1].withOpacity(0.4),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Motif décoratif
+              Positioned(
+                top: -20,
+                right: -20,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.15),
                   ),
-                ],
-              ),
-              child: Icon(icons[index], size: 50, color: textColors[index]),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              levels[index],
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: textColors[index],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text(
-                descriptions[index],
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: textColors[index].withOpacity(0.8),
                 ),
               ),
-            ),
-          ],
+              Positioned(
+                bottom: -30,
+                left: -30,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+              ),
+
+              // Badge collège
+              if (isCollege)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      'Collège',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: gradientColors[index][1],
+                        fontFamily: 'ComicNeue',
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Contenu principal
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        icons[index],
+                        size: 44,
+                        color: gradientColors[index][1],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      levels[index],
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'ComicNeue',
+                        shadows: [
+                          Shadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(1, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text(
+                        descriptions[index],
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'ComicNeue',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

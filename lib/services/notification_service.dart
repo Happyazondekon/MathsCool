@@ -18,10 +18,11 @@ class NotificationService {
   static const String _customNotificationsKey = 'custom_notifications';
   static const String _lastNotificationKey = 'last_notification_time';
 
-  // ID pour la notif de vies
+  // IDs pour les différentes notifications
   static const int _livesRefillNotificationId = 8888;
-  // --- NOUVEAU : ID pour le rappel d'achievements ---
   static const int _achievementReminderId = 9001;
+  static const int _dailyChallengeReminderId = 9002;
+  static const int _leaderboardReminderId = 9003;
 
   // Messages motivationnels classiques
   final List<String> _motivationalMessages = [
@@ -44,7 +45,7 @@ class NotificationService {
     "Prêt(e) pour ta session d'apprentissage ? 💫"
   ];
 
-  // --- NOUVEAU : Messages spécifiques pour les Achievements ---
+  // Messages spécifiques pour les Achievements
   final List<String> _achievementMessages = [
     "🏆 Psst... Un nouveau trophée t'attend peut-être !",
     "🥇 Viens débloquer ton prochain badge Expert !",
@@ -54,6 +55,42 @@ class NotificationService {
     "🎯 Objectif en vue : Viens compléter tes missions !",
     "🌟 Tes badges se sentent seuls... Viens en gagner d'autres !",
     "💪 Montre-nous tes talents et gagne des vies !",
+  ];
+
+  // Messages pour les défis quotidiens
+  final List<String> _dailyChallengeMessages = [
+    "⏰ Le défi du jour expire bientôt ! Ne le rate pas !",
+    "🎯 Un défi croustillant t'attend aujourd'hui !",
+    "🔥 Ton défi quotidien est prêt ! Viens le conquérir !",
+    "⭐ Gagne des étoiles avec le défi d'aujourd'hui !",
+    "🚀 Le défi du jour va booster ton classement !",
+    "💎 Un défi unique pour toi aujourd'hui ! Go !",
+    "🎪 Le défi du jour est arrivé ! À toi de jouer !",
+    "⚡ Flash défi : Montre ce que tu vaux aujourd'hui !",
+    "🎁 Cadeau du jour : Un super défi rien que pour toi !",
+    "🌟 Termine le défi et illumine le classement !",
+  ];
+
+  // Messages compétitifs pour les classements
+  final List<String> _leaderboardMessages = [
+    "🏆 Ne laisse pas {name} battre ton record !",
+    "👑 {name} te dépasse au classement ! Rattrape-le !",
+    "⚔️ Duel au sommet avec {name} ! Qui sera n°1 ?",
+    "🥇 {name} a fait un sans-faute ! À toi de faire mieux !",
+    "📈 {name} grimpe vite ! Défends ta position !",
+    "💪 {name} est juste devant toi ! Surpasse-le !",
+    "🎯 {name} vise le podium, et toi ?",
+    "🔝 {name} a gagné 3 étoiles ! Égalise son score !",
+    "⭐ {name} brille au classement ! Montre ton talent !",
+    "🚀 {name} est lancé ! Ne te laisse pas distancer !",
+  ];
+
+  // Noms aléatoires pour les messages compétitifs
+  final List<String> _randomCompetitorNames = [
+    "Emma", "Lucas", "Chloé", "Nathan", "Léa", "Tom",
+    "Inès", "Happy", "Jade", "Arthur", "Mékis", "Louis",
+    "Zoé", "Ethan", "Lina", "Mathis", "Sarah", "Noah",
+    "Camille", "Gabriel", "Lily", "Delali", "Alice", "Adam"
   ];
 
   /// Initialisation du service de notifications
@@ -141,15 +178,39 @@ class NotificationService {
     }
   }
 
-  // --- NOUVEAU : Programmer un rappel quotidien pour les achievements ---
+  // ========== MÉTHODES POUR OBTENIR DES MESSAGES ALÉATOIRES ==========
+
+  String _getRandomAchievementMessage() {
+    final random = Random();
+    return _achievementMessages[random.nextInt(_achievementMessages.length)];
+  }
+
+  String _getRandomDailyChallengeMessage() {
+    final random = Random();
+    return _dailyChallengeMessages[random.nextInt(_dailyChallengeMessages.length)];
+  }
+
+  String _getRandomLeaderboardMessage() {
+    final random = Random();
+    final name = _randomCompetitorNames[random.nextInt(_randomCompetitorNames.length)];
+    final message = _leaderboardMessages[random.nextInt(_leaderboardMessages.length)];
+    return message.replaceAll('{name}', name);
+  }
+
+  String _getRandomMotivationalMessage() {
+    final random = Random();
+    return _motivationalMessages[random.nextInt(_motivationalMessages.length)];
+  }
+
+  // ========== NOTIFICATIONS AUTOMATIQUES (ACHIEVEMENTS, DÉFIS, CLASSEMENTS) ==========
+
+  /// Programmer un rappel quotidien pour les achievements (17h30)
   Future<bool> scheduleDailyAchievementReminder() async {
     try {
       if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
         return false;
       }
 
-      // Configuration de l'heure : 17h30 (Heure idéale après l'école/devoirs)
-      // Vous pouvez changer l'heure ici (hour: 17, minute: 30)
       final now = DateTime.now();
       var scheduledDateTime = DateTime(
         now.year,
@@ -159,7 +220,6 @@ class NotificationService {
         30, // 30min
       );
 
-      // Si l'heure est passée, on commence demain
       if (scheduledDateTime.isBefore(now)) {
         scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
       }
@@ -168,13 +228,13 @@ class NotificationService {
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
       const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'mathscool_achievements', // Canal dédié
+        'mathscool_achievements',
         'Rappels de Trophées',
         channelDescription: 'Rappels pour débloquer les succès et badges',
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
         icon: 'baseline_calculate_white_36',
-        color: Color(0xFFFFD700), // Couleur Or pour les trophées
+        color: Color(0xFFFFD700),
         enableLights: true,
         enableVibration: true,
         playSound: true,
@@ -192,18 +252,16 @@ class NotificationService {
         iOS: iosDetails,
       );
 
-      // Utilisation de zonedSchedule avec DateTimeComponents.time
-      // Cela fait répéter la notification chaque jour à la même heure
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         _achievementReminderId,
         "Nouveaux succès disponibles ! 🏆",
-        _getRandomAchievementMessage(), // Message aléatoire
+        _getRandomAchievementMessage(),
         scheduledDate,
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time, // Répétition quotidienne
+        matchDateTimeComponents: DateTimeComponents.time,
         payload: 'mathscool_achievement_reminder',
       );
 
@@ -216,12 +274,180 @@ class NotificationService {
     }
   }
 
-  String _getRandomAchievementMessage() {
-    final random = Random();
-    return _achievementMessages[random.nextInt(_achievementMessages.length)];
+  /// Programmer un rappel quotidien pour le défi du jour (18h00)
+  Future<bool> scheduleDailyChallengeReminder() async {
+    try {
+      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      var scheduledDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        18, // 18h
+        0,  // 00min
+      );
+
+      if (scheduledDateTime.isBefore(now)) {
+        scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
+      }
+
+      final deviceTimeZone = _getDeviceTimeZone();
+      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'mathscool_daily_challenge',
+        'Défi Quotidien',
+        channelDescription: 'Rappels pour le défi du jour',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'baseline_calculate_white_36',
+        color: Color(0xFFFF6B6B),
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        sound: 'default',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _dailyChallengeReminderId,
+        "Défi Quotidien disponible ! 🎯",
+        _getRandomDailyChallengeMessage(),
+        scheduledDate,
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'mathscool_daily_challenge',
+      );
+
+      print('Rappel quotidien du défi programmé pour : $scheduledDate');
+      return true;
+
+    } catch (e) {
+      print('Erreur lors de la programmation du rappel de défi : $e');
+      return false;
+    }
   }
 
-  /// Programmer une notification personnalisée (CODE EXISTANT CONSERVÉ)
+  /// Programmer un rappel quotidien pour le classement (19h00)
+  Future<bool> scheduleLeaderboardReminder() async {
+    try {
+      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      var scheduledDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        19, // 19h
+        0,  // 00min
+      );
+
+      if (scheduledDateTime.isBefore(now)) {
+        scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
+      }
+
+      final deviceTimeZone = _getDeviceTimeZone();
+      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'mathscool_leaderboard',
+        'Classements',
+        channelDescription: 'Rappels compétitifs pour le classement',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'baseline_calculate_white_36',
+        color: Color(0xFFFFD700),
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+        sound: 'default',
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const NotificationDetails platformDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _leaderboardReminderId,
+        "Classement MathsCool 🏆",
+        _getRandomLeaderboardMessage(),
+        scheduledDate,
+        platformDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+        payload: 'mathscool_leaderboard',
+      );
+
+      print('Rappel de classement programmé pour : $scheduledDate');
+      return true;
+
+    } catch (e) {
+      print('Erreur lors de la programmation du rappel de classement : $e');
+      return false;
+    }
+  }
+
+  /// Programmer toutes les notifications automatiques en une seule fois
+  Future<Map<String, bool>> scheduleAllAutomaticReminders(String userName) async {
+    return {
+      'achievements': await scheduleDailyAchievementReminder(),
+      'dailyChallenge': await scheduleDailyChallengeReminder(),
+      'leaderboard': await scheduleLeaderboardReminder(),
+    };
+  }
+
+  /// Annuler toutes les notifications automatiques
+  Future<void> cancelAllAutomaticReminders() async {
+    await cancelNotification(_achievementReminderId);
+    await cancelNotification(_dailyChallengeReminderId);
+    await cancelNotification(_leaderboardReminderId);
+  }
+
+  /// Annuler le rappel des achievements
+  Future<void> cancelAchievementReminder() async {
+    await cancelNotification(_achievementReminderId);
+  }
+
+  /// Annuler le rappel du défi quotidien
+  Future<void> cancelDailyChallengeReminder() async {
+    await cancelNotification(_dailyChallengeReminderId);
+  }
+
+  /// Annuler le rappel de classement
+  Future<void> cancelLeaderboardReminder() async {
+    await cancelNotification(_leaderboardReminderId);
+  }
+
+  // ========== NOTIFICATIONS PERSONNALISÉES ==========
+
+  /// Programmer une notification personnalisée
   Future<bool> scheduleCustomNotification({
     required String userName,
     required int hour,
@@ -290,12 +516,6 @@ class NotificationService {
       print('Erreur programmation custom: $e');
       return false;
     }
-  }
-
-  Future<bool> _hasRequiredPermissions() async {
-    final notificationStatus = await Permission.notification.status;
-    final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
-    return notificationStatus.isGranted && (exactAlarmStatus.isGranted);
   }
 
   Future<void> _saveCustomNotification(
@@ -399,9 +619,67 @@ class NotificationService {
     }
   }
 
-  String _getRandomMotivationalMessage() {
-    final random = Random();
-    return _motivationalMessages[random.nextInt(_motivationalMessages.length)];
+  // ========== NOTIFICATIONS DE VIES ==========
+
+  /// Programmer une notification quand les vies sont rechargées
+  Future<bool> scheduleLivesRefilledNotification({
+    required String userName,
+    required Duration timeRemaining,
+  }) async {
+    try {
+      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
+        return false;
+      }
+
+      final now = DateTime.now();
+      final scheduledDateTime = now.add(timeRemaining);
+      final deviceTimeZone = _getDeviceTimeZone();
+      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
+
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'mathscool_lives',
+        'Vies Rechargées',
+        channelDescription: 'Notifications quand les vies sont complètes',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'baseline_calculate_white_36',
+        color: Color(0xFFE91E63),
+        enableLights: true,
+        enableVibration: true,
+        playSound: true,
+      );
+
+      await _flutterLocalNotificationsPlugin.zonedSchedule(
+        _livesRefillNotificationId,
+        "Vies au max ! ❤️",
+        "Hey $userName, tes vies sont rechargées ! Viens jouer ! 🎮",
+        scheduledDate,
+        const NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        payload: 'mathscool_lives_refill',
+      );
+
+      print('Notification de vies programmée pour : $scheduledDate');
+      return true;
+    } catch (e) {
+      print('Erreur programmation vies: $e');
+      return false;
+    }
+  }
+
+  /// Annuler la notification de vies
+  Future<void> cancelLivesRefilledNotification() async {
+    await cancelNotification(_livesRefillNotificationId);
+  }
+
+  // ========== GESTION GÉNÉRALE DES NOTIFICATIONS ==========
+
+  Future<bool> _hasRequiredPermissions() async {
+    final notificationStatus = await Permission.notification.status;
+    final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
+    return notificationStatus.isGranted && (exactAlarmStatus.isGranted);
   }
 
   Future<void> setNotificationsEnabled(bool enabled) async {
@@ -437,35 +715,7 @@ class NotificationService {
     return await _flutterLocalNotificationsPlugin.pendingNotificationRequests();
   }
 
-  Future<void> _saveLastNotificationTime() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_lastNotificationKey, DateTime.now().millisecondsSinceEpoch);
-    } catch (e) {
-      print('Erreur save timestamp: $e');
-    }
-  }
-
-  Future<DateTime?> getLastNotificationTime() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final timestamp = prefs.getInt(_lastNotificationKey);
-      return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<bool> shouldSendNotificationNow() async {
-    try {
-      final lastTime = await getLastNotificationTime();
-      if (lastTime == null) return true;
-      final now = DateTime.now();
-      return now.difference(lastTime).inHours >= 12;
-    } catch (e) {
-      return true;
-    }
-  }
+  // ========== NOTIFICATIONS IMMÉDIATES ==========
 
   Future<bool> sendImmediateNotification({
     required String userName,
@@ -498,6 +748,38 @@ class NotificationService {
       return true;
     } catch (e) {
       return false;
+    }
+  }
+
+  // ========== STATISTIQUES ET UTILITAIRES ==========
+
+  Future<void> _saveLastNotificationTime() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_lastNotificationKey, DateTime.now().millisecondsSinceEpoch);
+    } catch (e) {
+      print('Erreur save timestamp: $e');
+    }
+  }
+
+  Future<DateTime?> getLastNotificationTime() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final timestamp = prefs.getInt(_lastNotificationKey);
+      return timestamp != null ? DateTime.fromMillisecondsSinceEpoch(timestamp) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<bool> shouldSendNotificationNow() async {
+    try {
+      final lastTime = await getLastNotificationTime();
+      if (lastTime == null) return true;
+      final now = DateTime.now();
+      return now.difference(lastTime).inHours >= 12;
+    } catch (e) {
+      return true;
     }
   }
 
@@ -550,58 +832,5 @@ class NotificationService {
     } catch (e) {
       return 0;
     }
-  }
-
-  /// Programmer une notification quand les vies sont rechargées (CODE EXISTANT)
-  Future<bool> scheduleLivesRefilledNotification({
-    required String userName,
-    required Duration timeRemaining,
-  }) async {
-    try {
-      if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
-        return false;
-      }
-
-      final now = DateTime.now();
-      final scheduledDateTime = now.add(timeRemaining);
-      final deviceTimeZone = _getDeviceTimeZone();
-      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
-
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'mathscool_lives',
-        'Vies Rechargées',
-        channelDescription: 'Notifications quand les vies sont complètes',
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: 'baseline_calculate_white_36',
-        color: Color(0xFFE91E63),
-        enableLights: true,
-        enableVibration: true,
-        playSound: true,
-      );
-
-      await _flutterLocalNotificationsPlugin.zonedSchedule(
-        _livesRefillNotificationId,
-        "Vies au max ! ❤️",
-        "Hey $userName, tes vies sont rechargées ! Viens jouer ! 🎮",
-        scheduledDate,
-        const NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-        payload: 'mathscool_lives_refill',
-      );
-
-      print('Notification de vies programmée pour : $scheduledDate');
-      return true;
-    } catch (e) {
-      print('Erreur programmation vies: $e');
-      return false;
-    }
-  }
-
-  /// Annuler la notification de vies
-  Future<void> cancelLivesRefilledNotification() async {
-    await cancelNotification(_livesRefillNotificationId);
   }
 }

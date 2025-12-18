@@ -14,6 +14,7 @@ import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/services/progress_service.dart';
 import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/services/achievement_service.dart';
+import 'package:mathscool/services/daily_challenge_service.dart';
 
 // Imports pour le Kill Switch
 import 'package:mathscool/services/remote_config_service.dart';
@@ -48,6 +49,7 @@ void main() async {
         Provider(create: (_) => ProgressService()),
         ChangeNotifierProvider(create: (_) => LivesService()),
         ChangeNotifierProvider(create: (_) => AchievementService()),
+        ChangeNotifierProvider(create: (_) => DailyChallengeService()),
         Provider(create: (_) => ChatbotService()),
         Provider.value(value: notificationService),
       ],

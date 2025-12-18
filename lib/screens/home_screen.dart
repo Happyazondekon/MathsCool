@@ -20,6 +20,7 @@ import 'package:mathscool/widgets/lives_display.dart';
 
 import '../services/achievement_service.dart';
 import '../widgets/chatbot_floating_button.dart';
+import '../widgets/daily_challenge_button.dart';
 import 'achievements_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -451,6 +452,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     const SizedBox(height: 10),
 
                     // Contenu principal
+                    // Contenu principal
                     SizedBox(
                       height: size.height * 0.6,
                       child: Stack(
@@ -458,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         children: [
                           // Lottie Animation
                           Positioned(
-                            top: size.height * 0.05,
+                            top: size.height * 0.02,
                             child: Lottie.asset(
                               'assets/animations/home.json',
                               width: size.width * 0.8,
@@ -467,14 +469,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             ),
                           ),
 
-                          // Bouton principal avec effet toggle
+                          // Bouton principal (toggle)
                           Positioned(
-                            bottom: size.height * 0.1,
+                            bottom: size.height * 0.14,
                             child: ChristmasToggleButton(size: size),
+                          ),
+
+                          // ✅ Bouton Défi du jour EN DESSOUS du toggle
+                          Positioned(
+                            bottom: size.height * 0.05,
+                            left: 20,
+                            right: 20,
+                            child: const DailyChallengeButton(),
                           ),
                         ],
                       ),
                     ),
+
 
                     // Espacement en bas pour le scroll
                     SizedBox(height: size.height * 0.05),

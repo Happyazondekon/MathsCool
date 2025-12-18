@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Fichiers avec clés API et config locale
+lib/services/exercise_generator_service.dart
+lib/services/groq_service.dart
+firebase.json
+firestore.indexes.json
+.firebaserc
+firestore.rules

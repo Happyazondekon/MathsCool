@@ -9,14 +9,11 @@ import 'package:mathscool/screens/help_screen.dart';
 import 'package:mathscool/screens/home_screen.dart';
 import 'package:mathscool/screens/notification_settings_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
+import 'package:mathscool/screens/leaderboard_screen.dart';
+import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
-
-import 'leaderboard_screen.dart';
-
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -128,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() => _isEditing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Carte scolaire mise à jour ! 🎅'),
+            content: Text('Profil mis à jour avec succès !'),
             backgroundColor: Colors.green,
           ),
         );
@@ -184,7 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.red, width: 2), // Rouge Noël
+                      border: Border.all(color: AppColors.primary, width: 2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Image.asset('assets/avatars/avatar$i.png'),
@@ -197,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.green[50], // Vert pâle Noël
+                    color: Colors.green[50],
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
@@ -231,55 +228,119 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
-      body: Stack(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFF6B6B),
+              Color(0xFFD32F2F),
+              Colors.red,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(context),
+              const SizedBox(height: 20),
+
+              // Section informations profil
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: _isEditing
+                      ? _buildEditForm(context)
+                      : _buildProfileContent(context, displayName, email),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
         children: [
-          // Fond dégradé Noël
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+                onPressed: () => Navigator.pop(context),
+              ),
+              const Expanded(
+                child: Text(
+                  'Mon Profil',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFD32F2F),
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.logout_rounded, color: Color(0xFFD32F2F)),
+                onPressed: () async {
+                  await authService.signOut();
+                  if (mounted) Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
           Container(
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.christ, Colors.white],
+                colors: [Colors.orange.shade300, Colors.yellow.shade400],
               ),
+              borderRadius: BorderRadius.circular(15),
             ),
-          ),
-          // Éléments décoratifs Noël
-          Positioned(
-            top: 50,
-            right: 20,
-            child: Icon(Icons.star, color: Colors.yellow[700], size: 30),
-          ),
-          Positioned(
-            top: 100,
-            left: 10,
-            child: Icon(Icons.ac_unit, color: Colors.blue[50], size: 25),
-          ),
-          Positioned(
-            bottom: 150,
-            right: 30,
-            child: Icon(Icons.card_giftcard, color: Colors.red[300], size: 28),
-          ),
-          SafeArea(
-            child: Column(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildHeader(context, authService),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 400),
-                          transitionBuilder: (child, animation) {
-                            return ScaleTransition(scale: animation, child: child);
-                          },
-                          child: _isEditing
-                              ? _buildEditForm()
-                              : _buildSchoolIDCard(displayName, email),
-                        ),
-                        const SizedBox(height: 20),
-                        _buildMenuOptions(context),
-                      ],
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.person_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Gère tes informations et accède à tes statistiques',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ComicNeue',
                     ),
                   ),
                 ),
@@ -291,490 +352,478 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- CARTE SCOLAIRE THÈME NOËL ---
-  Widget _buildSchoolIDCard(String name, String email) {
+  Widget _buildProfileContent(BuildContext context, String displayName, String email) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        children: [
+          // Carte profil principale
+          _buildProfileCard(context, displayName, email),
+          const SizedBox(height: 20),
+
+          // Titre section menu
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.grid_view_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  'Menu Principal',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'ComicNeue',
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Grille des options de menu
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 20),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.0,
+            ),
+            itemCount: _menuOptions.length,
+            itemBuilder: (context, index) {
+              return _buildMenuCard(context, _menuOptions[index], index);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileCard(BuildContext context, String displayName, String email) {
     final now = DateTime.now();
     final studentId = email.hashCode.abs().toString().substring(0, 6);
 
-    return Stack(
-      children: [
-        Container(
-          key: const ValueKey('card'),
-          width: double.infinity,
-          height: 520,
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutBack,
+      builder: (context, double value, child) {
+        return Transform.scale(
+          scale: value.clamp(0.0, 1.0),
+          child: Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: () => setState(() => _isEditing = true),
+        child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.purple.shade400,
+                Colors.blue.shade600,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: Colors.green.withOpacity(0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-                spreadRadius: 2,
+                color: Colors.purple.withOpacity(0.4),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
-          child: Column(
+          child: Stack(
             children: [
-              // HEADER - Bandeau supérieur Noël
-              Container(
-                height: 100,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.green.shade600],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+              // Motif décoratif
+              Positioned(
+                top: -20,
+                right: -20,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.15),
                   ),
                 ),
-                child: Stack(
+              ),
+              Positioned(
+                bottom: -30,
+                left: -30,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+              ),
+
+              // Contenu principal
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Motif de Noël
-                    Positioned(
-                      right: -30,
-                      top: -30,
-                      child: Icon(Icons.star, color: Colors.yellow[100]!.withOpacity(0.3), size: 80),
+                    Row(
+                      children: [
+                        // Avatar
+                        Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: SizedBox(
+                              width: 80,
+                              height: 80,
+                              child: _buildAvatarImage(),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+
+                        // Informations principales
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                displayName,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontFamily: 'ComicNeue',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                email,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  _selectedLevel ?? 'Niveau non défini',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Bouton édition
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.edit_rounded,
+                            color: Colors.purple,
+                            size: 20,
+                          ),
+                        ),
+                      ],
                     ),
-                    Positioned(
-                      left: -20,
-                      bottom: -20,
-                      child: Icon(Icons.ac_unit, color: Colors.blue[50]!.withOpacity(0.3), size: 60),
-                    ),
-                    // Contenu du header
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
+
+                    const SizedBox(height: 20),
+
+                    // Informations supplémentaires
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Logo école avec bordure Noël
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
+                          const Text(
+                            'Informations Scolaires',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.green, width: 2),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.red.withOpacity(0.2),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              height: 40,
-                              width: 40,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.calculate_rounded,
-                                color: Colors.red,
-                                size: 40,
-                              ),
+                              fontFamily: 'ComicNeue',
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          // Nom de l'école
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'MathsCool',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'ComicNeue',
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'CARTE D\'ÉLÈVE - JOYEUX NOËL !',
-                                  style: TextStyle(
-                                    color: Colors.yellow[100],
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 1.0,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          // Année scolaire
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.yellow.withOpacity(0.5)),
-                            ),
-                            child: Text(
-                              '${now.year}-${now.year + 1}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                          const SizedBox(height: 12),
+                          _buildInfoRow('Établissement', _schoolController.text.isNotEmpty ? _schoolController.text : 'MathsCool'),
+                          const SizedBox(height: 8),
+                          _buildInfoRow('N° Élève', studentId),
+                          const SizedBox(height: 8),
+                          _buildInfoRow('Année Scolaire', '${now.year}-${now.year + 1}'),
+                          if (_bioController.text.isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            _buildInfoRow('Devise', _bioController.text),
+                          ],
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-              // CORPS DE LA CARTE
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white70,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEditForm(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: TweenAnimationBuilder(
+        tween: Tween<double>(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutBack,
+        builder: (context, double value, child) {
+          return Transform.scale(
+            scale: value.clamp(0.0, 1.0),
+            child: Opacity(
+              opacity: value.clamp(0.0, 1.0),
+              child: child,
+            ),
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Center(
+                  child: Text(
+                    'Modifier le Profil',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFD32F2F),
+                      fontFamily: 'ComicNeue',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Avatar avec bouton de changement
+                Center(
+                  child: Stack(
                     children: [
-                      // Photo et informations principales
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Photo d'identité avec bordure Noël
-                          Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.red, width: 3), // Rouge Noël
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Container(
-                                width: 100,
-                                height: 120,
-                                color: Colors.green[50], // Fond vert pâle
-                                child: _buildAvatarImage(isRectangle: true),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          // Informations élève
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 4),
-                                _buildInfoRow('NOM', name.toUpperCase()),
-                                const SizedBox(height: 12),
-                                _buildInfoRow('CLASSE', _selectedLevel ?? 'Non défini'),
-                                const SizedBox(height: 12),
-                                _buildInfoRow('N° ÉLÈVE', studentId),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Séparateur avec icône Noël
-                      Row(
-                        children: [
-                          Expanded(child: Divider(color: Colors.green[300], thickness: 2)),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: Icon(Icons.star, color: Colors.yellow[700], size: 20),
-                          ),
-                          Expanded(child: Divider(color: Colors.green[300], thickness: 2)),
-                        ],
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Informations supplémentaires
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Colors.red[50]!, Colors.green[50]!],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.red[100]!),
-                        ),
-                        child: Column(
-                          children: [
-                            _buildDetailRow(
-                              Icons.home_work_outlined,
-                              'Établissement',
-                              _schoolController.text.isNotEmpty ? _schoolController.text : 'MathsCool',
-                            ),
-                            const SizedBox(height: 12),
-                            _buildDetailRow(
-                              Icons.favorite_outline,
-                              'Devise de Noël',
-                              _bioController.text.isNotEmpty ? _bioController.text : 'Joyeuses Mathématiques ! 🎄',
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(60),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 8,
                             ),
                           ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(56),
+                          child: SizedBox(
+                            width: 112,
+                            height: 112,
+                            child: _buildAvatarImage(),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: _showAvatarSelectionDialog,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt_rounded,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
 
-              // FOOTER - Bande décorative Noël
-              Container(
-                height: 8,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.green.shade600],
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
+                const SizedBox(height: 24),
+
+                // Champs de formulaire
+                TextFormField(
+                  controller: _displayNameController,
+                  decoration: _inputDecoration('Prénom / Pseudo', Icons.person_outline),
+                  validator: (v) => v!.isEmpty ? 'Ce champ est requis' : null,
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 16),
 
-        // Bouton crayon en haut à droite
-        Positioned(
-          top: 130,
-          right: 95,
-          child: GestureDetector(
-            onTap: () => setState(() => _isEditing = true),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: const Icon(
-                Icons.edit,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            color: Colors.green[800],
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.red[700],
-            fontFamily: 'ComicNeue',
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 18, color: Colors.red),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.green[800],
-                  fontWeight: FontWeight.w500,
+                DropdownButtonFormField<String>(
+                  value: _selectedLevel,
+                  decoration: _inputDecoration('Classe', Icons.school_outlined),
+                  items: _levels.map((level) => DropdownMenuItem(
+                    value: level,
+                    child: Text(level),
+                  )).toList(),
+                  onChanged: (val) => setState(() => _selectedLevel = val),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.red[700],
+                const SizedBox(height: 16),
+
+                TextFormField(
+                  controller: _schoolController,
+                  decoration: _inputDecoration('École', Icons.location_city_outlined),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+                const SizedBox(height: 16),
 
-  // --- FORMULAIRE D'ÉDITION THÈME NOËL ---
-  Widget _buildEditForm() {
-    return Card(
-      key: const ValueKey('form'),
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      color: Colors.green[50],
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.edit, color: Colors.red),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Modifier mes informations',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'ComicNeue',
-                      color: Colors.red,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
+                TextFormField(
+                  controller: _bioController,
+                  decoration: _inputDecoration('Devise ou Hobby', Icons.favorite_outline),
+                  maxLength: 40,
+                ),
 
-              Center(
-                child: Stack(
+                const SizedBox(height: 24),
+
+                // Boutons
+                Row(
                   children: [
-                    _buildAvatarImage(radius: 50),
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: _showAvatarSelectionDialog,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade300,
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
                         ),
+                        onPressed: () => setState(() => _isEditing = false),
+                        child: const Text('Annuler'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        onPressed: _isUpdating ? null : _updateProfile,
+                        child: _isUpdating
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                            : const Text('Sauvegarder'),
                       ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-
-              TextFormField(
-                controller: _displayNameController,
-                decoration: _inputDecoration('Ton Prénom / Pseudo', Icons.person_outline),
-                validator: (v) => v!.isEmpty ? 'Dis-nous comment tu t\'appelles !' : null,
-              ),
-              const SizedBox(height: 16),
-
-              DropdownButtonFormField<String>(
-                value: _selectedLevel,
-                decoration: _inputDecoration('Ta Classe', Icons.school_outlined),
-                items: _levels.map((level) => DropdownMenuItem(
-                  value: level,
-                  child: Text(level),
-                )).toList(),
-                onChanged: (val) => setState(() => _selectedLevel = val),
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _schoolController,
-                decoration: _inputDecoration('Ton École', Icons.location_city_outlined).copyWith(
-                  helperText: 'Par défaut: MathsCool',
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              TextFormField(
-                controller: _bioController,
-                maxLength: 40,
-                decoration: _inputDecoration('Ta devise ou Hobby', Icons.favorite_outline).copyWith(
-                  helperText: 'Ex: J\'adore les cadeaux de Noël !',
-                ),
-              ),
-
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => setState(() => _isEditing = false),
-                      icon: const Icon(Icons.close, size: 18),
-                      label: const Text('Annuler'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      onPressed: _isUpdating ? null : _updateProfile,
-                      icon: _isUpdating
-                          ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Icon(Icons.check, size: 18),
-                      label: const Text('Sauvegarder'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -787,23 +836,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       prefixIcon: Icon(icon, color: Colors.red),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.green[300]!),
+        borderSide: BorderSide(color: Colors.grey.shade400),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.green[300]!),
+        borderSide: BorderSide(color: Colors.grey.shade400),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.red, width: 2),
+        borderSide: const BorderSide(color: Colors.red, width: 2),
       ),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: Colors.grey.shade50,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     );
   }
 
-  Widget _buildAvatarImage({double? radius, bool isRectangle = false}) {
+  Widget _buildAvatarImage() {
     ImageProvider? image;
 
     if (_imageFile != null) {
@@ -826,124 +875,171 @@ class _ProfileScreenState extends State<ProfileScreen> {
       image = const AssetImage('assets/avatars/avatar1.png');
     }
 
-    if (isRectangle) {
-      return Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: image,
-            fit: BoxFit.cover,
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: image,
+          fit: BoxFit.cover,
         ),
-      );
-    }
-
-    return CircleAvatar(
-      radius: radius ?? 40,
-      backgroundImage: image,
-      backgroundColor: Colors.green[100],
-    );
-  }
-
-  Widget _buildMenuOptions(BuildContext context) {
-    final authService = Provider.of<AuthService>(context, listen: false);
-    return Column(
-      children: [
-      _buildMenuCard(
-          'Classements 🏆',
-          Icons.emoji_events_rounded,
-          Colors.amber,
-          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen())),
-        ),
-        const SizedBox(height: 10),
-        _buildMenuCard(
-          'Voir ma progression',
-          Icons.bar_chart_rounded,
-          Colors.red, // Rouge Noël
-              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProgressScreen())),
-        ),
-        const SizedBox(height: 10),
-        _buildMenuCard(
-          'Centre d\'aide',
-          Icons.help_outline_rounded,
-          Colors.green, // Vert Noël
-              () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpScreen())),
-        ),
-        const SizedBox(height: 10),
-        _buildMenuCard(
-          'Mes Rappels',
-          Icons.notifications_active_outlined,
-          Colors.orange, // Orange Noël
-              () => Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationSettingsScreen(userName: _displayNameController.text))),
-        ),
-        const SizedBox(height: 10),
-        _buildMenuCard(
-          'Retour accueil',
-          Icons.home_rounded,
-          Colors.red, // Rouge Noël
-              () => Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMenuCard(String title, IconData icon, Color color, VoidCallback onTap) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      color: Colors.green[50], // Fond vert pâle Noël
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontFamily: 'ComicNeue',
-            fontSize: 16,
-            color: Colors.green[900],
-          ),
-        ),
-        trailing: Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.red),
-        onTap: onTap,
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, AuthService authService) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
-            onPressed: () => Navigator.pop(context),
+  // Options de menu
+  final List<Map<String, dynamic>> _menuOptions = [
+    {
+      'title': 'Classements ',
+      'icon': Icons.emoji_events_rounded,
+      'color': Colors.amber,
+      'route': (BuildContext context) => const LeaderboardScreen(),
+    },
+    {
+      'title': 'Ma Progression',
+      'icon': Icons.bar_chart_rounded,
+      'color': Colors.blue,
+      'route': (BuildContext context) => const ProgressScreen(),
+    },
+    {
+      'title': 'Boutique',
+      'icon': Icons.shopping_bag_rounded, // Icône de sac de shopping
+      'color': Colors.orangeAccent,       // Couleur vive pour attirer l'attention
+      'route': (BuildContext context) => const StoreScreen(), // Remplacez par votre écran de boutique
+    },
+    {
+      'title': 'Centre d\'Aide',
+      'icon': Icons.help_outline_rounded,
+      'color': Colors.green,
+      'route': (BuildContext context) => const HelpScreen(),
+    },
+    {
+      'title': 'Mes Rappels',
+      'icon': Icons.notifications_active_outlined,
+      'color': Colors.orange,
+      'route': (BuildContext context) => NotificationSettingsScreen(userName: ''),
+    },
+    {
+      'title': 'Retour Accueil',
+      'icon': Icons.home_rounded,
+      'color': Colors.red,
+      'route': (BuildContext context) => const HomeScreen(),
+    },
+  ];
+
+  Widget _buildMenuCard(BuildContext context, Map<String, dynamic> option, int index) {
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + (index * 80)),
+      curve: Curves.easeOutBack,
+      builder: (context, double value, child) {
+        return Transform.scale(
+          scale: value.clamp(0.0, 1.0),
+          child: Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: child,
           ),
-          const Text(
-            'Ma Carte Scolaire 🎄',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontFamily: 'ComicNeue',
+        );
+      },
+      child: GestureDetector(
+        onTap: () {
+          if (option['title'] == 'Retour Accueil') {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: option['route']),
+                  (route) => false,
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: option['route']),
+            );
+          }
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                option['color'].withOpacity(0.8),
+                option['color'].withOpacity(0.6),
+              ],
             ),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: option['color'].withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.logout_rounded, color: Colors.white, size: 26),
-            onPressed: () async {
-              await authService.signOut();
-              if (mounted) Navigator.pop(context);
-            },
+          child: Stack(
+            children: [
+              // Motif décoratif
+              Positioned(
+                top: -15,
+                right: -15,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.15),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -20,
+                left: -20,
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+              ),
+
+              // Contenu
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.3),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        option['icon'],
+                        size: 32,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Text(
+                        option['title'],
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'ComicNeue',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -14,7 +14,9 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
-import 'admin_seeder_screen.dart';
+import 'leaderboard_screen.dart';
+
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -848,16 +850,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authService = Provider.of<AuthService>(context, listen: false);
     return Column(
       children: [
-        if (kDebugMode) // Visible uniquement en mode développement
-          _buildMenuCard(
-            '⚙️ Admin - Défis Quotidiens',
-            Icons.admin_panel_settings,
-            Colors.purple,
-                () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const AdminSeederScreen()),
-            ),
-          ),
+      _buildMenuCard(
+          'Classements 🏆',
+          Icons.emoji_events_rounded,
+          Colors.amber,
+          () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen())),
+        ),
         const SizedBox(height: 10),
         _buildMenuCard(
           'Voir ma progression',

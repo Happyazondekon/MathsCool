@@ -1,40 +1,43 @@
 // lib/screens/daily_challenge_result_screen.dart
+
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:confetti/confetti.dart';
 import '../models/daily_challenge_model.dart';
 import 'leaderboard_screen.dart';
+import 'dart:math';
 
 class DailyChallengeResultScreen extends StatefulWidget {
   final DailyChallengeResult result;
-
   const DailyChallengeResultScreen({Key? key, required this.result}) : super(key: key);
 
   @override
   State<DailyChallengeResultScreen> createState() => _DailyChallengeResultScreenState();
 }
 
-class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen> with SingleTickerProviderStateMixin {
+class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
+    with SingleTickerProviderStateMixin {
   late ConfettiController _confettiController;
   late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
+  late Animation<double> _scoreAnimation;
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController = ConfettiController(duration: const Duration(seconds: 4));
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 2000),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+    _scoreAnimation = Tween<double>(begin: 0, end: widget.result.score.toDouble()).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.fastOutSlowIn),
     );
 
     _animationController.forward();
     if (widget.result.stars >= 2) {
-      _confettiController.play();
+      Future.delayed(const Duration(milliseconds: 800), () => _confettiController.play());
     }
   }
 
@@ -45,194 +48,138 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
     super.dispose();
   }
 
-  String _getPerformanceMessage() {
-    final percentage = (widget.result.score / 10) * 100;
-    if (percentage >= 90) return "Incroyable ! Tu es un génie ! 🏆";
-    if (percentage >= 70) return "Super travail ! Continue comme ça ! ⭐";
-    if (percentage >= 50) return "Pas mal ! Tu progresses ! 💪";
-    return "Continue à t'entraîner ! 📚";
-  }
-
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+    return Scaffold(
+      body: Stack(
+        children: [
+          // FOND IDENTIQUE AU DAILY CHALLENGE SCREEN
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+              ),
             ),
           ),
-          child: Stack(
+
+          // SYMBOLES MATHÉMATIQUES FLOTTANTS (Même logique que DailyChallengeScreen)
+          CustomPaint(
+            size: MediaQuery.of(context).size,
+            painter: _MathBackgroundPainter(),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                _buildHeader(),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
+                      child: _buildGlassCard(),
+                    ),
+                  ),
+                ),
+                _buildActionButtons(),
+                const SizedBox(height: 30),
+              ],
+            ),
+          ),
+
+          // Confettis
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConfettiWidget(
+              confettiController: _confettiController,
+              blastDirectionality: BlastDirectionality.explosive,
+              numberOfParticles: 50,
+              colors: const [Colors.white, Colors.yellow, Colors.pink, Colors.blue, Colors.orange],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: const Text(
+        "DÉFI TERMINÉ",
+        style: TextStyle(
+          color: Colors.white,
+          letterSpacing: 2,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'ComicNeue',
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGlassCard() {
+    final bool isSuccess = widget.result.stars >= 2;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(40),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(40),
+            border: Border.all(color: Colors.white.withOpacity(0.3)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-
-                      // Animation Lottie
-                      ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Lottie.asset(
-                          widget.result.stars >= 2
-                              ? 'assets/animations/success.json'
-                              : 'assets/animations/encouragement.json',
-                          height: 200,
-                          repeat: false,
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      // Carte de résultat
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(28),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.15),
-                              blurRadius: 20,
-                              offset: const Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Défi terminé ! 🎉',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFD32F2F),
-                                fontFamily: 'ComicNeue',
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _getPerformanceMessage(),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black54,
-                                fontFamily: 'ComicNeue',
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 30),
-
-                            // Score
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                _buildStatCard(
-                                  '${widget.result.score}/10',
-                                  'Score',
-                                  Icons.check_circle,
-                                  Colors.green,
-                                ),
-                                _buildStatCard(
-                                  '${widget.result.timeSeconds}s',
-                                  'Temps',
-                                  Icons.timer,
-                                  Colors.blue,
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Étoiles
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Icon(
-                                    index < widget.result.stars
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    color: Colors.orange,
-                                    size: 50,
-                                  ),
-                                );
-                              }),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 30),
-
-                      // Boutons d'action
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
-                          );
-                        },
-                        icon: const Icon(Icons.leaderboard, size: 24),
-                        label: const Text(
-                          'Voir le classement 🏆',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Navigator.popUntil(context, (route) => route.isFirst);
-                        },
-                        icon: const Icon(Icons.home),
-                        label: const Text('Retour à l\'accueil'),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white, width: 2),
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              Lottie.asset(
+                isSuccess ? 'assets/animations/success.json' : 'assets/animations/encouragement.json',
+                height: 150,
               ),
+              const SizedBox(height: 20),
 
-              // Confettis
-              if (widget.result.stars >= 2)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: ConfettiWidget(
-                    confettiController: _confettiController,
-                    blastDirectionality: BlastDirectionality.explosive,
-                    numberOfParticles: 30,
-                    gravity: 0.1,
-                    colors: const [
-                      Colors.green,
-                      Colors.blue,
-                      Colors.pink,
-                      Colors.orange,
-                      Colors.purple,
-                    ],
-                  ),
-                ),
+              AnimatedBuilder(
+                animation: _scoreAnimation,
+                builder: (context, child) {
+                  return Text(
+                    "${_scoreAnimation.value.toInt()}",
+                    style: const TextStyle(
+                      fontSize: 80,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      fontFamily: 'ComicNeue',
+                    ),
+                  );
+                },
+              ),
+              const Text(
+                "Points gagnés",
+                style: TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 30),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (i) => Icon(
+                  Icons.star_rounded,
+                  size: 50,
+                  color: i < widget.result.stars ? Colors.amber : Colors.white24,
+                )),
+              ),
+              const SizedBox(height: 40),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildMiniStat(Icons.timer_rounded, "${widget.result.timeSeconds}s", "Temps"),
+                  _buildMiniStat(Icons.star_border_rounded, "${widget.result.stars}/3", "Étoiles"),
+                ],
+              ),
             ],
           ),
         ),
@@ -240,32 +187,117 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
     );
   }
 
-  Widget _buildStatCard(String value, String label, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: color.withOpacity(0.3), width: 2),
-      ),
+  Widget _buildMiniStat(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white70, size: 28),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18, fontFamily: 'ComicNeue')),
+        Text(label, style: const TextStyle(color: Colors.white60, fontSize: 12, fontFamily: 'ComicNeue')),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
+          // BOUTON DORÉ
+          GestureDetector(
+            onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LeaderboardScreen())),
+            child: Container(
+              height: 60,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFD700), Color(0xFFFFA500)], // Gold to Orange-Gold
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Center(
+                child: Text(
+                  "CLASSEMENTS 🏅",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontFamily: 'ComicNeue',
+                    shadows: [Shadow(color: Colors.black26, blurRadius: 2, offset: Offset(0, 1))],
+                  ),
+                ),
+              ),
             ),
           ),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: Colors.black54),
+          const SizedBox(height: 16),
+          // BOUTON RETOUR
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              height: 55,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white30),
+              ),
+              child: const Center(
+                child: Text(
+                  "RETOUR",
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'ComicNeue'),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+// Background Painter identique au DailyChallengeScreen
+class _MathBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.1)
+      ..style = PaintingStyle.fill;
+
+    final mathSymbols = ['+', '-', '×', '÷', '=', '%', '√', 'x', 'y', 'π'];
+    final random = Random(42); // Seed fixe pour la stabilité visuelle
+
+    for (int i = 0; i < 30; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final symbolSize = random.nextDouble() * 30 + 10;
+
+      if (i % 3 == 0) {
+        canvas.drawCircle(Offset(x, y), symbolSize / 2, paint);
+      } else {
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: i % 3 == 1 ? '${random.nextInt(10)}' : mathSymbols[random.nextInt(mathSymbols.length)],
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.15),
+              fontSize: symbolSize,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'ComicNeue',
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout();
+        textPainter.paint(canvas, Offset(x, y));
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

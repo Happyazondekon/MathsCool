@@ -1,9 +1,11 @@
 // lib/screens/leaderboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart';
 import '../models/user_model.dart';
 import '../models/daily_challenge_model.dart';
 import '../services/daily_challenge_service.dart';
+import 'dart:math';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({Key? key}) : super(key: key);
@@ -21,7 +23,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _loadLeaderboard();
   }
 
@@ -49,10 +51,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
         });
       }
     } catch (e) {
-      print('Erreur chargement leaderboard: $e');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -63,72 +62,61 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              const SizedBox(height: 16),
-              if (_userStats != null) _buildUserStatsCard(),
-              const SizedBox(height: 16),
-              _buildTabBar(),
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
-                    : TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildTopLeaderboard(),
-                    _buildUserHistory(),
-                  ],
-                ),
+        child: Stack(
+          children: [
+            CustomPaint(
+              size: MediaQuery.of(context).size,
+              painter: _MathBackgroundPainter(),
+            ),
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  _buildTabButtons(),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _isLoading
+                            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                            : _buildLeaderboardList(),
+                        _buildUserHistory(),
+                        _buildStatsTab(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildHeader() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Color(0xFFD32F2F)),
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
           const Expanded(
-            child: Column(
-              children: [
-                Text(
-                  'Classement 🏆',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
-                    fontFamily: 'ComicNeue',
-                  ),
-                ),
-                Text(
-                  'Top des champions du mois',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+            child: Text(
+              'Classements 🏅',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'ComicNeue',
+              ),
             ),
           ),
           const SizedBox(width: 48),
@@ -137,144 +125,33 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
     );
   }
 
-  Widget _buildUserStatsCard() {
-    if (_userStats == null) return const SizedBox.shrink();
-
+  Widget _buildTabButtons() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Mes stats 📊',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'ComicNeue',
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.orange.shade400, Colors.orange.shade600],
-                  ),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.local_fire_department, color: Colors.white, size: 18),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${_userStats!.currentStreak} jours',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildStatItem(
-                '${_userStats!.totalScore}',
-                'Points',
-                Icons.emoji_events,
-                Colors.orange,
-              ),
-              _buildStatItem(
-                '${_userStats!.challengesCompleted}',
-                'Défis',
-                Icons.done_all,
-                Colors.green,
-              ),
-              _buildStatItem(
-                '${_userStats!.totalStars}',
-                'Étoiles',
-                Icons.star,
-                Colors.yellow.shade700,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String value, String label, IconData icon, Color color) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabBar() {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.black12,
         borderRadius: BorderRadius.circular(25),
       ),
       child: TabBar(
         controller: _tabController,
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
-          ),
+          color: Colors.white,
         ),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey,
+        labelColor: Colors.red,
+        unselectedLabelColor: Colors.white,
         tabs: const [
           Tab(text: 'Top 10'),
-          Tab(text: 'Mon historique'),
+          Tab(text: 'Moi'),
+          Tab(text: 'Stats'),
         ],
       ),
     );
   }
 
-  Widget _buildTopLeaderboard() {
+  Widget _buildLeaderboardList() {
     if (_topPlayers.isEmpty) {
-      return const Center(
-        child: Text(
-          'Aucun joueur pour l\'instant',
-          style: TextStyle(color: Colors.white, fontSize: 16),
-        ),
-      );
+      return _buildEmptyState("Aucun score", "Sois le premier à jouer !");
     }
 
     return ListView.builder(
@@ -283,86 +160,75 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
       itemBuilder: (context, index) {
         final player = _topPlayers[index];
         final rank = index + 1;
+        final isMe = player.userId == Provider.of<AppUser?>(context)?.uid;
+        final isTop3 = rank <= 3;
 
         return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
+          margin: const EdgeInsets.only(bottom: 15),
+          padding: EdgeInsets.all(isTop3 ? 20 : 15),
           decoration: BoxDecoration(
-            color: rank <= 3
-                ? Colors.amber.withOpacity(0.2)
-                : Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(15),
-            border: rank <= 3
-                ? Border.all(color: Colors.amber, width: 2)
-                : null,
+            color: isMe ? Colors.white : Colors.white.withOpacity(isTop3 ? 0.3 : 0.15),
+            borderRadius: BorderRadius.circular(25),
+            border: isTop3
+                ? Border.all(color: _getRankColor(rank), width: 3)
+                : (isMe ? Border.all(color: Colors.white, width: 2) : null),
+            boxShadow: isTop3 ? [
+              BoxShadow(
+                color: _getRankColor(rank).withOpacity(0.3),
+                blurRadius: 15,
+                spreadRadius: 2,
+              )
+            ] : null,
           ),
           child: Row(
             children: [
-              // Rang
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  gradient: rank == 1
-                      ? const LinearGradient(colors: [Colors.yellow, Colors.amber])
-                      : rank == 2
-                      ? const LinearGradient(colors: [Colors.grey, Colors.blueGrey])
-                      : rank == 3
-                      ? const LinearGradient(colors: [Colors.orange, Colors.deepOrange])
-                      : const LinearGradient(colors: [Colors.blue, Colors.lightBlue]),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : '$rank',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: rank <= 3 ? 20 : 16,
-                      color: rank > 3 ? Colors.white : null,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Info joueur
+              _buildRankBadge(rank),
+              const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       player.userName,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        color: isMe ? Colors.red : Colors.white,
                         fontWeight: FontWeight.bold,
+                        fontSize: isTop3 ? 20 : 16,
+                        fontFamily: 'ComicNeue',
                       ),
                     ),
-                    Text(
-                      '🔥 Série: ${player.currentStreak} jours',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    if (isTop3) Text(
+                      'Elite MathKid 🌟',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        fontFamily: 'ComicNeue',
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              // Score
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     '${player.totalScore} pts',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      color: isMe ? Colors.red : Colors.white,
                       fontWeight: FontWeight.bold,
-                      color: Colors.orange,
+                      fontSize: isTop3 ? 22 : 16,
+                      fontFamily: 'ComicNeue',
                     ),
                   ),
                   Row(
                     children: [
-                      const Icon(Icons.star, color: Colors.yellow, size: 16),
+                      const Icon(Icons.star_rounded, color: Colors.amber, size: 18),
                       Text(
                         '${player.totalStars}',
-                        style: const TextStyle(fontSize: 12),
+                        style: TextStyle(
+                          color: isMe ? Colors.red : Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -375,13 +241,132 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> with SingleTicker
     );
   }
 
-  Widget _buildUserHistory() {
-    // TODO: Implémenter l'historique de l'utilisateur
-    return const Center(
-      child: Text(
-        'Historique à venir',
-        style: TextStyle(color: Colors.white, fontSize: 16),
+  Widget _buildRankBadge(int rank) {
+    if (rank == 1) return const Text('🥇', style: TextStyle(fontSize: 35));
+    if (rank == 2) return const Text('🥈', style: TextStyle(fontSize: 35));
+    if (rank == 3) return const Text('🥉', style: TextStyle(fontSize: 35));
+
+    return Container(
+      width: 35,
+      height: 35,
+      decoration: const BoxDecoration(
+        color: Colors.white24,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: Text(
+          '$rank',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontFamily: 'ComicNeue',
+          ),
+        ),
       ),
     );
   }
+
+  Color _getRankColor(int rank) {
+    if (rank == 1) return Colors.amber;
+    if (rank == 2) return const Color(0xFFC0C0C0); // Argent
+    if (rank == 3) return const Color(0xFFCD7F32); // Bronze
+    return Colors.transparent;
+  }
+
+  Widget _buildUserHistory() {
+    return _buildEmptyState("Mon Historique", "Tes derniers défis apparaîtront ici bientôt !");
+  }
+
+  Widget _buildStatsTab() {
+    if (_userStats == null) return _buildEmptyState("Pas de statistiques", "Relève ton premier défi pour voir tes stats !");
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(25),
+      child: Column(
+        children: [
+          _buildStatCard("Série Actuelle", "${_userStats!.currentStreak} jours", Icons.local_fire_department, Colors.orange),
+          const SizedBox(height: 15),
+          _buildStatCard("Total Étoiles", "${_userStats!.totalStars} ⭐", Icons.star, Colors.amber),
+          const SizedBox(height: 15),
+          _buildStatCard("Meilleure Série", "${_userStats!.bestStreak} jours", Icons.emoji_events, Colors.blue),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 30),
+          ),
+          const SizedBox(width: 20),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(color: Colors.grey, fontSize: 14, fontFamily: 'ComicNeue')),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black87, fontFamily: 'ComicNeue')),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String title, String sub) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.leaderboard_outlined, size: 80, color: Colors.white30),
+          const SizedBox(height: 10),
+          Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'ComicNeue')),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Text(sub, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontFamily: 'ComicNeue')),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MathBackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white.withOpacity(0.08);
+    final random = Random(42);
+    final mathSymbols = ['+', '-', '×', '÷', '=', '√', 'π'];
+
+    for (int i = 0; i < 25; i++) {
+      final x = random.nextDouble() * size.width;
+      final y = random.nextDouble() * size.height;
+      final symbolSize = random.nextDouble() * 20 + 10;
+
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: mathSymbols[random.nextInt(mathSymbols.length)],
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.1),
+            fontSize: symbolSize,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      );
+      textPainter.layout();
+      textPainter.paint(canvas, Offset(x, y));
+    }
+  }
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

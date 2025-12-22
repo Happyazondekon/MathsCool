@@ -6,6 +6,7 @@ import '../models/user_model.dart';
 import '../models/achievement_model.dart';
 import '../services/achievement_service.dart';
 import '../services/lives_service.dart';
+import '../services/sound_service.dart';
 import '../utils/colors.dart';
 
 class AchievementsScreen extends StatefulWidget {
@@ -60,6 +61,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       final livesReward = await achievementService.claimAchievement(user.uid, achievement.id);
       await livesService.addLivesFromAchievement(user.uid, livesReward);
 
+      // ✅ AJOUTER LE SON
+      await SoundService().playAchievement(); // 🎵 Son badge
       _confettiController.play();
       _showSuccessDialog(achievement, livesReward);
 

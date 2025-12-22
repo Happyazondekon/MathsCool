@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mathscool/services/chatbot_service.dart';
+import 'package:mathscool/services/sound_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
@@ -25,6 +26,9 @@ void main() async {
 
   // Initialiser Firebase
   await Firebase.initializeApp();
+
+  // ✅ Initialiser le service audio
+  await SoundService().initialize();
 
   // Initialiser le service de notifications
   final notificationService = NotificationService();
@@ -58,13 +62,70 @@ void main() async {
   );
 }
 
-class MathsCoolApp extends StatelessWidget {
-  final bool showUpdateScreen; // Variable pour savoir si on doit bloquer
+// ✅ MODIFICATION : StatefulWidget pour gérer le cycle de vie
+class MathsCoolApp extends StatefulWidget {
+  final bool showUpdateScreen;
 
   const MathsCoolApp({
     super.key,
-    this.showUpdateScreen = false, // Par défaut à false
+    this.showUpdateScreen = false,
   });
+
+  @override
+  State<MathsCoolApp> createState() => _MathsCoolAppState();
+}
+
+// ✅ NOUVEAU : State avec WidgetsBindingObserver
+class _MathsCoolAppState extends State<MathsCoolApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    // ✅ Enregistrer l'observateur du cycle de vie
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // ✅ Nettoyer l'observateur
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // ✅ NOUVEAU : Méthode appelée quand l'état de l'app change
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    switch (state) {
+      case AppLifecycleState.resumed:
+      // 🟢 App revient au premier plan
+        print('📱 App au premier plan');
+        SoundService().resumeAll();
+        break;
+
+      case AppLifecycleState.inactive:
+      // 🟡 App en transition (ex: notification)
+        print('📱 App inactive');
+        break;
+
+      case AppLifecycleState.paused:
+      // 🔴 App en arrière-plan
+        print('📱 App en arrière-plan');
+        SoundService().pauseAll();
+        break;
+
+      case AppLifecycleState.detached:
+      // ⚫ App en cours de fermeture
+        print('📱 App se ferme');
+        SoundService().dispose();
+        break;
+
+      case AppLifecycleState.hidden:
+      // 🟤 App cachée (nouveau dans Flutter 3.13+)
+        print('📱 App cachée');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +137,9 @@ class MathsCoolApp extends StatelessWidget {
         fontFamily: 'ComicNeue',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      // LOGIQUE : Si update requise -> Écran de blocage, Sinon -> Flux normal (Auth)
-      home: showUpdateScreen ? const UpdateRequiredScreen() : const AuthWrapper(),
+      home: widget.showUpdateScreen
+          ? const UpdateRequiredScreen()
+          : const AuthWrapper(),
       routes: {
         '/home': (context) => const HomeScreen(),
       },
@@ -157,13 +219,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final userName = user.displayName ?? 'MathKid';
 
-      // 1. Restaurer les notifications personnalisées existantes (si l'utilisateur en avait configuré)
+      // 1. Restaurer les notifications personnalisées existantes
       await notificationService.restoreCustomNotifications(userName);
 
-      // 2. Programmer le rappel quotidien pour les achievements (17h30 par défaut)
+      // 2. Programmer le rappel quotidien pour les achievements
       await notificationService.scheduleDailyAchievementReminder();
 
-      print('Notifications (Rappels & Achievements) programmées pour $userName');
+      print('Notifications programmées pour $userName');
     } catch (e) {
       print('Erreur lors de la programmation des notifications: $e');
     }

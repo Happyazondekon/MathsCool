@@ -2,9 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/lives_model.dart';
 import 'notification_service.dart';
+import 'sound_service.dart'; // ✅ IMPORT AJOUTÉ
 
 class LivesService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final SoundService _soundService = SoundService(); // ✅ INSTANCE AJOUTÉE
 
   LivesData? _livesData;
   LivesData? get livesData => _livesData;
@@ -35,7 +37,13 @@ class LivesService extends ChangeNotifier {
         // 2. Calculer la régénération (si le temps a passé hors ligne)
         _livesData = rawData.regenerate();
 
-        // 3. Si des vies ont été régénérées (et qu'on n'est pas en illimité), on met à jour la BDD
+        // ✅ SON : Si des vies ont été régénérées automatiquement
+        if (_livesData!.currentLives > rawData.currentLives) {
+          // Son doux de recharge (ne joue que si on a gagné des vies)
+          await _soundService.playNotification();
+        }
+
+        // 3. Si des vies ont été régénérées, on met à jour la BDD
         if (_livesData!.currentLives != rawData.currentLives) {
           _saveLives(userId, _livesData!);
         }
@@ -65,12 +73,15 @@ class LivesService extends ChangeNotifier {
 
     // Ajouter les vies directement (sans limite de max)
     _livesData = _livesData!.copyWith(
-      currentLives: (_livesData!.currentLives + lives).clamp(0, LivesData.MAX_LIVES + 10), // Peut dépasser un peu le max
+      currentLives: (_livesData!.currentLives + lives).clamp(0, LivesData.MAX_LIVES + 10),
       lastLossTime: DateTime.now(),
     );
 
     await _saveLives(userId, _livesData!);
     notifyListeners();
+
+    // ✅ SON : Recharge de vies depuis un achievement
+    await _soundService.playLifeRestore();
 
     // Si on arrive au max, annuler les notifications
     if (_livesData!.currentLives >= LivesData.MAX_LIVES) {
@@ -100,7 +111,7 @@ class LivesService extends ChangeNotifier {
     // Si la semaine illimitée est active, on ne perd rien !
     if (_livesData!.isUnlimited) {
       if (kDebugMode) print('Vies illimitées actives ! Aucune perte.');
-      return true;
+      return true; // Pas de son ici, car pas de perte réelle
     }
 
     // --- 2. LOGIQUE STANDARD ---
@@ -108,7 +119,11 @@ class LivesService extends ChangeNotifier {
     _livesData = _livesData!.regenerate();
 
     final available = _livesData!.availableLives;
-    if (available <= 0) return false; // Bloque le jeu si 0 vies
+    if (available <= 0) {
+      // ✅ SON : Plus de vies disponibles (son d'échec/alerte)
+      await _soundService.playLifeLost();
+      return false; // Bloque le jeu si 0 vies
+    }
 
     // Retirer une vie et reset du timer
     _livesData = _livesData!.copyWith(
@@ -119,6 +134,9 @@ class LivesService extends ChangeNotifier {
     // Sauvegarder
     await _saveLives(userId, _livesData!);
     notifyListeners();
+
+    // ✅ SON : Perte d'une vie (mais il en reste)
+    await _soundService.playLifeLost();
 
     // --- 3. NOTIFICATION ---
     // Programmer la notification de recharge si besoin
@@ -155,6 +173,9 @@ class LivesService extends ChangeNotifier {
     await _saveLives(userId, _livesData!);
     notifyListeners();
 
+    // ✅ SON : Recharge complète (achat boutique)
+    await _soundService.playLifeRestore();
+
     // Annuler la notification car on est plein
     await NotificationService().cancelLivesRefilledNotification();
   }
@@ -167,13 +188,16 @@ class LivesService extends ChangeNotifier {
     final expiryDate = DateTime.now().add(const Duration(days: 7));
 
     _livesData = _livesData!.copyWith(
-      currentLives: LivesData.MAX_LIVES, // On remplit aussi les cœurs pour l'esthétique
-      unlimitedUntil: expiryDate,        // On définit la date de fin
+      currentLives: LivesData.MAX_LIVES,
+      unlimitedUntil: expiryDate,
       totalLivesBought: _livesData!.totalLivesBought + 1,
     );
 
     await _saveLives(userId, _livesData!);
     notifyListeners();
+
+    // ✅ SON : Activation mode illimité (son de victoire/puissance)
+    await _soundService.playVictory();
 
     // On annule les notifs de rappel puisqu'on est tranquille pour une semaine
     await NotificationService().cancelLivesRefilledNotification();
@@ -182,7 +206,7 @@ class LivesService extends ChangeNotifier {
   // Vérifier si l'utilisateur peut jouer
   Future<bool> canPlay(String userId) async {
     if (_livesData == null) await loadLives(userId);
-    return _livesData!.canPlay; // Le modèle gère déjà le cas illimité -> canPlay renverra true
+    return _livesData!.canPlay;
   }
 
   // Formatter le temps restant pour l'affichage UI

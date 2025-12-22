@@ -28,6 +28,7 @@ import 'package:mathscool/widgets/chatbot_floating_button.dart';
 import 'package:mathscool/widgets/connection_status_badge.dart';
 
 import ' chatbot_screen.dart';
+import '../services/sound_service.dart';
 
 class ExerciseScreen extends StatefulWidget {
   final String level;
@@ -162,9 +163,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final exercise = _exercises[_currentIndex];
     final isCorrect = selectedIndex == exercise.correctAnswer;
 
+    // ✅ AJOUTER LE SON
+    final soundService = SoundService();
+
     final livesService = Provider.of<LivesService>(context, listen: false);
 
     if (isCorrect) {
+      await soundService.playCorrectAnswer();
       setState(() {
         _score++;
         _feedbackMessage = isCollege
@@ -173,6 +178,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         _showFeedback = true;
       });
     } else {
+      await soundService.playWrongAnswer();
       bool stillHasLives = await livesService.loseLife(user.uid);
 
       if (!stillHasLives) {

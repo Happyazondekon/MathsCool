@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/screens/theme_selection.dart';
 import 'package:mathscool/utils/colors.dart';
 
+import '../services/sound_service.dart';
 import '../widgets/theme_selection.dart';
 
 class LevelSelectionScreen extends StatelessWidget {
@@ -197,6 +198,8 @@ class LevelSelectionScreen extends StatelessWidget {
       },
       child: GestureDetector(
         onTap: () {
+          // ✅ AJOUTER ICI
+          SoundService().playButtonClick();
           Navigator.push(
             context,
             MaterialPageRoute(

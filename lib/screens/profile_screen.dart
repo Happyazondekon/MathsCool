@@ -10,6 +10,7 @@ import 'package:mathscool/screens/home_screen.dart';
 import 'package:mathscool/screens/notification_settings_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
 import 'package:mathscool/screens/leaderboard_screen.dart';
+import 'package:mathscool/screens/sound_settings_screen.dart';
 import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
@@ -912,10 +913,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'route': (BuildContext context) => const HelpScreen(),
     },
     {
-      'title': 'Mes Rappels',
-      'icon': Icons.notifications_active_outlined,
-      'color': Colors.orange,
-      'route': (BuildContext context) => NotificationSettingsScreen(userName: ''),
+      'title': 'Sons & Musique',
+      'icon': Icons.volume_up_rounded,
+      'color': Colors.deepPurple,
+      'route': (BuildContext context) => const SoundSettingsScreen(),
     },
     {
       'title': 'Retour Accueil',

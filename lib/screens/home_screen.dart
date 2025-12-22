@@ -19,6 +19,7 @@ import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/widgets/lives_display.dart';
 
 import '../services/achievement_service.dart';
+import '../services/sound_service.dart';
 import '../widgets/chatbot_floating_button.dart';
 import '../widgets/daily_challenge_button.dart';
 import 'achievements_screen.dart';
@@ -64,6 +65,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         Provider.of<LivesService>(context, listen: false).loadLives(user.uid);
       }
     });
+    // ✅ LANCER LA MUSIQUE DE FOND
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SoundService().playBackgroundMusic();
+    });
   }
 
   Future<void> _loadSavedAvatar() async {
@@ -79,6 +84,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    // ✅ ARRÊTER LA MUSIQUE
+    SoundService().stopBackgroundMusic();
     _backgroundAnimationController.dispose();
     super.dispose();
   }

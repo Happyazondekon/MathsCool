@@ -1,7 +1,7 @@
 name: mathscool
 description: Une application éducative pour les enfants
 
-version: 2.2.3+12
+version: 2.2.4+13
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
@@ -34,6 +34,7 @@ dependencies:
   package_info_plus: ^9.0.0
   http: ^1.1.0
   connectivity_plus: ^6.1.1
+  audioplayers: ^5.2.1
 
 
 
@@ -49,6 +50,7 @@ flutter:
     - assets/animations/
     - assets/avatars/
     - assets/images/math_pattern.png
+    - assets/sounds/
   fonts:
     - family: ComicNeue
       fonts:

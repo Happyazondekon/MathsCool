@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:confetti/confetti.dart';
 import '../models/daily_challenge_model.dart';
+import '../services/sound_service.dart';
 import 'leaderboard_screen.dart';
 import 'dart:math';
 
@@ -39,6 +40,17 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
     if (widget.result.stars >= 2) {
       Future.delayed(const Duration(milliseconds: 800), () => _confettiController.play());
     }
+    // ✅ JOUER LE SON DE VICTOIRE
+    if (widget.result.stars >= 2) {
+      SoundService().playVictory();
+      Future.delayed(const Duration(milliseconds: 800), () {
+        _confettiController.play();
+      });
+    }
+
+    // ✅ JOUER LE SON D'ÉTOILES
+    SoundService().playStars(widget.result.stars);
+
   }
 
   @override

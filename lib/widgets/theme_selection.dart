@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/screens/exercise_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 
+import '../services/sound_service.dart';
+
 class ThemeSelectionScreen extends StatelessWidget {
   final String level;
 
@@ -12,6 +14,8 @@ class ThemeSelectionScreen extends StatelessWidget {
   // --- LOGIQUE DE NAVIGATION ---
 
   void _startExercises(BuildContext context, String theme, {required bool isInfinite}) {
+    // ✅ AJOUTER ICI
+    SoundService().playStartChallenge();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -434,6 +438,8 @@ class ThemeSelectionScreen extends StatelessWidget {
         onTap: isDisabled
             ? null
             : () {
+          // ✅ AJOUTER ICI
+          SoundService().playButtonClick();
           showModalBottomSheet(
             context: context,
             backgroundColor: Colors.transparent,

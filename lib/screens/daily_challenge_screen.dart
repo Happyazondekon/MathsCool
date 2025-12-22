@@ -8,6 +8,7 @@ import '../models/exercise_model.dart';
 import '../services/daily_challenge_service.dart';
 import '../services/hybrid_exercise_service.dart';
 import '../services/lives_service.dart';
+import '../services/sound_service.dart';
 import '../widgets/chatbot_floating_button.dart';
 import 'daily_challenge_result_screen.dart';
 import 'store_screen.dart';
@@ -159,17 +160,22 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
     final exercise = _exercises[_currentIndex];
     final isCorrect = selectedIndex == exercise.correctAnswer;
+    // ✅ AJOUTER LE SON
+    final soundService = SoundService();
+
     final livesService = Provider.of<LivesService>(context, listen: false);
 
     setState(() => _isSaving = true);
 
     if (isCorrect) {
+      await soundService.playCorrectAnswer();
       setState(() {
         _score++;
         _feedbackMessage = "Bravo ! 🥳 C'est correct 🎉";
         _showFeedback = true;
       });
     } else {
+      await soundService.playWrongAnswer();
       // Perte de vie
       bool stillHasLives = await livesService.loseLife(user.uid);
 

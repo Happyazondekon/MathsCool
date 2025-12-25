@@ -11,10 +11,9 @@ import 'package:mathscool/models/user_model.dart';
 import 'package:mathscool/screens/level_selection.dart';
 import 'package:mathscool/screens/profile_screen.dart';
 import 'package:mathscool/screens/notification_settings_screen.dart';
-import 'package:mathscool/screens/store_screen.dart'; // Import Boutique
+import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 
-// Nouveaux imports pour le système de vies
 import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/widgets/lives_display.dart';
 
@@ -42,7 +41,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
 
-    // Animation pour un effet subtil sur le fond
     _backgroundAnimationController = AnimationController(
       duration: const Duration(seconds: 10),
       vsync: this,
@@ -55,17 +53,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
     );
 
-    // Chargement de l'avatar depuis les SharedPreferences
     _loadSavedAvatar();
 
-    // --- NOUVEAU : Chargement des vies au démarrage ---
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = Provider.of<AppUser?>(context, listen: false);
       if (user != null) {
         Provider.of<LivesService>(context, listen: false).loadLives(user.uid);
       }
     });
-    // ✅ LANCER LA MUSIQUE DE FOND
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       SoundService().playBackgroundMusic();
     });
@@ -84,7 +80,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void dispose() {
-    // ✅ ARRÊTER LA MUSIQUE
     SoundService().stopBackgroundMusic();
     _backgroundAnimationController.dispose();
     super.dispose();
@@ -96,9 +91,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final authService = Provider.of<AuthService>(context);
     final currentUser = authService.currentUser;
 
-    // Récupération du nom d'utilisateur
     final displayName = currentUser?.displayName ?? 'MathKid';
-    // Récupération de l'URL de la photo utilisateur
     final photoURL = currentUser?.photoURL;
 
     return Scaffold(
@@ -114,10 +107,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Color(0xDBA30E0E), // Bleu nuit de Noël (Rouge foncé ici selon ton code)
+                      Color(0xDBA30E0E),
                       Color(0xDBD12C2C),
                       Color(0xDBD15959),
-                      Color(0xFFE8F4F8), // Blanc neigeux
+                      Color(0xFFE8F4F8),
                     ],
                     stops: [0.0, 0.3, 0.6, 1.0],
                   ),
@@ -132,10 +125,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
           // Éléments décoratifs de Noël
           if (size.height > 600) ...[
-            // Flocons de neige animés
             ...List.generate(8, (index) => _buildSnowflake(size, index)),
 
-            // Étoiles scintillantes
             Positioned(
               top: 80,
               left: 40,
@@ -152,7 +143,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: _buildTwinklingStar(20, delay: 1000),
             ),
 
-            // Cadeaux décoratifs
             Positioned(
               bottom: 100,
               left: -10,
@@ -211,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       TextSpan(
                                         text: 'Cool',
                                         style: TextStyle(
-                                          color: const Color(0xFFFFD700), // Or
+                                          color: const Color(0xFFFFD700),
                                           fontStyle: FontStyle.italic,
                                           shadows: [
                                             Shadow(
@@ -226,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                   ),
                                 ),
                               ),
-                              // Petit bonnet de Noël sur le logo
                               const Positioned(
                                 top: -15,
                                 right: -5,
@@ -240,7 +229,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                           Row(
                             children: [
-                              // J'ai retiré LivesDisplay d'ici
                               // Bouton Achievements avec badge
                               Consumer<AchievementService>(
                                 builder: (context, achievementService, _) {
@@ -311,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 },
                               ),
 
-                              // Bouton notifications avec thème de Noël
+                              // Bouton notifications
                               GestureDetector(
                                 onTap: () => Navigator.push(
                                   context,
@@ -348,24 +336,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 ),
                               ),
 
-                              // Avatar avec bordure festive
+                              // Avatar
                               GestureDetector(
                                 onTap: () async {
-                                  // 1. On attend le retour de la page profil
                                   await Navigator.push(
                                     context,
                                     MaterialPageRoute(builder: (context) => const ProfileScreen()),
                                   );
 
-                                  // 2. Une fois revenu, on exécute ces actions :
                                   if (mounted) {
-                                    // Recharger l'avatar (votre logique existante)
                                     await _loadSavedAvatar();
-
-                                    // IMPORTANT : Recharger les infos utilisateur Firebase pour avoir le nouveau nom
                                     await authService.reloadUser();
-
-                                    // IMPORTANT : Forcer la reconstruction de l'écran pour afficher le nouveau texte
                                     setState(() {});
                                   }
                                 },
@@ -421,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.elasticOut,
                       child: Container(
-                        margin: const EdgeInsets.only(top: 5, bottom: 5), // Réduit le bottom margin
+                        margin: const EdgeInsets.only(top: 5, bottom: 5),
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -451,70 +432,64 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
 
-                    // --- NOUVEAU EMPLACEMENT DES VIES ---
+                    // Affichage des vies
                     const Padding(
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       child: LivesDisplay(showTimer: true),
                     ),
+
                     const SizedBox(height: 10),
 
-                    // Contenu principal
-                    // Contenu principal
-                    SizedBox(
-                      height: size.height * 0.6,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          // Lottie Animation
-                          Positioned(
-                            top: size.height * 0.02,
-                            child: Lottie.asset(
-                              'assets/animations/home.json',
-                              width: size.width * 0.8,
-                              height: size.height * 0.4,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
+                    // Contenu principal - RÉORGANISÉ
+                    Column(
+                      children: [
+                        // Animation Lottie
+                        Lottie.asset(
+                          'assets/animations/home.json',
+                          width: size.width * 0.8,
+                          height: size.height * 0.35,
+                          fit: BoxFit.contain,
+                        ),
 
-                          // Bouton principal (toggle)
-                          Positioned(
-                            bottom: size.height * 0.14,
-                            child: ChristmasToggleButton(size: size),
-                          ),
+                        const SizedBox(height: 20),
 
-                          // ✅ Bouton Défi du jour EN DESSOUS du toggle
-                          Positioned(
-                            bottom: size.height * 0.05,
-                            left: 20,
-                            right: 20,
-                            child: const DailyChallengeButton(),
-                          ),
-                        ],
-                      ),
+                        // Bouton principal "Déballer les maths"
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: ChristmasToggleButton(size: size),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Bouton Défi du jour
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: DailyChallengeButton(),
+                        ),
+
+                        SizedBox(height: size.height * 0.05),
+                      ],
                     ),
-
-
-                    // Espacement en bas pour le scroll
-                    SizedBox(height: size.height * 0.05),
                   ],
                 ),
               ),
             ),
-          ),Positioned(
+          ),
+
+          // Chatbot flottant
+          const Positioned(
             bottom: 20,
             right: 20,
-            child: const ChatbotFloatingButton(),
+            child: ChatbotFloatingButton(),
           ),
         ],
       ),
     );
   }
 
-  // Flocon de neige animé
   Widget _buildSnowflake(Size screenSize, int index) {
     final random = Random(index);
     final left = random.nextDouble() * screenSize.width;
-    // final animationDelay = random.nextInt(3000); // Non utilisé mais gardé pour ref
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: -50.0, end: screenSize.height + 50),
@@ -540,7 +515,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  // Étoile scintillante
   Widget _buildTwinklingStar(double size, {required int delay}) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.3, end: 1.0),
@@ -564,7 +538,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  // Cadeau décoratif
   Widget _buildGiftBox(double size, Color color) {
     return Container(
       width: size,
@@ -582,7 +555,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       ),
       child: Stack(
         children: [
-          // Ruban vertical
           Center(
             child: Container(
               width: size * 0.2,
@@ -590,7 +562,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               color: const Color(0xFFFFD700),
             ),
           ),
-          // Ruban horizontal
           Center(
             child: Container(
               width: size,
@@ -598,7 +569,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               color: const Color(0xDBD15959),
             ),
           ),
-          // Nœud
           Positioned(
             top: size * 0.3,
             left: size * 0.3,
@@ -616,7 +586,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  // Fonction pour déterminer quelle image de profil afficher
   ImageProvider _getProfileImage(String? photoURL) {
     if (_avatarPath != null) {
       if (_avatarPath!.startsWith('base64:')) {
@@ -700,7 +669,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
   }
 
   void _toggleButton() async {
-    // --- NOUVEAU : Vérification des vies avant l'animation ---
     final user = Provider.of<AppUser?>(context, listen: false);
     final livesService = Provider.of<LivesService>(context, listen: false);
 
@@ -708,11 +676,10 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
       final canPlay = await livesService.canPlay(user.uid);
       if (!canPlay) {
         _showNoLivesDialog();
-        return; // Arrête tout si pas de vies
+        return;
       }
     }
 
-    // Si on a des vies, on continue l'animation normale
     if (_isClosed) {
       _animationController.reverse();
     } else {
@@ -721,7 +688,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
           context,
           MaterialPageRoute(builder: (context) => const LevelSelectionScreen()),
         );
-        // Réinitialiser après la navigation
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
             _animationController.reverse();
@@ -734,7 +700,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
     });
   }
 
-  // --- NOUVEAU : Dialogue "Plus de vies" ---
   void _showNoLivesDialog() {
     showDialog(
       context: context,
@@ -807,14 +772,14 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
               onTap: _toggleButton,
               borderRadius: BorderRadius.circular(40),
               child: Container(
-                width: widget.size.width * 0.75,
+                width: double.infinity,
                 height: 75,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFFC62828), // Rouge foncé
-                      Color(0xFFD32F2F), // Rouge moyen
-                      Color(0xFF2E7D32), // Vert sapin
+                      Color(0xFFC62828),
+                      Color(0xFFD32F2F),
+                      Color(0xFF2E7D32),
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -841,7 +806,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
                 ),
                 child: Stack(
                   children: [
-                    // Effet de brillance qui disparaît
                     Positioned(
                       top: -10 * _scaleAnimation.value,
                       left: -10 * _scaleAnimation.value,
@@ -858,7 +822,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
                       ),
                     ),
 
-                    // Contenu principal
                     Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -924,7 +887,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
                       ),
                     ),
 
-                    // Bordure lumineuse
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
@@ -961,7 +923,6 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
     const seedValue = 42;
     final random = Random(seedValue);
 
-    // Symboles mathématiques avec couleurs de Noël
     final colors = [
       Colors.red.withOpacity(0.1),
       Colors.green.withOpacity(0.1),
@@ -977,7 +938,6 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
       final radius = (random.nextDouble() * 20 + 10) * (0.8 + 0.2 * sin(animationValue * 0.5));
 
       if (i % 4 == 0) {
-        // Dessiner des étoiles
         _drawStar(canvas, Offset(x, y), radius, paint);
       } else if (i % 3 == 0) {
         canvas.drawCircle(Offset(x, y), radius, paint);
@@ -1000,7 +960,6 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
     }
   }
 
-  // Dessiner une étoile
   void _drawStar(Canvas canvas, Offset center, double radius, Paint paint) {
     final path = Path();
     const points = 5;

@@ -5,6 +5,8 @@ import 'package:lottie/lottie.dart';
 import '../models/user_model.dart';
 import '../models/daily_challenge_model.dart';
 import '../services/daily_challenge_service.dart';
+import '../services/username_service.dart'; // ✅ AJOUT
+import '../widgets/username_dialog.dart'; // ✅ AJOUT
 import 'dart:math';
 
 class LeaderboardScreen extends StatefulWidget {
@@ -22,6 +24,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   LeaderboardEntry? _userStats;
   List<LeaderboardEntry> _topPlayers = [];
   bool _isLoading = true;
+  String _username = 'MathKid'; // ✅ AJOUT
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     )..repeat(reverse: true);
 
     _loadLeaderboard();
+    _checkAndPromptUsername(); // ✅ AJOUT
   }
 
   @override
@@ -46,6 +50,334 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     _animationController.dispose();
     _bounceController.dispose();
     super.dispose();
+  }
+
+  // ✅ NOUVELLE MÉTHODE : Vérifier et afficher le dialog si username = MathKid
+  Future<void> _checkAndPromptUsername() async {
+    final user = Provider.of<AppUser?>(context, listen: false);
+    if (user == null) return;
+
+    final usernameService = Provider.of<UsernameService>(context, listen: false);
+    final username = await usernameService.getUsername(user.uid);
+
+    if (mounted) {
+      setState(() {
+        _username = username;
+      });
+
+      // Si c'est encore MathKid, afficher le dialog après 1 seconde
+      if (username == 'MathKid') {
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          _showUsernamePrompt();
+        }
+      }
+    }
+  }
+
+  // ✅ NOUVELLE MÉTHODE : Afficher le dialog de choix de username
+  void _showUsernamePrompt() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => WillPopScope(
+        onWillPop: () async => false,
+        child: ScaleTransition(
+          scale: CurvedAnimation(
+            parent: AnimationController(
+              vsync: this,
+              duration: const Duration(milliseconds: 400),
+            )..forward(),
+            curve: Curves.easeOutBack,
+          ),
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.purple.shade300,
+                    Colors.blue.shade500,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.purple.withOpacity(0.5),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  // Motifs décoratifs
+                  Positioned(
+                    top: -30,
+                    right: -30,
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.15),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: -40,
+                    left: -40,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                  ),
+
+                  // Contenu principal
+                  Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Icône avec animation
+                        TweenAnimationBuilder(
+                          tween: Tween<double>(begin: 0, end: 1),
+                          duration: const Duration(milliseconds: 600),
+                          curve: Curves.elasticOut,
+                          builder: (context, double value, child) {
+                            return Transform.scale(
+                              scale: value,
+                              child: child,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 15,
+                                  spreadRadius: 3,
+                                ),
+                              ],
+                            ),
+                            child: const Text(
+                              '🏆',
+                              style: TextStyle(fontSize: 50),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Titre
+                        const Text(
+                          'Bienvenue Champion !',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontFamily: 'ComicNeue',
+                            shadows: [
+                              Shadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        const Text(
+                          'Pour apparaître dans le classement',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white70,
+                            fontFamily: 'ComicNeue',
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Message dans un container
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Choisis ton nom d\'utilisateur unique !',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'ComicNeue',
+                                  color: Colors.purple.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.blue.shade600,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Ton nom sera visible par tous les joueurs',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                        fontFamily: 'ComicNeue',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Boutons
+                        Row(
+                          children: [
+                            // Bouton Plus tard
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () => Navigator.of(context).pop(),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.5),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Plus tard',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'ComicNeue',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 12),
+
+                            // Bouton Choisir mon nom
+                            Expanded(
+                              flex: 2,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  Navigator.of(context).pop();
+                                  await _showUsernameDialog();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.edit_rounded,
+                                          color: Colors.purple.shade700,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Choisir mon nom',
+                                          style: TextStyle(
+                                            color: Colors.purple.shade700,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            fontFamily: 'ComicNeue',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ✅ NOUVELLE MÉTHODE : Afficher le dialog de modification de username
+  Future<void> _showUsernameDialog() async {
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => UsernameDialog(
+        currentUsername: _username,
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _username = result;
+      });
+
+      // Recharger le leaderboard pour voir le nouveau nom
+      _loadLeaderboard();
+    }
   }
 
   Future<void> _loadLeaderboard() async {
@@ -72,6 +404,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<AppUser?>(context); // ✅ AJOUT pour StreamBuilder
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -97,7 +431,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             SafeArea(
               child: Column(
                 children: [
-                  _buildHeader(),
+                  _buildHeader(user), // ✅ MODIFIÉ
                   const SizedBox(height: 10),
                   if (!_isLoading && _topPlayers.length >= 3) _buildPodiumPreview(),
                   const SizedBox(height: 15),
@@ -165,7 +499,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
     );
   }
 
-  Widget _buildHeader() {
+  // ✅ MODIFIÉ : Header avec bouton d'édition du username
+  Widget _buildHeader(AppUser? user) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -201,23 +536,67 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
               constraints: const BoxConstraints(),
             ),
           ),
-          const Expanded(
-            child: Text(
-              '🏆 Classements ',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
-                fontFamily: 'ComicNeue',
-                shadows: [
-                  Shadow(
-                    color: Colors.black38,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
+          Expanded(
+            child: Column(
+              children: [
+                const Text(
+                  '🏆 Classements',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    fontFamily: 'ComicNeue',
+                    shadows: [
+                      Shadow(
+                        color: Colors.black38,
+                        blurRadius: 6,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                // ✅ AJOUT : Affichage du username avec bouton d'édition
+                if (user != null)
+                  StreamBuilder<String>(
+                    stream: Provider.of<UsernameService>(context, listen: false).watchUsername(user.uid),
+                    builder: (context, snapshot) {
+                      final displayName = snapshot.data ?? _username;
+
+                      return GestureDetector(
+                        onTap: _showUsernameDialog,
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                displayName,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'ComicNeue',
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.edit_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 48),

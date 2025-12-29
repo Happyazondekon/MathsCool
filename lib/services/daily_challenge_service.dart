@@ -2,6 +2,7 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:mathscool/services/username_service.dart';
 import '../models/daily_challenge_model.dart';
 
 class DailyChallengeService extends ChangeNotifier {
@@ -177,11 +178,20 @@ class DailyChallengeService extends ChangeNotifier {
       await _firestore.runTransaction((transaction) async {
         final doc = await transaction.get(leaderboardRef);
 
+        // Récupérer le vrai username depuis UsernameService
+        String userName = 'MathKid';
+        try {
+          final usernameService = UsernameService();
+          userName = await usernameService.getUsername(result.userId);
+        } catch (e) {
+          print('⚠️ Erreur récupération username: $e');
+        }
+
         if (!doc.exists) {
-          // Créer une nouvelle entrée
+          // Créer une nouvelle entrée avec le vrai username
           final newEntry = LeaderboardEntry(
             userId: result.userId,
-            userName: 'MathKid', // Sera mis à jour plus tard
+            userName: userName, // Utiliser le vrai username
             totalScore: result.score,
             challengesCompleted: 1,
             currentStreak: 1,
@@ -192,27 +202,25 @@ class DailyChallengeService extends ChangeNotifier {
           transaction.set(leaderboardRef, newEntry.toFirestore());
 
           if (kDebugMode) {
-            print('✅ Nouvelle entrée leaderboard créée');
+            print('✅ Nouvelle entrée leaderboard créée avec username: $userName');
           }
         } else {
-          // Mettre à jour l'entrée existante
+          // Reste du code inchangé...
           final data = doc.data()!;
           final entry = LeaderboardEntry.fromFirestore(data);
 
-          // Calculer la série (streak)
           final lastPlayed = entry.lastPlayed;
           final daysDifference = result.completedAt.difference(lastPlayed).inDays;
 
           int newStreak = entry.currentStreak;
           if (daysDifference == 1) {
-            // Jour consécutif
             newStreak = entry.currentStreak + 1;
           } else if (daysDifference > 1) {
-            // Série brisée
             newStreak = 1;
           }
 
           final updatedEntry = entry.copyWith(
+            userName: userName, // Mettre à jour le username à chaque fois
             totalScore: entry.totalScore + result.score,
             challengesCompleted: entry.challengesCompleted + 1,
             currentStreak: newStreak,
@@ -224,7 +232,7 @@ class DailyChallengeService extends ChangeNotifier {
           transaction.update(leaderboardRef, updatedEntry.toFirestore());
 
           if (kDebugMode) {
-            print('✅ Leaderboard mis à jour - Streak: $newStreak');
+            print('✅ Leaderboard mis à jour - Username: $userName, Streak: $newStreak');
           }
         }
       });
@@ -234,7 +242,6 @@ class DailyChallengeService extends ChangeNotifier {
       }
     }
   }
-
   /// Récupère le top 10 du classement
   Future<List<LeaderboardEntry>> getTopLeaderboard({int limit = 10}) async {
     try {

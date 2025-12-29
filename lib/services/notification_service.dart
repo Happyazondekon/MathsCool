@@ -22,7 +22,10 @@ class NotificationService {
   static const int _livesRefillNotificationId = 8888;
   static const int _achievementReminderId = 9001;
   static const int _dailyChallengeReminderId = 9002;
-  static const int _leaderboardReminderId = 9003;
+  // IDs multiples pour les rappels de classement (3 par jour)
+  static const int _leaderboardReminderId1 = 9003;
+  static const int _leaderboardReminderId2 = 9004;
+  static const int _leaderboardReminderId3 = 9005;
 
   // Messages motivationnels classiques
   final List<String> _motivationalMessages = [
@@ -80,7 +83,7 @@ class NotificationService {
     "📈 {name} grimpe vite ! Défends ta position !",
     "💪 {name} est juste devant toi ! Surpasse-le !",
     "🎯 {name} vise le podium, et toi ?",
-    "🔝 {name} a gagné 3 étoiles ! Égalise son score !",
+    "🔥 {name} a gagné 3 étoiles ! Égalise son score !",
     "⭐ {name} brille au classement ! Montre ton talent !",
     "🚀 {name} est lancé ! Ne te laisse pas distancer !",
   ];
@@ -216,7 +219,7 @@ class NotificationService {
         now.year,
         now.month,
         now.day,
-        17, // 17h
+        18, // 17h
         30, // 30min
       );
 
@@ -277,17 +280,22 @@ class NotificationService {
   /// Programmer un rappel quotidien pour le défi du jour (18h00)
   Future<bool> scheduleDailyChallengeReminder() async {
     try {
+      print('🟡 DEBUG: Début de scheduleDailyChallengeReminder');
+
       if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
+        print('❌ DEBUG: Notifications désactivées ou permissions manquantes pour daily challenge');
         return false;
       }
+
+      print('🟢 DEBUG: Permissions OK pour daily challenge');
 
       final now = DateTime.now();
       var scheduledDateTime = DateTime(
         now.year,
         now.month,
         now.day,
-        18, // 18h
-        0,  // 00min
+        19, // 18h
+        19,  // 00min
       );
 
       if (scheduledDateTime.isBefore(now)) {
@@ -335,99 +343,181 @@ class NotificationService {
         payload: 'mathscool_daily_challenge',
       );
 
-      print('Rappel quotidien du défi programmé pour : $scheduledDate');
+      print('✅ Rappel quotidien du défi programmé pour : $scheduledDate');
       return true;
 
     } catch (e) {
-      print('Erreur lors de la programmation du rappel de défi : $e');
+      print('❌ Erreur lors de la programmation du rappel de défi : $e');
       return false;
     }
   }
 
-  /// Programmer un rappel quotidien pour le classement (19h00)
-  Future<bool> scheduleLeaderboardReminder() async {
+  /// Programmer plusieurs rappels quotidiens pour le classement (11h, 15h, 19h)
+  Future<Map<String, bool>> scheduleLeaderboardReminders() async {
+    Map<String, bool> results = {};
+
     try {
+      print('🟡 DEBUG: Début de scheduleLeaderboardReminders');
+
       if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
-        return false;
+        print('❌ DEBUG: Notifications désactivées ou permissions manquantes pour leaderboard');
+        return {
+          'morning': false,
+          'afternoon': false,
+          'evening': false,
+        };
       }
 
-      final now = DateTime.now();
-      var scheduledDateTime = DateTime(
-        now.year,
-        now.month,
-        now.day,
-        19, // 19h
-        0,  // 00min
-      );
+      print('🟢 DEBUG: Permissions OK pour leaderboard');
 
-      if (scheduledDateTime.isBefore(now)) {
-        scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
-      }
+      // Horaires des 3 rappels quotidiens
+      final schedules = [
+        {'hour': 11, 'minute': 0, 'id': _leaderboardReminderId1, 'name': 'morning'},
+        {'hour': 15, 'minute': 0, 'id': _leaderboardReminderId2, 'name': 'afternoon'},
+        {'hour': 19, 'minute': 24, 'id': _leaderboardReminderId3, 'name': 'evening'},
+      ];
 
       final deviceTimeZone = _getDeviceTimeZone();
-      final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
+      final now = DateTime.now();
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'mathscool_leaderboard',
-        'Classements',
-        channelDescription: 'Rappels compétitifs pour le classement',
-        importance: Importance.high,
-        priority: Priority.high,
-        icon: 'baseline_calculate_white_36',
-        color: Color(0xFFFFD700),
-        enableLights: true,
-        enableVibration: true,
-        playSound: true,
-      );
+      print('📅 DEBUG: Programmation des rappels de classement - Heure actuelle: $now');
 
-      const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        sound: 'default',
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      );
+      for (final schedule in schedules) {
+        try {
+          var scheduledDateTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            schedule['hour'] as int,
+            schedule['minute'] as int,
+          );
 
-      const NotificationDetails platformDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
+          if (scheduledDateTime.isBefore(now)) {
+            scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
+          }
 
-      await _flutterLocalNotificationsPlugin.zonedSchedule(
-        _leaderboardReminderId,
-        "Classement MathsCool 🏆",
-        _getRandomLeaderboardMessage(),
-        scheduledDate,
-        platformDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: 'mathscool_leaderboard',
-      );
+          final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
-      print('Rappel de classement programmé pour : $scheduledDate');
-      return true;
+          const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+            'mathscool_leaderboard',
+            'Classements',
+            channelDescription: 'Rappels compétitifs pour le classement',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: 'baseline_calculate_white_36',
+            color: Color(0xFFFFD700),
+            enableLights: true,
+            enableVibration: true,
+            playSound: true,
+          );
 
+          const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+            sound: 'default',
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          );
+
+          const NotificationDetails platformDetails = NotificationDetails(
+            android: androidDetails,
+            iOS: iosDetails,
+          );
+
+          await _flutterLocalNotificationsPlugin.zonedSchedule(
+            schedule['id'] as int,
+            "Classement MathsCool 🏆",
+            _getRandomLeaderboardMessage(),
+            scheduledDate,
+            platformDetails,
+            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+            uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+            matchDateTimeComponents: DateTimeComponents.time,
+            payload: 'mathscool_leaderboard',
+          );
+
+          results[schedule['name'] as String] = true;
+          print('✅ Rappel de classement (${schedule['name']}) programmé pour : $scheduledDate');
+        } catch (e) {
+          print('❌ Erreur programmation rappel ${schedule['name']}: $e');
+          results[schedule['name'] as String] = false;
+        }
+      }
+
+      return results;
     } catch (e) {
-      print('Erreur lors de la programmation du rappel de classement : $e');
-      return false;
+      print('❌ Erreur lors de la programmation des rappels de classement : $e');
+      return {
+        'morning': false,
+        'afternoon': false,
+        'evening': false,
+      };
     }
   }
 
   /// Programmer toutes les notifications automatiques en une seule fois
-  Future<Map<String, bool>> scheduleAllAutomaticReminders(String userName) async {
-    return {
-      'achievements': await scheduleDailyAchievementReminder(),
-      'dailyChallenge': await scheduleDailyChallengeReminder(),
-      'leaderboard': await scheduleLeaderboardReminder(),
-    };
+  Future<Map<String, dynamic>> scheduleAllAutomaticReminders(String userName) async {
+    print('🚀 DEBUG: Début de scheduleAllAutomaticReminders pour $userName');
+
+    try {
+      // Vérifier d'abord les permissions et l'état
+      final hasPermissions = await _hasRequiredPermissions();
+      final notificationsEnabled = await areNotificationsEnabled();
+
+      print('📋 DEBUG: État des notifications:');
+      print('   - Permissions: $hasPermissions');
+      print('   - Activées: $notificationsEnabled');
+
+      if (!notificationsEnabled || !hasPermissions) {
+        print('❌ DEBUG: Notifications désactivées ou permissions manquantes');
+        return {
+          'achievements': false,
+          'dailyChallenge': false,
+          'leaderboard': {},
+        };
+      }
+
+      print('\n📅 DEBUG: Programmation des notifications:');
+
+      // 1. Achievements
+      print('   1. Achievements...');
+      final achievementResult = await scheduleDailyAchievementReminder();
+      print('      → $achievementResult');
+
+      // 2. Daily Challenge
+      print('   2. Daily Challenge...');
+      final dailyChallengeResult = await scheduleDailyChallengeReminder();
+      print('      → $dailyChallengeResult');
+
+      // 3. Leaderboard
+      print('   3. Leaderboard...');
+      final leaderboardResults = await scheduleLeaderboardReminders();
+      print('      → $leaderboardResults');
+
+      print('\n✅ DEBUG: Toutes les notifications ont été programmées');
+
+      return {
+        'achievements': achievementResult,
+        'dailyChallenge': dailyChallengeResult,
+        'leaderboard': leaderboardResults,
+      };
+    } catch (e) {
+      print('❌ Erreur dans scheduleAllAutomaticReminders: $e');
+      return {
+        'achievements': false,
+        'dailyChallenge': false,
+        'leaderboard': {},
+      };
+    }
   }
 
   /// Annuler toutes les notifications automatiques
   Future<void> cancelAllAutomaticReminders() async {
     await cancelNotification(_achievementReminderId);
     await cancelNotification(_dailyChallengeReminderId);
-    await cancelNotification(_leaderboardReminderId);
+    await cancelNotification(_leaderboardReminderId1);
+    await cancelNotification(_leaderboardReminderId2);
+    await cancelNotification(_leaderboardReminderId3);
   }
 
   /// Annuler le rappel des achievements
@@ -440,9 +530,11 @@ class NotificationService {
     await cancelNotification(_dailyChallengeReminderId);
   }
 
-  /// Annuler le rappel de classement
-  Future<void> cancelLeaderboardReminder() async {
-    await cancelNotification(_leaderboardReminderId);
+  /// Annuler tous les rappels de classement
+  Future<void> cancelLeaderboardReminders() async {
+    await cancelNotification(_leaderboardReminderId1);
+    await cancelNotification(_leaderboardReminderId2);
+    await cancelNotification(_leaderboardReminderId3);
   }
 
   // ========== NOTIFICATIONS PERSONNALISÉES ==========
@@ -831,6 +923,56 @@ class NotificationService {
       return cleanedCount;
     } catch (e) {
       return 0;
+    }
+  }
+
+  /// Méthode de test pour vérifier chaque type de notification
+  Future<void> testAllNotifications() async {
+    print('🧪 DEBUG: Test de toutes les notifications');
+
+    // Test 1: Achievements
+    print('\n1. Test Achievements:');
+    final achievementResult = await scheduleDailyAchievementReminder();
+    print('   Résultat: $achievementResult');
+
+    // Test 2: Daily Challenge
+    print('\n2. Test Daily Challenge:');
+    final dailyResult = await scheduleDailyChallengeReminder();
+    print('   Résultat: $dailyResult');
+
+    // Test 3: Leaderboard
+    print('\n3. Test Leaderboard:');
+    final leaderboardResult = await scheduleLeaderboardReminders();
+    print('   Résultat: $leaderboardResult');
+
+    // Vérification des permissions
+    print('\n4. Vérification permissions:');
+    final hasPerm = await _hasRequiredPermissions();
+    final enabled = await areNotificationsEnabled();
+    print('   Permissions: $hasPerm');
+    print('   Notifications activées: $enabled');
+  }
+
+  /// Reprogrammer toutes les notifications (utile pour débogage)
+  Future<Map<String, dynamic>> rescheduleAllNotifications(String userName) async {
+    try {
+      print('🔄 DEBUG: Reprogrammation de toutes les notifications');
+
+      // Annuler toutes les notifications existantes
+      await cancelAllAutomaticReminders();
+
+      // Attendre un court instant
+      await Future.delayed(Duration(milliseconds: 500));
+
+      // Reprogrammer toutes les notifications
+      return await scheduleAllAutomaticReminders(userName);
+    } catch (e) {
+      print('❌ Erreur lors de la reprogrammation : $e');
+      return {
+        'achievements': false,
+        'dailyChallenge': false,
+        'leaderboard': {},
+      };
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/services/sound_service.dart';
+import 'package:mathscool/services/username_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
@@ -54,6 +55,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => LivesService()),
         ChangeNotifierProvider(create: (_) => AchievementService()),
         ChangeNotifierProvider(create: (_) => DailyChallengeService()),
+        ChangeNotifierProvider(create: (_) => UsernameService()),
         Provider(create: (_) => ChatbotService()),
         Provider.value(value: notificationService),
       ],
@@ -214,7 +216,6 @@ class _AuthWrapperState extends State<AuthWrapper> {
       onForgotPasswordClicked: _toggleToForgotPassword,
     );
   }
-
   Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
     try {
       final userName = user.displayName ?? 'MathKid';
@@ -222,12 +223,17 @@ class _AuthWrapperState extends State<AuthWrapper> {
       // 1. Restaurer les notifications personnalisées existantes
       await notificationService.restoreCustomNotifications(userName);
 
-      // 2. Programmer le rappel quotidien pour les achievements
-      await notificationService.scheduleDailyAchievementReminder();
+      // 2. Programmer TOUTES les notifications automatiques en une seule fois
+      final results = await notificationService.scheduleAllAutomaticReminders(userName);
 
-      print('Notifications programmées pour $userName');
+      // 3. Log des résultats
+      print('📱 Notifications programmées pour $userName');
+      print('   ✅ Achievements: ${results['achievements']}');
+      print('   ✅ Daily Challenge: ${results['dailyChallenge']}');
+      print('   ✅ Leaderboard: ${results['leaderboard']}');
+
     } catch (e) {
-      print('Erreur lors de la programmation des notifications: $e');
+      print('❌ Erreur lors de la programmation des notifications: $e');
     }
   }
 }

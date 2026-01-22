@@ -1,6 +1,7 @@
 // lib/screens/sound_settings_screen.dart
 import 'package:flutter/material.dart';
 import '../services/sound_service.dart';
+import '../utils/colors.dart';
 
 class SoundSettingsScreen extends StatefulWidget {
   const SoundSettingsScreen({Key? key}) : super(key: key);
@@ -34,9 +35,9 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),

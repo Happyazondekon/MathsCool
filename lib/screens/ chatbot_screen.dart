@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/models/chatbot_model.dart';
-import 'package:mathscool/screens/store_screen.dart'; // <--- IMPORT NÉCESSAIRE
+import 'package:mathscool/screens/store_screen.dart';
+import 'package:mathscool/utils/colors.dart';
 
 class ChatbotScreen extends StatefulWidget {
   final String userId;
@@ -112,22 +113,18 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
         _scrollToBottom();
       }
 
-      // Sauvegarder les messages
       await _chatbotService.saveChatMessage(widget.userId, userMessage);
       await _chatbotService.saveChatMessage(widget.userId, aiMessage);
 
     } catch (e) {
-      setState(() => _isLoading = false); // Arrêter le chargement
+      setState(() => _isLoading = false);
 
-      // --- MODIFICATION ICI : Détection de la limite ---
       if (e.toString().contains('Limite de requêtes atteinte')) {
-        // Afficher la popup et proposer la boutique
         _showLimitReachedDialog();
       } else {
-        // Erreur générique (problème réseau, etc.)
         final errorMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          content: 'Désolé, je ne peux pas répondre pour le moment. 🎄\nEssaie de reformuler ta question !',
+          content: 'Désolé, je ne peux pas répondre pour le moment. 🤖\nEssaie de reformuler ta question !',
           isUser: false,
           timestamp: DateTime.now(),
         );
@@ -142,7 +139,6 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     }
   }
 
-  // --- NOUVELLE MÉTHODE : Popup de redirection ---
   void _showLimitReachedDialog() {
     showDialog(
       context: context,
@@ -156,7 +152,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.orange.shade50, Colors.white],
+              colors: [AppColors.background, AppColors.surface],
             ),
           ),
           child: Column(
@@ -165,41 +161,57 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
+                  gradient: LinearGradient(
+                    colors: [AppColors.accent, AppColors.warning],
+                  ),
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.accent.withOpacity(0.4),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
                 ),
-                child: const Text("🎅", style: TextStyle(fontSize: 40)),
+                child: Icon(
+                  Icons.lock_clock,
+                  size: 40,
+                  color: AppColors.textLight,
+                ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                "Ho ho ho ! Pause !",
+              Text(
+                "Pause nécessaire ! ⏸️",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: Color(0xFFD32F2F),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
+              Text(
                 "Tu as utilisé tes 3 questions gratuites pour aujourd'hui.",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontFamily: 'ComicNeue',
+                  color: AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Fermer le dialogue
-                  // Redirection vers la boutique
+                  Navigator.pop(context);
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const StoreScreen()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFD32F2F),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.textLight,
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -219,7 +231,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   "Revenir demain",
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
               ),
             ],
@@ -238,9 +250,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFFFF6B6B),
-              const Color(0xFFD32F2F),
-              Colors.red.shade800,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -287,7 +299,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
           Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
+              color: AppColors.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.15),
@@ -297,7 +309,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               ],
             ),
             child: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFFD32F2F)),
+              icon: Icon(Icons.arrow_back_rounded, color: AppColors.primary),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -307,34 +319,35 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
-                colors: [
-                  Colors.orange.shade300,
-                  Colors.yellow.shade600,
-                ],
+                colors: [AppColors.accent, AppColors.warning],
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.orange.withOpacity(0.5),
+                  color: AppColors.accent.withOpacity(0.5),
                   blurRadius: 10,
                   spreadRadius: 2,
                 ),
               ],
             ),
-            child: const Text("🎅", style: TextStyle(fontSize: 24)),
+            child: Icon(
+              Icons.smart_toy_rounded,
+              size: 24,
+              color: AppColors.textLight,
+            ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "MathKid Assistant",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppColors.textLight,
                     fontFamily: 'ComicNeue',
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
-                    shadows: [
+                    shadows: const [
                       Shadow(
                         color: Colors.black26,
                         blurRadius: 4,
@@ -343,15 +356,15 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     ],
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Row(
                   children: [
-                    Icon(Icons.circle, color: Colors.greenAccent, size: 10),
-                    SizedBox(width: 6),
+                    Icon(Icons.circle, color: AppColors.success, size: 10),
+                    const SizedBox(width: 6),
                     Text(
                       "Toujours prêt à t'aider !",
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: AppColors.textLight.withOpacity(0.9),
                         fontFamily: 'ComicNeue',
                         fontSize: 12,
                       ),
@@ -376,33 +389,30 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.orange.shade300,
-                      Colors.yellow.shade500,
-                    ],
-                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.6),
+                      color: AppColors.surface.withOpacity(0.6),
                       blurRadius: 30,
                       spreadRadius: 10,
                     ),
                   ],
                 ),
-                child: const Text(
-                  "🎅",
-                  style: TextStyle(fontSize: 80),
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: AppColors.surface,
+                  child: CircleAvatar(
+                    radius: 55,
+                    backgroundImage: const AssetImage('assets/images/logo.png'),
+                  ),
                 ),
               ),
               const SizedBox(height: 30),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.95),
+                  color: AppColors.surface.withOpacity(0.95),
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: [
                     BoxShadow(
@@ -412,7 +422,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     ),
                   ],
                 ),
-                child: const Column(
+                child: Column(
                   children: [
                     Text(
                       "Salut champion ! 👋",
@@ -420,17 +430,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
-                        color: Color(0xFFD32F2F),
+                        color: AppColors.primary,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       "Je suis MathKid, ton assistant mathématiques personnel !",
                       style: TextStyle(
                         fontSize: 16,
                         fontFamily: 'ComicNeue',
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -439,19 +449,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               ),
               const SizedBox(height: 30),
               _buildSuggestionCard(
-                icon: "🎯",
+                icon: Icons.quiz_rounded,
                 title: "Pose-moi une question",
                 description: "Sur n'importe quel sujet de maths !",
               ),
               const SizedBox(height: 12),
               _buildSuggestionCard(
-                icon: "💡",
+                icon: Icons.lightbulb_outline_rounded,
                 title: "Explications simples",
                 description: "Je t'explique tout de façon amusante",
               ),
               const SizedBox(height: 12),
               _buildSuggestionCard(
-                icon: "🚀",
+                icon: Icons.rocket_launch_rounded,
                 title: "Exemples concrets",
                 description: "Avec des exemples de la vie réelle",
               ),
@@ -463,7 +473,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
   }
 
   Widget _buildSuggestionCard({
-    required String icon,
+    required IconData icon,
     required String title,
     required String description,
   }) {
@@ -471,10 +481,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: AppColors.surface.withOpacity(0.9),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.white.withOpacity(0.5),
+          color: AppColors.border.withOpacity(0.5),
           width: 2,
         ),
         boxShadow: [
@@ -492,13 +502,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.orange.shade100,
-                  Colors.yellow.shade100,
+                  AppColors.primary.withOpacity(0.2),
+                  AppColors.accent.withOpacity(0.2),
                 ],
               ),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: Text(icon, style: const TextStyle(fontSize: 28)),
+            child: Icon(icon, size: 28, color: AppColors.primary),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -507,20 +517,20 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'ComicNeue',
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontFamily: 'ComicNeue',
-                    color: Colors.black54,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -580,16 +590,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                 decoration: BoxDecoration(
                   gradient: isUser
                       ? LinearGradient(
-                    colors: [
-                      Colors.white,
-                      Colors.grey.shade50,
-                    ],
+                    colors: [AppColors.surface, AppColors.background],
                   )
                       : LinearGradient(
-                    colors: [
-                      Colors.yellow.shade300,
-                      Colors.orange.shade200,
-                    ],
+                    colors: [AppColors.accent, AppColors.warning],
                   ),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(isUser ? 20 : 5),
@@ -611,7 +615,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     Text(
                       message.content,
                       style: TextStyle(
-                        color: isUser ? Colors.black87 : Colors.black87,
+                        color: AppColors.textPrimary,
                         fontFamily: 'ComicNeue',
                         fontSize: 15,
                         height: 1.4,
@@ -622,9 +626,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                       _formatTime(message.timestamp),
                       style: TextStyle(
                         fontSize: 11,
-                        color: isUser
-                            ? Colors.grey.shade600
-                            : Colors.black54,
+                        color: AppColors.textSecondary,
                         fontFamily: 'ComicNeue',
                       ),
                     ),
@@ -646,23 +648,24 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: isUser
-            ? const LinearGradient(
-          colors: [Color(0xFF6B8CFF), Color(0xFF4A6FE8)],
+            ? LinearGradient(
+          colors: [AppColors.secondary, AppColors.info],
         )
             : LinearGradient(
-          colors: [Colors.orange.shade300, Colors.yellow.shade500],
+          colors: [AppColors.accent, AppColors.warning],
         ),
         boxShadow: [
           BoxShadow(
-            color: (isUser ? Colors.blue : Colors.orange).withOpacity(0.4),
+            color: (isUser ? AppColors.secondary : AppColors.accent).withOpacity(0.4),
             blurRadius: 8,
             spreadRadius: 1,
           ),
         ],
       ),
-      child: Text(
-        isUser ? "😊" : "🎅",
-        style: const TextStyle(fontSize: 20),
+      child: Icon(
+        isUser ? Icons.person_rounded : Icons.smart_toy_rounded,
+        size: 20,
+        color: AppColors.textLight,
       ),
     );
   }
@@ -680,7 +683,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.yellow.shade300, Colors.orange.shade200],
+                colors: [AppColors.accent, AppColors.warning],
               ),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(5),
@@ -704,17 +707,15 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                   height: 18,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.red.shade700,
-                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
+                Text(
                   "MathKid réfléchit...",
                   style: TextStyle(
                     fontFamily: 'ComicNeue',
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                     fontSize: 15,
                   ),
                 ),
@@ -730,7 +731,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         boxShadow: [
           BoxShadow(
@@ -747,10 +748,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: AppColors.background,
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: Colors.grey.shade300,
+                    color: AppColors.border,
                     width: 1.5,
                   ),
                 ),
@@ -762,7 +763,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     hintText: "Pose ta question mathématique...",
                     hintStyle: TextStyle(
                       fontFamily: 'ComicNeue',
-                      color: Colors.grey.shade500,
+                      color: AppColors.textSecondary,
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -770,9 +771,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                       vertical: 14,
                     ),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'ComicNeue',
                     fontSize: 15,
+                    color: AppColors.textPrimary,
                   ),
                   onSubmitted: (_) => _sendMessage(),
                 ),
@@ -781,13 +783,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
             const SizedBox(width: 12),
             Container(
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.secondary],
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.red.withOpacity(0.4),
+                    color: AppColors.primary.withOpacity(0.4),
                     blurRadius: 12,
                     spreadRadius: 2,
                   ),
@@ -802,7 +804,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     padding: const EdgeInsets.all(14),
                     child: Icon(
                       _isLoading ? Icons.hourglass_empty : Icons.send_rounded,
-                      color: Colors.white,
+                      color: AppColors.textLight,
                       size: 24,
                     ),
                   ),

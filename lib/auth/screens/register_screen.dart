@@ -1,19 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
-
 import '../auth_service.dart';
-
-// --- COULEURS DE NOËL SPÉCIFIQUES ---
-// On utilise les mêmes couleurs de Noël que pour l'écran de connexion
-class ChristmasColors {
-  static const Color primaryRed = Color(0xFFC63437); // Rouge profond de Noël
-  static const Color secondaryGreen = Color(0xFF2E7D32); // Vert sapin
-  static const Color accentGold = Color(0xFFFFD700); // Or (pour les boutons/accents)
-  static const Color snowWhite = Color(0xFFFFFFFF); // Neige/Blanc
-}
-// ------------------------------------
 
 class RegisterScreen extends StatefulWidget {
   final VoidCallback onLoginClicked;
@@ -36,7 +24,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
 
-  // LOGIQUE NON MODIFIÉE
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     if (_passwordController.text != _confirmController.text) {
@@ -57,12 +44,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         displayName: _nameController.text.trim(),
       );
 
-      // NOUVEAU: Envoyer l'email de vérification immédiatement après l'inscription
       await authService.sendEmailVerification();
 
       if (mounted) {
-        // L'utilisateur est connecté et le Wrapper (dans main.dart) le redirigera vers EmailVerificationScreen
-        // Aucun autre setState ou navigation n'est nécessaire ici.
+        // L'utilisateur est connecté et le Wrapper le redirigera vers EmailVerificationScreen
       }
     } on Exception catch (e) {
       setState(() => _errorMessage = e.toString());
@@ -71,7 +56,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // LOGIQUE NON MODIFIÉE
   Future<void> _signInWithGoogle() async {
     setState(() {
       _isGoogleLoading = true;
@@ -83,8 +67,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final user = await authService.signInWithGoogle();
 
       if (user != null && mounted) {
-        // Google Sign-In vérifie automatiquement l'email
-        // Rediriger vers l'écran principal
         Navigator.of(context).pushReplacementNamed('/home');
       }
     } catch (e) {
@@ -94,7 +76,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // LOGIQUE NON MODIFIÉE
   @override
   void dispose() {
     _nameController.dispose();
@@ -109,14 +90,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient (Thème de Noël)
+          // Background avec gradient moderne
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                // Gradient de Noël : Rouge Profond à Vert Sapin
-                colors: [ChristmasColors.primaryRed, ChristmasColors.secondaryGreen],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.gradientStart,
+                  AppColors.gradientMiddle,
+                  AppColors.gradientEnd,
+                ],
               ),
             ),
           ),
@@ -128,233 +112,299 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Logo de l'application (Ajout d'un thème visuel de Noël autour du logo)
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CircleAvatar(
-                            radius: 70, // Taille légèrement augmentée pour l'effet festif
-                            backgroundColor: ChristmasColors.accentGold, // Bordure Dorée
-                          ),
-                          CircleAvatar(
-                            radius: 65,
-                            backgroundColor: ChristmasColors.snowWhite,
-                            child: CircleAvatar(
-                              radius: 60,
-                              backgroundImage: const AssetImage('assets/images/logo.png'),
+                      // Logo de l'application avec ombre
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 20,
+                              spreadRadius: 5,
                             ),
+                          ],
+                        ),
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: AppColors.surface,
+                          child: CircleAvatar(
+                            radius: 55,
+                            backgroundImage: const AssetImage('assets/images/logo.png'),
                           ),
-                          // Petit élément de Noël (comme un bonnet ou un flocon)
-                          const Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Icon(
-                              Icons.star, // Étoile
-                              color: ChristmasColors.snowWhite,
-                              size: 30,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      // Phrase de bienvenue (Texte de Noël)
-                      const Text(
-                        'Aidez le Père Noël ! 🎁',
+                      const SizedBox(height: 24),
+                      // Titre de bienvenue
+                      Text(
+                        'Créer un compte',
                         style: TextStyle(
-                          fontSize: 24, // Augmenté pour la fête
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: ChristmasColors.snowWhite,
-                          letterSpacing: 1.2,
+                          color: AppColors.textLight,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Créez votre compte pour commencer les cadeaux mathématiques.',
+                      Text(
+                        'Rejoignez MathsCool pour commencer',
                         style: TextStyle(
                           fontSize: 16,
-                          color: ChristmasColors.snowWhite, // Blanc neige
+                          color: AppColors.textLight.withOpacity(0.9),
                         ),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 24),
-                      // Username Input (Couleurs adaptées)
+                      // Champ Nom d'utilisateur
                       TextFormField(
                         controller: _nameController,
-                        style: const TextStyle(color: Colors.black87),
+                        style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Nom d\'utilisateur',
-                          prefixIcon: const Icon(Icons.person, color: ChristmasColors.primaryRed),
+                          labelStyle: TextStyle(color: AppColors.textSecondary),
+                          prefixIcon: Icon(Icons.person, color: AppColors.primary),
                           filled: true,
-                          fillColor: ChristmasColors.snowWhite,
+                          fillColor: AppColors.surface,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.accentGold, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.secondaryGreen, width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.accent,
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) =>
                         value!.isNotEmpty ? null : 'Entrez votre nom d\'utilisateur',
                       ),
                       const SizedBox(height: 16),
-                      // Email Input (Couleurs adaptées)
+                      // Champ Email
                       TextFormField(
                         controller: _emailController,
-                        style: const TextStyle(color: Colors.black87),
+                        keyboardType: TextInputType.emailAddress,
+                        style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Adresse Email',
-                          prefixIcon: const Icon(Icons.email, color: ChristmasColors.primaryRed),
+                          labelStyle: TextStyle(color: AppColors.textSecondary),
+                          prefixIcon: Icon(Icons.email, color: AppColors.primary),
                           filled: true,
-                          fillColor: ChristmasColors.snowWhite,
+                          fillColor: AppColors.surface,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.accentGold, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.secondaryGreen, width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.accent,
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) =>
                         value!.contains('@') ? null : 'Email invalide',
                       ),
                       const SizedBox(height: 16),
-                      // Password Input (Couleurs adaptées)
+                      // Champ Mot de passe
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        style: const TextStyle(color: Colors.black87),
+                        style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Mot de passe',
-                          prefixIcon: const Icon(Icons.lock, color: ChristmasColors.primaryRed),
+                          labelStyle: TextStyle(color: AppColors.textSecondary),
+                          prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: ChristmasColors.primaryRed, // Icône rouge
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.textSecondary,
                             ),
                             onPressed: () =>
                                 setState(() => _obscurePassword = !_obscurePassword),
                           ),
                           filled: true,
-                          fillColor: ChristmasColors.snowWhite,
+                          fillColor: AppColors.surface,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.accentGold, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.secondaryGreen, width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.accent,
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) =>
                         value!.length >= 6 ? null : '6 caractères minimum',
                       ),
                       const SizedBox(height: 16),
-                      // Confirm Password Input (Couleurs adaptées)
+                      // Champ Confirmer le mot de passe
                       TextFormField(
                         controller: _confirmController,
                         obscureText: _obscureConfirm,
-                        style: const TextStyle(color: Colors.black87),
+                        style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
                           labelText: 'Confirmer le mot de passe',
-                          prefixIcon: const Icon(Icons.lock, color: ChristmasColors.primaryRed),
+                          labelStyle: TextStyle(color: AppColors.textSecondary),
+                          prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscureConfirm
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: ChristmasColors.primaryRed, // Icône rouge
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: AppColors.textSecondary,
                             ),
                             onPressed: () =>
                                 setState(() => _obscureConfirm = !_obscureConfirm),
                           ),
                           filled: true,
-                          fillColor: ChristmasColors.snowWhite,
+                          fillColor: AppColors.surface,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.accentGold, width: 2),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: const BorderSide(color: ChristmasColors.secondaryGreen, width: 1),
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: AppColors.accent,
+                              width: 2,
+                            ),
                           ),
                         ),
                         validator: (value) =>
                         value!.isNotEmpty ? null : 'Confirmez votre mot de passe',
                       ),
-                      // Error Message (Couleur adaptées)
+                      // Message d'erreur
                       if (_errorMessage != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                              color: ChristmasColors.accentGold, // Afficher l'erreur en or
-                              fontWeight: FontWeight.bold,
+                        Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppColors.error,
+                              width: 1,
                             ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.error_outline,
+                                color: AppColors.error,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  _errorMessage!,
+                                  style: TextStyle(
+                                    color: AppColors.error,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       const SizedBox(height: 24),
-                      // Register Button (Thème de Noël)
+                      // Bouton d'inscription
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: _isLoading
-                            ? const Center(child: CircularProgressIndicator(color: ChristmasColors.snowWhite)) // Indicateur blanc
+                            ? Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.surface,
+                          ),
+                        )
                             : ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ChristmasColors.accentGold, // Bouton Or
+                            backgroundColor: AppColors.accent,
+                            foregroundColor: AppColors.textPrimary,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            elevation: 5,
+                            elevation: 4,
+                            shadowColor: AppColors.accent.withOpacity(0.5),
                           ),
                           onPressed: _register,
                           child: const Text(
-                            'Créer un compte 🎄',
+                            'Créer un compte',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: ChristmasColors.primaryRed, // Texte Rouge
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ),
                       ),
                       // Séparateur
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: Row(
                           children: [
                             Expanded(
-                                child:
-                                Divider(color: ChristmasColors.accentGold, thickness: 1.5)), // Or
+                              child: Divider(
+                                color: AppColors.textLight.withOpacity(0.6),
+                                thickness: 1,
+                              ),
+                            ),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Text(
                                 'OU',
                                 style: TextStyle(
-                                  color: ChristmasColors.snowWhite,
-                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textLight.withOpacity(0.95),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),
                             Expanded(
-                                child:
-                                Divider(color: ChristmasColors.accentGold, thickness: 1.5)), // Or
+                              child: Divider(
+                                color: AppColors.textLight.withOpacity(0.6),
+                                thickness: 1,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                      // Google Sign-in Button (Logique inchangée, style adapté)
+                      // Bouton Google Sign-in
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: _isGoogleLoading
-                            ? const Center(child: CircularProgressIndicator(color: ChristmasColors.snowWhite)) // Indicateur blanc
-                            : ElevatedButton.icon(
+                            ? Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.primary,
+                          ),
+                        )
+                            : OutlinedButton.icon(
                           icon: Image.asset(
                             'assets/images/google_logo.png',
                             height: 24,
@@ -363,29 +413,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             'Continuer avec Google',
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               color: Colors.black87,
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ChristmasColors.snowWhite, // Bouton blanc
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              side: const BorderSide(color: ChristmasColors.primaryRed, width: 2), // Bordure Rouge
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: AppColors.surface,
+                            side: BorderSide(
+                              color: AppColors.border,
+                              width: 1.5,
                             ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 2,
                           ),
                           onPressed: _signInWithGoogle,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      // Login Link
+                      const SizedBox(height: 24),
+                      // Lien de connexion
                       TextButton(
                         onPressed: widget.onLoginClicked,
                         child: RichText(
-                          text: const TextSpan(
+                          text: TextSpan(
                             text: 'Déjà un compte ? ',
                             style: TextStyle(
-                              color: ChristmasColors.snowWhite,
+                              color: AppColors.textLight.withOpacity(0.95),
                               fontSize: 16,
                             ),
                             children: [
@@ -393,8 +447,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 text: 'Se connecter',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  // Couleur d'accent festive, par exemple un jaune brillant
-                                  color: ChristmasColors.accentGold,
+                                  color: AppColors.accent,
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
                             ],

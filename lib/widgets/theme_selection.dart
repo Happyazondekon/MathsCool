@@ -11,10 +11,7 @@ class ThemeSelectionScreen extends StatelessWidget {
 
   bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(level);
 
-  // --- LOGIQUE DE NAVIGATION ---
-
   void _startExercises(BuildContext context, String theme, {required bool isInfinite}) {
-    // ✅ AJOUTER ICI
     SoundService().playStartChallenge();
     Navigator.push(
       context,
@@ -28,13 +25,11 @@ class ThemeSelectionScreen extends StatelessWidget {
     );
   }
 
-  // --- WIDGETS DU SÉLECTEUR DE MODE ---
-
   Widget _buildModeSelector(BuildContext context, String theme) {
     return Container(
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(30),
       ),
       child: Column(
@@ -45,7 +40,7 @@ class ThemeSelectionScreen extends StatelessWidget {
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.purple.shade400, Colors.blue.shade400],
+                colors: [AppColors.primary, AppColors.secondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -59,14 +54,14 @@ class ThemeSelectionScreen extends StatelessWidget {
                     color: Colors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.emoji_events,
-                    color: Colors.white,
+                    color: AppColors.textLight,
                     size: 28,
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -75,16 +70,16 @@ class ThemeSelectionScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColors.textLight,
                           fontFamily: 'ComicNeue',
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         'Comment veux-tu t\'entraîner ?',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white70,
+                          color: AppColors.textLight.withOpacity(0.9),
                         ),
                       ),
                     ],
@@ -105,7 +100,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                   label: 'Mode Normal',
                   subtitle: '20 exercices progressifs',
                   gradient: LinearGradient(
-                    colors: [Colors.blue.shade400, Colors.blue.shade600],
+                    colors: [AppColors.info, AppColors.secondary],
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -119,7 +114,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                   label: 'Mode Infini',
                   subtitle: 'Entraînement illimité',
                   gradient: LinearGradient(
-                    colors: [Colors.purple.shade400, Colors.purple.shade600],
+                    colors: [AppColors.secondary, AppColors.primary],
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -168,7 +163,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                   color: Colors.white.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: Icon(icon, color: Colors.white, size: 32),
+                child: Icon(icon, color: AppColors.textLight, size: 32),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -177,27 +172,27 @@ class ThemeSelectionScreen extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         fontFamily: 'ComicNeue',
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: Colors.white70,
+                        color: AppColors.textLight.withOpacity(0.9),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white,
+                color: AppColors.textLight,
                 size: 20,
               ),
             ],
@@ -207,58 +202,54 @@ class ThemeSelectionScreen extends StatelessWidget {
     );
   }
 
-  // --- DONNÉES ---
-
   List<Map<String, dynamic>> _getThemes() {
     if (isCollege) {
-      return const [
+      return [
         {
           'name': 'Nombres Relatifs',
           'symbolText': '±',
-          'color': Colors.indigo
+          'color': AppColors.primary
         },
         {
           'name': 'Fractions',
           'symbolText': '½',
-          'color': Colors.teal
+          'color': Color(0xFF14B8A6)
         },
         {
           'name': 'Algèbre',
           'symbolText': 'x=y',
-          'color': Colors.deepOrange
+          'color': Color(0xFFF97316)
         },
         {
           'name': 'Puissances',
           'symbolText': 'x²',
-          'color': Colors.purpleAccent
+          'color': AppColors.secondary
         },
         {
           'name': 'Théorèmes',
           'icon': Icons.change_history,
-          'color': Colors.brown
+          'color': Color(0xFF78350F)
         },
         {
           'name': 'Statistiques',
           'icon': Icons.bar_chart,
-          'color': Colors.blueGrey
+          'color': Color(0xFF475569)
         },
       ];
     } else {
-      return const [
-        {'name': 'Addition', 'icon': Icons.add, 'color': Colors.orange},
-        {'name': 'Soustraction', 'icon': Icons.remove, 'color': Colors.blue},
-        {'name': 'Multiplication', 'icon': Icons.close, 'color': Colors.green},
+      return [
+        {'name': 'Addition', 'icon': Icons.add, 'color': AppColors.warning},
+        {'name': 'Soustraction', 'icon': Icons.remove, 'color': AppColors.info},
+        {'name': 'Multiplication', 'icon': Icons.close, 'color': AppColors.success},
         {
           'name': 'Division',
           'symbolText': '÷',
-          'color': Colors.purple
+          'color': AppColors.secondary
         },
-        {'name': 'Géométrie', 'icon': Icons.square_foot, 'color': Colors.red},
+        {'name': 'Géométrie', 'icon': Icons.square_foot, 'color': AppColors.error},
       ];
     }
   }
-
-  // --- BUILD UI ---
 
   @override
   Widget build(BuildContext context) {
@@ -267,14 +258,14 @@ class ThemeSelectionScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -316,20 +307,20 @@ class ThemeSelectionScreen extends StatelessWidget {
                         color: Colors.white.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.grid_view_rounded,
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         size: 20,
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Sélectionne un thème',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
-                        color: Colors.white,
+                        color: AppColors.textLight,
                       ),
                     ),
                   ],
@@ -369,7 +360,7 @@ class ThemeSelectionScreen extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -382,7 +373,7 @@ class ThemeSelectionScreen extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
             onPressed: () => Navigator.pop(context),
           ),
           Expanded(
@@ -390,10 +381,10 @@ class ThemeSelectionScreen extends StatelessWidget {
               children: [
                 Text(
                   level,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
@@ -401,7 +392,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                   '${_getThemes().length} thèmes disponibles',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey.shade600,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -438,7 +429,6 @@ class ThemeSelectionScreen extends StatelessWidget {
         onTap: isDisabled
             ? null
             : () {
-          // ✅ AJOUTER ICI
           SoundService().playButtonClick();
           showModalBottomSheet(
             context: context,
@@ -453,18 +443,18 @@ class ThemeSelectionScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: isDisabled
-                  ? [Colors.grey.shade400, Colors.grey.shade500]
+                  ? [AppColors.disabled, AppColors.border]
                   : [
-                theme['color'],
-                theme['color'].withOpacity(0.7),
+                theme['color'] as Color,
+                (theme['color'] as Color).withOpacity(0.7),
               ],
             ),
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
                 color: isDisabled
-                    ? Colors.grey.withOpacity(0.3)
-                    : theme['color'].withOpacity(0.4),
+                    ? AppColors.disabled.withOpacity(0.3)
+                    : (theme['color'] as Color).withOpacity(0.4),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -515,13 +505,17 @@ class ThemeSelectionScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
-                          color: isDisabled ? Colors.white60 : Colors.white,
+                          color: isDisabled
+                              ? Colors.white60
+                              : AppColors.textLight,
                         ),
                       )
                           : Icon(
                         theme['icon'],
                         size: 36,
-                        color: isDisabled ? Colors.white60 : Colors.white,
+                        color: isDisabled
+                            ? Colors.white60
+                            : AppColors.textLight,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -532,7 +526,9 @@ class ThemeSelectionScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: isDisabled ? Colors.white60 : Colors.white,
+                          color: isDisabled
+                              ? Colors.white60
+                              : AppColors.textLight,
                           fontFamily: 'ComicNeue',
                         ),
                         textAlign: TextAlign.center,
@@ -548,11 +544,11 @@ class ThemeSelectionScreen extends StatelessWidget {
                           color: Colors.white.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Bientôt',
                           style: TextStyle(
                             fontSize: 10,
-                            color: Colors.white,
+                            color: AppColors.textLight,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

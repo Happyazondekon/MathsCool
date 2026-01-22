@@ -30,14 +30,14 @@ class LevelSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -76,7 +76,7 @@ class LevelSelectionScreen extends StatelessWidget {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -91,17 +91,17 @@ class LevelSelectionScreen extends StatelessWidget {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+                icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
                 onPressed: () => Navigator.pop(context),
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Choisis ton niveau',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
@@ -114,7 +114,7 @@ class LevelSelectionScreen extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange.shade300, Colors.yellow.shade400],
+                colors: [AppColors.accent, AppColors.warning],
               ),
               borderRadius: BorderRadius.circular(15),
             ),
@@ -127,18 +127,18 @@ class LevelSelectionScreen extends StatelessWidget {
                     color: Colors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lightbulb_rounded,
-                    color: Colors.white,
+                    color: AppColors.textLight,
                     size: 20,
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Choisis le niveau qui correspond à ta classe',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.textLight,
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'ComicNeue',
@@ -155,16 +155,16 @@ class LevelSelectionScreen extends StatelessWidget {
 
   Widget _buildLevelCard(BuildContext context, int index) {
     final List<List<Color>> gradientColors = [
-      [Colors.amber.shade300, Colors.amber.shade500],           // CI
-      [Colors.blue.shade300, Colors.blue.shade500],             // CP
-      [Colors.green.shade300, Colors.green.shade500],           // CE1
-      [Colors.pink.shade300, Colors.pink.shade500],             // CE2
-      [Colors.purple.shade300, Colors.purple.shade500],         // CM1
-      [Colors.red.shade300, Colors.red.shade500],               // CM2
-      [Colors.cyan.shade300, Colors.cyan.shade500],             // 6ème
-      [Colors.teal.shade300, Colors.teal.shade500],             // 5ème
-      [Colors.orange.shade300, Colors.orange.shade500],         // 4ème
-      [Colors.blueGrey.shade300, Colors.blueGrey.shade500],     // 3ème
+      [AppColors.accent, AppColors.warning],                    // CI
+      [AppColors.info, AppColors.secondary],                    // CP
+      [AppColors.success, Color(0xFF059669)],                   // CE1
+      [AppColors.gradientEnd, Color(0xFFEC4899)],               // CE2
+      [AppColors.secondary, Color(0xFF7C3AED)],                 // CM1
+      [AppColors.error, Color(0xFFDC2626)],                     // CM2
+      [Color(0xFF06B6D4), Color(0xFF0891B2)],                   // 6ème
+      [Color(0xFF14B8A6), Color(0xFF0D9488)],                   // 5ème
+      [AppColors.warning, Color(0xFFF97316)],                   // 4ème
+      [Color(0xFF64748B), Color(0xFF475569)],                   // 3ème
     ];
 
     final List<IconData> icons = [
@@ -180,7 +180,6 @@ class LevelSelectionScreen extends StatelessWidget {
       Icons.history_edu_rounded,
     ];
 
-    // Badge pour les niveaux collège
     final bool isCollege = index >= 6;
 
     return TweenAnimationBuilder(
@@ -198,7 +197,6 @@ class LevelSelectionScreen extends StatelessWidget {
       },
       child: GestureDetector(
         onTap: () {
-          // ✅ AJOUTER ICI
           SoundService().playButtonClick();
           Navigator.push(
             context,
@@ -288,7 +286,7 @@ class LevelSelectionScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surface,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
@@ -307,12 +305,12 @@ class LevelSelectionScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(
                       levels[index],
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         fontFamily: 'ComicNeue',
-                        shadows: [
+                        shadows: const [
                           Shadow(
                             color: Colors.black26,
                             blurRadius: 4,
@@ -329,9 +327,9 @@ class LevelSelectionScreen extends StatelessWidget {
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Colors.white,
+                          color: AppColors.textLight,
                           fontWeight: FontWeight.w500,
                           fontFamily: 'ComicNeue',
                         ),

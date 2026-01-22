@@ -18,6 +18,9 @@ import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/services/achievement_service.dart';
 import 'package:mathscool/services/daily_challenge_service.dart';
 
+// ✅ IMPORTS GEMS AJOUTÉS
+import 'package:mathscool/services/gems_service.dart';
+
 // Imports pour le Kill Switch
 import 'package:mathscool/services/remote_config_service.dart';
 import 'package:mathscool/screens/update_required_screen.dart';
@@ -28,7 +31,7 @@ void main() async {
   // Initialiser Firebase
   await Firebase.initializeApp();
 
-  // ✅ Initialiser le service audio
+  // Initialiser le service audio
   await SoundService().initialize();
 
   // Initialiser le service de notifications
@@ -53,7 +56,19 @@ void main() async {
         Provider(create: (_) => UserService()),
         Provider(create: (_) => ProgressService()),
         ChangeNotifierProvider(create: (_) => LivesService()),
-        ChangeNotifierProvider(create: (_) => AchievementService()),
+
+        // ✅ GEMS SERVICE - AJOUTÉ EN PREMIER
+        ChangeNotifierProvider(create: (_) => GemsService()),
+
+        // ✅ ACHIEVEMENT SERVICE - MODIFIÉ pour dépendre de GemsService
+        ChangeNotifierProxyProvider<GemsService, AchievementService>(
+          create: (context) => AchievementService(
+            Provider.of<GemsService>(context, listen: false),
+          ),
+          update: (context, gemsService, previousAchievementService) =>
+          previousAchievementService ?? AchievementService(gemsService),
+        ),
+
         ChangeNotifierProvider(create: (_) => DailyChallengeService()),
         ChangeNotifierProvider(create: (_) => UsernameService()),
         Provider(create: (_) => ChatbotService()),
@@ -64,7 +79,6 @@ void main() async {
   );
 }
 
-// ✅ MODIFICATION : StatefulWidget pour gérer le cycle de vie
 class MathsCoolApp extends StatefulWidget {
   final bool showUpdateScreen;
 
@@ -77,53 +91,44 @@ class MathsCoolApp extends StatefulWidget {
   State<MathsCoolApp> createState() => _MathsCoolAppState();
 }
 
-// ✅ NOUVEAU : State avec WidgetsBindingObserver
 class _MathsCoolAppState extends State<MathsCoolApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    // ✅ Enregistrer l'observateur du cycle de vie
     WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    // ✅ Nettoyer l'observateur
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  // ✅ NOUVEAU : Méthode appelée quand l'état de l'app change
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
     switch (state) {
       case AppLifecycleState.resumed:
-      // 🟢 App revient au premier plan
         print('📱 App au premier plan');
         SoundService().resumeAll();
         break;
 
       case AppLifecycleState.inactive:
-      // 🟡 App en transition (ex: notification)
         print('📱 App inactive');
         break;
 
       case AppLifecycleState.paused:
-      // 🔴 App en arrière-plan
         print('📱 App en arrière-plan');
         SoundService().pauseAll();
         break;
 
       case AppLifecycleState.detached:
-      // ⚫ App en cours de fermeture
         print('📱 App se ferme');
         SoundService().dispose();
         break;
 
       case AppLifecycleState.hidden:
-      // 🟤 App cachée (nouveau dans Flutter 3.13+)
         print('📱 App cachée');
         break;
     }
@@ -185,37 +190,65 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Widget build(BuildContext context) {
     final user = Provider.of<AppUser?>(context);
     final notificationService = Provider.of<NotificationService>(context, listen: false);
+    final gemsService = Provider.of<GemsService>(context, listen: false);
 
-    if (user != null) {
-      if (!user.emailVerified) {
-        return const EmailVerificationScreen();
+    // ✅ DÉCONNEXION : Arrêter le listener des gems
+    if (user == null) {
+      gemsService.stopListening();
+
+      if (_isForgotPasswordScreen) {
+        return ForgotPasswordScreen(
+          onLoginClicked: _toggleToLogin,
+        );
       }
 
-      // Programmer les notifications de manière asynchrone une fois connecté
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scheduleNotificationsForUser(user, notificationService);
-      });
+      if (!_isLoginScreen) {
+        return RegisterScreen(
+          onLoginClicked: _toggleToLogin,
+        );
+      }
 
-      return const HomeScreen();
-    }
-
-    if (_isForgotPasswordScreen) {
-      return ForgotPasswordScreen(
-        onLoginClicked: _toggleToLogin,
+      return LoginScreen(
+        onRegisterClicked: _toggleToRegister,
+        onForgotPasswordClicked: _toggleToForgotPassword,
       );
     }
 
-    if (!_isLoginScreen) {
-      return RegisterScreen(
-        onLoginClicked: _toggleToLogin,
-      );
+    // ✅ CONNEXION : Vérifier email
+    if (!user.emailVerified) {
+      return const EmailVerificationScreen();
     }
 
-    return LoginScreen(
-      onRegisterClicked: _toggleToRegister,
-      onForgotPasswordClicked: _toggleToForgotPassword,
-    );
+    // ✅ CHARGER LES GEMS AU LOGIN (avec écoute en temps réel)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeUserData(user, notificationService);
+    });
+
+    return const HomeScreen();
   }
+
+  // ✅ NOUVELLE MÉTHODE : Initialiser toutes les données utilisateur
+  Future<void> _initializeUserData(AppUser user, NotificationService notificationService) async {
+    try {
+      final gemsService = Provider.of<GemsService>(context, listen: false);
+      final achievementService = Provider.of<AchievementService>(context, listen: false);
+
+      // 1. Charger les Gems (démarre automatiquement le listener en temps réel)
+      await gemsService.loadGems(user.uid);
+
+      // 2. Charger les Achievements
+      await achievementService.initialize();
+      await achievementService.loadUserAchievements(user.uid);
+
+      // 3. Programmer les notifications
+      await _scheduleNotificationsForUser(user, notificationService);
+
+      print('✅ Données utilisateur initialisées avec succès');
+    } catch (e) {
+      print('❌ Erreur initialisation données utilisateur: $e');
+    }
+  }
+
   Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
     try {
       final userName = user.displayName ?? 'MathKid';

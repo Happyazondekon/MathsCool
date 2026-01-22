@@ -28,6 +28,7 @@ import 'package:mathscool/widgets/chatbot_floating_button.dart';
 import 'package:mathscool/widgets/connection_status_badge.dart';
 
 import ' chatbot_screen.dart';
+import '../services/gems_service.dart';
 import '../services/sound_service.dart';
 
 class ExerciseScreen extends StatefulWidget {
@@ -97,6 +98,153 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         }
       }
     });
+  }
+// Utiliser un Hint (20 gems)
+  void _useHint() async {
+    final user = Provider.of<AppUser?>(context, listen: false);
+    if (user == null) return;
+
+    final gemsService = Provider.of<GemsService>(context, listen: false);
+    final success = await gemsService.buyHint(user.uid);
+
+    if (success) {
+      // Afficher l'indice
+      final exercise = _exercises[_currentIndex];
+      final correctOption = exercise.options[exercise.correctAnswer];
+
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.lightbulb, color: Colors.amber, size: 60),
+                const SizedBox(height: 16),
+                const Text(
+                  'Indice 💡',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'La bonne réponse est : $correctOption',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Compris !'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      // Pas assez de gems
+      _showInsufficientGemsDialog(20);
+    }
+  }
+
+// Passer une question (30 gems)
+  void _skipQuestion() async {
+    final user = Provider.of<AppUser?>(context, listen: false);
+    if (user == null) return;
+
+    final gemsService = Provider.of<GemsService>(context, listen: false);
+    final success = await gemsService.skipQuestion(user.uid);
+
+    if (success) {
+      setState(() {
+        _feedbackMessage = 'Question passée ! ⏭️';
+        _showFeedback = true;
+      });
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (mounted) {
+        setState(() {
+          _showFeedback = false;
+          if (_currentIndex < _exercises.length - 1) {
+            _currentIndex++;
+            _animationController.reset();
+            _animationController.forward();
+          } else {
+            _currentIndex++;
+          }
+        });
+      }
+    } else {
+      _showInsufficientGemsDialog(30);
+    }
+  }
+
+// Dialogue "Pas assez de gems"
+  void _showInsufficientGemsDialog(int needed) {
+    final gemsService = Provider.of<GemsService>(context, listen: false);
+    final missing = gemsService.getMissingGems(needed);
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.diamond_outlined, color: Colors.orange, size: 60),
+              const SizedBox(height: 16),
+              const Text(
+                'Pas assez de Gems 💎',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'ComicNeue',
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Il te manque $missing gems.\nVisite la boutique pour en obtenir !',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Fermer'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const StoreScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.amber,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Boutique 🛒'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _loadExercises() async {
@@ -290,7 +438,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${achievement.name} (+${achievement.livesReward} vies)',
+                      '${achievement.name} (+${achievement.gemsReward} 💎)', // ✅ CHANGÉ : gemsReward au lieu de livesReward
                       style: const TextStyle(fontSize: 12),
                     ),
                   ],
@@ -316,7 +464,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       );
     }
   }
-
   void _showNoLivesDialog() {
     showDialog(
       context: context,
@@ -465,9 +612,10 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFFFF6B6B),
-                Color(0xFFD32F2F),
-                Colors.red,
+                AppColors.gradientStart,
+                AppColors.gradientMiddle,
+                AppColors.gradientEnd,
+                AppColors.background,
               ],
             ),
           ),
@@ -512,12 +660,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         body: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
               colors: [
-                Color(0xFFFF6B6B),
-                Color(0xFFD32F2F),
-                Colors.red,
+                AppColors.gradientStart,
+                AppColors.gradientMiddle,
+                AppColors.gradientEnd,
               ],
             ),
           ),
@@ -607,12 +755,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -905,7 +1053,56 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               ),
             ),
             const SizedBox(height: 20),
+// Boutons d'aide (Hint / Skip)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Bouton Hint (20 gems)
+                  Consumer<GemsService>(
+                    builder: (context, gemsService, _) {
+                      final canAfford = gemsService.canAfford(20);
 
+                      return ElevatedButton.icon(
+                        onPressed: canAfford ? () => _useHint() : null,
+                        icon: const Icon(Icons.lightbulb_outline, size: 18),
+                        label: const Text('Indice (20💎)'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: canAfford ? Colors.blue : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // Bouton Skip (30 gems)
+                  Consumer<GemsService>(
+                    builder: (context, gemsService, _) {
+                      final canAfford = gemsService.canAfford(30);
+
+                      return ElevatedButton.icon(
+                        onPressed: canAfford ? () => _skipQuestion() : null,
+                        icon: const Icon(Icons.skip_next, size: 18),
+                        label: const Text('Passer (30💎)'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: canAfford ? Colors.orange : Colors.grey,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
             Expanded(
               child: useListView
                   ? ListView.builder(
@@ -1106,16 +1303,19 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: AppColors.gradientStart.withOpacity(0.3),
                     blurRadius: 20,
                     spreadRadius: 5,
                     offset: const Offset(0, 10),
                   ),
                 ],
                 gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [
-                    Colors.orange.shade300,
-                    Colors.yellow.shade500,
+                    AppColors.gradientStart,
+                    AppColors.gradientMiddle,
+                    AppColors.gradientEnd,
                   ],
                 ),
               ),
@@ -1237,7 +1437,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF9C27B0),
+                          backgroundColor: AppColors.primary,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),

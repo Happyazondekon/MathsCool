@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mathscool/utils/colors.dart';
 
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
@@ -26,14 +27,14 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -65,7 +66,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -78,10 +79,10 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
                 Text(
@@ -89,7 +90,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
@@ -97,7 +98,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                   'Tout pour réussir ! 📚',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -113,7 +114,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -127,12 +128,12 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
         controller: _tabController,
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+          gradient: LinearGradient(
+            colors: [AppColors.primary, AppColors.secondary],
           ),
         ),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey,
+        labelColor: AppColors.textLight,
+        unselectedLabelColor: AppColors.textSecondary,
         labelStyle: const TextStyle(
           fontWeight: FontWeight.bold,
           fontFamily: 'ComicNeue',
@@ -177,7 +178,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
   Widget _buildFAQCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -194,24 +195,24 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
           leading: Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.secondary],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.question_answer_rounded,
-              color: Colors.white,
+              color: AppColors.textLight,
               size: 24,
             ),
           ),
-          title: const Text(
+          title: Text(
             'Questions fréquentes',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'ComicNeue',
               fontSize: 18,
-              color: Color(0xFFD32F2F),
+              color: AppColors.primary,
             ),
           ),
           children: [
@@ -240,13 +241,13 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                 margin: const EdgeInsets.only(top: 2),
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
+                  color: AppColors.accent.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.help_rounded,
                   size: 16,
-                  color: Colors.orange.shade700,
+                  color: AppColors.accent,
                 ),
               ),
               const SizedBox(width: 10),
@@ -256,11 +257,11 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                   children: [
                     Text(
                       question,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                         fontFamily: 'ComicNeue',
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -269,7 +270,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       style: TextStyle(
                         fontSize: 14,
                         fontFamily: 'ComicNeue',
-                        color: Colors.grey.shade700,
+                        color: AppColors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -286,7 +287,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
   Widget _buildMathKidManualCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -304,31 +305,31 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.green.shade400, Colors.green.shade700],
+                colors: [AppColors.success, Color(0xFF059669)],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.menu_book_rounded,
-              color: Colors.white,
+              color: AppColors.textLight,
               size: 24,
             ),
           ),
-          title: const Text(
+          title: Text(
             'Manuel MathKid',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'ComicNeue',
               fontSize: 18,
-              color: Color(0xFFD32F2F),
+              color: AppColors.primary,
             ),
           ),
-          subtitle: const Text(
+          subtitle: Text(
             'Niveau Primaire',
             style: TextStyle(
               fontSize: 12,
               fontFamily: 'ComicNeue',
-              color: Colors.grey,
+              color: AppColors.textSecondary,
             ),
           ),
           children: [
@@ -343,7 +344,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       'L\'addition ( + ) c\'est rassembler : 3 + 2 = 5.',
                       'La soustraction ( - ) c\'est enlever : 5 - 2 = 3.',
                     ],
-                    Colors.green,
+                    AppColors.success,
                   ),
                   const SizedBox(height: 16),
                   _buildManualSection(
@@ -352,7 +353,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       'C\'est ajouter plusieurs fois le même nombre :',
                       '3 × 4 = 12 (c\'est 4+4+4).',
                     ],
-                    Colors.blue,
+                    AppColors.info,
                   ),
                   const SizedBox(height: 16),
                   _buildManualSection(
@@ -362,7 +363,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       '• Rectangle : 2 grands côtés, 2 petits',
                       '• Triangle : 3 côtés',
                     ],
-                    Colors.purple,
+                    AppColors.secondary,
                   ),
                 ],
               ),
@@ -376,7 +377,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
   Widget _buildMathExpertManualCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -394,31 +395,31 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.purple.shade400, Colors.purple.shade700],
+                colors: [AppColors.secondary, AppColors.primary],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.school_rounded,
-              color: Colors.white,
+              color: AppColors.textLight,
               size: 24,
             ),
           ),
-          title: const Text(
+          title: Text(
             'Manuel MathExpert',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'ComicNeue',
               fontSize: 18,
-              color: Color(0xFFD32F2F),
+              color: AppColors.primary,
             ),
           ),
-          subtitle: const Text(
+          subtitle: Text(
             'Niveau Collège',
             style: TextStyle(
               fontSize: 12,
               fontFamily: 'ComicNeue',
-              color: Colors.grey,
+              color: AppColors.textSecondary,
             ),
           ),
           children: [
@@ -434,7 +435,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       '• Addition : Si les signes sont les mêmes, on ajoute.',
                       '• Multiplication : "Moins par Moins donne Plus" !',
                     ],
-                    Colors.indigo,
+                    AppColors.primary,
                   ),
                   const SizedBox(height: 16),
                   _buildManualSection(
@@ -444,7 +445,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       '• Simplifier : Diviser le haut et le bas par le même nombre.',
                       '• Additionner : Mettre au même dénominateur !',
                     ],
-                    Colors.teal,
+                    Color(0xFF14B8A6),
                   ),
                   const SizedBox(height: 16),
                   _buildManualSection(
@@ -453,7 +454,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       'On remplace un nombre inconnu par une lettre (x).',
                       'But : Trouver la valeur de x qui rend l\'égalité vraie.',
                     ],
-                    Colors.deepOrange,
+                    Color(0xFFF97316),
                   ),
                   const SizedBox(height: 16),
                   _buildManualSection(
@@ -462,7 +463,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                       '• Pythagore : a² + b² = c² (triangle rectangle)',
                       '• Thalès : Pour calculer des longueurs.',
                     ],
-                    Colors.brown,
+                    Color(0xFF78350F),
                   ),
                 ],
               ),
@@ -497,7 +498,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                 ),
                 child: Icon(
                   Icons.lightbulb_rounded,
-                  color: Colors.white,
+                  color: AppColors.textLight,
                   size: 16,
                 ),
               ),
@@ -537,7 +538,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                     style: TextStyle(
                       fontSize: 14,
                       fontFamily: 'ComicNeue',
-                      color: Colors.grey.shade800,
+                      color: AppColors.textPrimary,
                       height: 1.4,
                     ),
                   ),
@@ -554,7 +555,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -573,24 +574,24 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.amber.shade400, Colors.orange.shade600],
+                    colors: [AppColors.accent, AppColors.warning],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.tips_and_updates_rounded,
-                  color: Colors.white,
+                  color: AppColors.textLight,
                   size: 24,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Astuces pour réussir',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: Color(0xFFD32F2F),
+                  color: AppColors.primary,
                 ),
               ),
             ],
@@ -619,12 +620,12 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+              gradient: LinearGradient(
+                colors: [AppColors.primary, AppColors.secondary],
               ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: Icon(icon, color: AppColors.textLight, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -633,11 +634,11 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                     fontFamily: 'ComicNeue',
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -646,7 +647,7 @@ class _HelpScreenState extends State<HelpScreen> with SingleTickerProviderStateM
                   style: TextStyle(
                     fontSize: 14,
                     fontFamily: 'ComicNeue',
-                    color: Colors.grey.shade700,
+                    color: AppColors.textSecondary,
                     height: 1.4,
                   ),
                 ),

@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/achievement_model.dart';
+import 'gems_service.dart'; // ✅ IMPORT AJOUTÉ
 
 class AchievementService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final GemsService _gemsService; // ✅ AJOUTÉ
 
   List<Achievement> _allAchievements = [];
   Map<String, UserAchievement> _userAchievements = {};
@@ -11,8 +13,8 @@ class AchievementService extends ChangeNotifier {
   List<Achievement> get allAchievements => _allAchievements;
   Map<String, UserAchievement> get userAchievements => _userAchievements;
 
-  // --- CORRECTION 1 : Constructeur pour charger la liste statique immédiatement ---
-  AchievementService() {
+  // ✅ CONSTRUCTEUR MODIFIÉ pour injecter GemsService
+  AchievementService(this._gemsService) {
     _allAchievements = PredefinedAchievements.getAllAchievements();
   }
 
@@ -25,7 +27,6 @@ class AchievementService extends ChangeNotifier {
 
   /// Charger les achievements de l'utilisateur
   Future<void> loadUserAchievements(String userId) async {
-    // S'assurer que la liste de référence est chargée
     if (_allAchievements.isEmpty) initialize();
 
     try {
@@ -36,8 +37,6 @@ class AchievementService extends ChangeNotifier {
 
       _userAchievements = {};
 
-      // 1. Initialiser avec des valeurs par défaut pour TOUS les achievements définis dans l'app
-      // C'est crucial pour les nouveaux achievements ajoutés lors d'une mise à jour
       for (var achievement in _allAchievements) {
         _userAchievements[achievement.id] = UserAchievement(
           achievementId: achievement.id,
@@ -47,19 +46,16 @@ class AchievementService extends ChangeNotifier {
         );
       }
 
-      // 2. Si des données existent dans Firestore, on met à jour par dessus les défauts
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
         data.forEach((key, value) {
           if (value is Map<String, dynamic>) {
-            // On ne charge que si l'achievement existe encore dans notre code
             if (_allAchievements.any((a) => a.id == key)) {
               _userAchievements[key] = UserAchievement.fromFirestore(value);
             }
           }
         });
       } else {
-        // Premier chargement : on crée le doc vide pour éviter de recharger à chaque fois
         await _saveUserAchievements(userId);
       }
 
@@ -93,7 +89,6 @@ class AchievementService extends ChangeNotifier {
     int incrementBy = 1,
     String? level,
   }) async {
-    // S'assurer que tout est chargé avant de traiter
     if (_allAchievements.isEmpty) initialize();
     if (_userAchievements.isEmpty) await loadUserAchievements(userId);
 
@@ -102,15 +97,11 @@ class AchievementService extends ChangeNotifier {
 
     try {
       for (var achievement in _allAchievements) {
-        // Vérifier si l'achievement correspond au type d'action (ex: exercice terminé)
         if (achievement.type != type) continue;
 
-        // Vérifier le niveau requis si applicable
         if (achievement.requiredLevel != null &&
             achievement.requiredLevel != level) continue;
 
-        // --- CORRECTION 2 : Gestion robuste si l'entrée est nulle ---
-        // On récupère l'existant OU on crée une instance par défaut
         UserAchievement userAchievement = _userAchievements[achievement.id] ?? UserAchievement(
           achievementId: achievement.id,
           currentProgress: 0,
@@ -118,14 +109,11 @@ class AchievementService extends ChangeNotifier {
           isClaimed: false,
         );
 
-        // Si déjà complété, on ne fait rien
         if (userAchievement.isCompleted) continue;
 
-        // Mettre à jour la progression
         final newProgress = userAchievement.currentProgress + incrementBy;
         final isNowCompleted = newProgress >= achievement.targetValue;
 
-        // Mettre à jour la map locale
         _userAchievements[achievement.id] = userAchievement.copyWith(
           currentProgress: newProgress,
           isCompleted: isNowCompleted,
@@ -140,7 +128,6 @@ class AchievementService extends ChangeNotifier {
         }
       }
 
-      // Sauvegarder uniquement si il y a eu des changements
       if (needsSave) {
         await _saveUserAchievements(userId);
         notifyListeners();
@@ -153,10 +140,9 @@ class AchievementService extends ChangeNotifier {
     return newlyCompleted;
   }
 
-  /// Réclamer les récompenses d'un achievement
+  /// ✅ MODIFIÉ : Réclamer les récompenses d'un achievement (maintenant en Gems)
   Future<int> claimAchievement(String userId, String achievementId) async {
     try {
-      // S'assurer que la liste est chargée pour le 'firstWhere'
       if (_allAchievements.isEmpty) initialize();
 
       final achievement = _allAchievements.firstWhere(
@@ -178,7 +164,14 @@ class AchievementService extends ChangeNotifier {
       await _saveUserAchievements(userId);
       notifyListeners();
 
-      return achievement.livesReward;
+      // ✅ DONNER DES GEMS AU LIEU DE VIES
+      await _gemsService.rewardAchievement(
+        userId,
+        achievementId,
+        achievement.gemsReward,
+      );
+
+      return achievement.gemsReward; // ✅ Retourner les gems gagnés
 
     } catch (e) {
       if (kDebugMode) print('Erreur réclamation achievement: $e');
@@ -190,7 +183,6 @@ class AchievementService extends ChangeNotifier {
   List<Achievement> getUnclaimedAchievements() {
     List<Achievement> unclaimed = [];
 
-    // Sécurité si appelé trop tôt
     if (_allAchievements.isEmpty) return [];
 
     for (var achievement in _allAchievements) {
@@ -206,13 +198,19 @@ class AchievementService extends ChangeNotifier {
     return unclaimed;
   }
 
-  /// Obtenir le nombre total de vies non réclamées
-  int getTotalUnclaimedLives() {
+  /// ✅ MODIFIÉ : Obtenir le nombre total de gems non réclamés
+  int getTotalUnclaimedGems() {
     int total = 0;
     for (var achievement in getUnclaimedAchievements()) {
-      total += achievement.livesReward;
+      total += achievement.gemsReward;
     }
     return total;
+  }
+
+  /// ✅ BACKWARD COMPATIBILITY : Ancienne méthode qui retournait des vies
+  int getTotalUnclaimedLives() {
+    // Retourner 0 car les achievements ne donnent plus de vies
+    return 0;
   }
 
   /// Obtenir la progression d'un achievement (0.0 à 1.0)
@@ -245,12 +243,32 @@ class AchievementService extends ChangeNotifier {
       if (value.isClaimed) claimed++;
     });
 
+    // ✅ CALCULER LES GEMS TOTAUX GAGNÉS
+    int totalGemsEarned = 0;
+    _userAchievements.forEach((key, value) {
+      if (value.isClaimed) {
+        final achievement = _allAchievements.firstWhere(
+              (a) => a.id == key,
+          orElse: () => Achievement(
+            id: '',
+            name: '',
+            description: '',
+            icon: '',
+            type: AchievementType.exercisesCompleted,
+            targetValue: 0,
+            gemsReward: 0,
+          ),
+        );
+        totalGemsEarned += achievement.gemsReward;
+      }
+    });
+
     return {
       'total': total,
       'completed': completed,
       'claimed': claimed,
       'unclaimed': completed - claimed,
-      'totalLivesEarned': claimed * 2, // Moyenne approximative
+      'totalGemsEarned': totalGemsEarned, // ✅ CHANGÉ
       'completionRate': total > 0 ? (completed / total) : 0.0,
     };
   }
@@ -279,9 +297,7 @@ class AchievementService extends ChangeNotifier {
     });
   }
 
-  // Ajouter après la méthode updateProgress existante :
-
-  /// Mise à jour spécifique pour le mode infini
+  // Méthodes existantes (inchangées)
   Future<List<Achievement>> updateInfiniteModeProgress({
     required String userId,
     int exercisesCompleted = 1,
@@ -293,14 +309,11 @@ class AchievementService extends ChangeNotifier {
     );
   }
 
-  /// Mise à jour pour la maîtrise d'un thème
   Future<List<Achievement>> updateThemeMastery({
     required String userId,
     required String theme,
     required String level,
   }) async {
-    // TODO: Tracker les thèmes complétés dans Firestore
-    // Pour l'instant, on incrémente juste le compteur
     return await updateProgress(
       userId: userId,
       type: AchievementType.themeMastery,
@@ -308,12 +321,10 @@ class AchievementService extends ChangeNotifier {
     );
   }
 
-  /// Mise à jour pour la maîtrise d'un niveau
   Future<List<Achievement>> updateLevelMastery({
     required String userId,
     required String level,
   }) async {
-    // TODO: Tracker les niveaux complétés dans Firestore
     return await updateProgress(
       userId: userId,
       type: AchievementType.levelMastery,
@@ -321,12 +332,10 @@ class AchievementService extends ChangeNotifier {
     );
   }
 
-  /// Vérifier les achievements secrets basés sur l'heure/date
   Future<List<Achievement>> checkTimeBasedAchievements(String userId) async {
     List<Achievement> unlocked = [];
     final now = DateTime.now();
 
-    // Oiseau de nuit (minuit - 6h)
     if (now.hour >= 0 && now.hour < 6) {
       final nightOwl = await updateProgress(
         userId: userId,
@@ -336,7 +345,6 @@ class AchievementService extends ChangeNotifier {
       unlocked.addAll(nightOwl.where((a) => a.id == 'night_owl'));
     }
 
-    // Lève-tôt (5h - 7h)
     if (now.hour >= 5 && now.hour < 7) {
       final earlyBird = await updateProgress(
         userId: userId,
@@ -344,26 +352,6 @@ class AchievementService extends ChangeNotifier {
         incrementBy: 1,
       );
       unlocked.addAll(earlyBird.where((a) => a.id == 'early_bird'));
-    }
-
-    // Noël (25 décembre)
-    if (now.month == 12 && now.day == 25) {
-      final christmas = await updateProgress(
-        userId: userId,
-        type: AchievementType.exercisesCompleted,
-        incrementBy: 1,
-      );
-      unlocked.addAll(christmas.where((a) => a.id == 'christmas_special'));
-    }
-
-    // Nouvel An (1er janvier)
-    if (now.month == 1 && now.day == 1) {
-      final newYear = await updateProgress(
-        userId: userId,
-        type: AchievementType.exercisesCompleted,
-        incrementBy: 1,
-      );
-      unlocked.addAll(newYear.where((a) => a.id == 'new_year'));
     }
 
     return unlocked;

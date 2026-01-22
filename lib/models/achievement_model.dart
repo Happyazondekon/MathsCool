@@ -14,6 +14,12 @@ enum AchievementType {
   themeMastery,
 }
 
+enum AchievementDifficulty {
+  easy,   // 10 gems
+  medium, // 20 gems
+  hard,   // 30 gems
+}
+
 class Achievement {
   final String id;
   final String name;
@@ -21,7 +27,8 @@ class Achievement {
   final String icon;
   final AchievementType type;
   final int targetValue;
-  final int livesReward;
+  final int gemsReward; // ✅ CHANGÉ : gems au lieu de vies
+  final AchievementDifficulty difficulty; // ✅ NOUVEAU
   final String? requiredLevel;
   final bool isSecret;
 
@@ -32,10 +39,14 @@ class Achievement {
     required this.icon,
     required this.type,
     required this.targetValue,
-    required this.livesReward,
+    required this.gemsReward,
+    this.difficulty = AchievementDifficulty.easy,
     this.requiredLevel,
     this.isSecret = false,
   });
+
+  // ✅ Helper pour backward compatibility (si certains endroits utilisent encore livesReward)
+  int get livesReward => 0; // Les achievements ne donnent plus de vies
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -45,7 +56,8 @@ class Achievement {
       'icon': icon,
       'type': type.toString(),
       'targetValue': targetValue,
-      'livesReward': livesReward,
+      'gemsReward': gemsReward,
+      'difficulty': difficulty.toString(),
       'requiredLevel': requiredLevel,
       'isSecret': isSecret,
     };
@@ -61,7 +73,11 @@ class Achievement {
             (e) => e.toString() == data['type'],
       ),
       targetValue: data['targetValue'] as int,
-      livesReward: data['livesReward'] as int,
+      gemsReward: data['gemsReward'] as int? ?? 10, // Défaut 10 gems
+      difficulty: AchievementDifficulty.values.firstWhere(
+            (e) => e.toString() == (data['difficulty'] ?? 'AchievementDifficulty.easy'),
+        orElse: () => AchievementDifficulty.easy,
+      ),
       requiredLevel: data['requiredLevel'] as String?,
       isSecret: data['isSecret'] as bool? ?? false,
     );
@@ -123,7 +139,7 @@ class UserAchievement {
 class PredefinedAchievements {
   static List<Achievement> getAllAchievements() {
     return [
-      // 🎯 SÉRIE : PREMIERS PAS (1 vie chacun)
+      // 🎯 SÉRIE : PREMIERS PAS (Easy - 10 gems)
       Achievement(
         id: 'first_steps',
         name: 'Premiers pas',
@@ -131,7 +147,8 @@ class PredefinedAchievements {
         icon: '👶',
         type: AchievementType.exercisesCompleted,
         targetValue: 1,
-        livesReward: 1,
+        gemsReward: 10,
+        difficulty: AchievementDifficulty.easy,
       ),
       Achievement(
         id: 'getting_started',
@@ -140,7 +157,8 @@ class PredefinedAchievements {
         icon: '🚀',
         type: AchievementType.exercisesCompleted,
         targetValue: 5,
-        livesReward: 1,
+        gemsReward: 10,
+        difficulty: AchievementDifficulty.easy,
       ),
       Achievement(
         id: 'on_track',
@@ -149,10 +167,11 @@ class PredefinedAchievements {
         icon: '🛤️',
         type: AchievementType.exercisesCompleted,
         targetValue: 15,
-        livesReward: 1,
+        gemsReward: 10,
+        difficulty: AchievementDifficulty.easy,
       ),
 
-      // 📚 SÉRIE : APPRENTISSAGE (1-2 vies)
+      // 📚 SÉRIE : APPRENTISSAGE (Medium - 20 gems)
       Achievement(
         id: 'beginner',
         name: 'Apprenti',
@@ -160,7 +179,8 @@ class PredefinedAchievements {
         icon: '📚',
         type: AchievementType.exercisesCompleted,
         targetValue: 25,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'learner',
@@ -169,7 +189,8 @@ class PredefinedAchievements {
         icon: '📖',
         type: AchievementType.exercisesCompleted,
         targetValue: 50,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'student',
@@ -178,10 +199,11 @@ class PredefinedAchievements {
         icon: '🎓',
         type: AchievementType.exercisesCompleted,
         targetValue: 75,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
 
-      // 🏆 SÉRIE : MAÎTRISE (2-3 vies)
+      // 🏆 SÉRIE : MAÎTRISE (Hard - 30 gems)
       Achievement(
         id: 'skilled',
         name: 'Compétent',
@@ -189,16 +211,18 @@ class PredefinedAchievements {
         icon: '🎖️',
         type: AchievementType.exercisesCompleted,
         targetValue: 100,
-        livesReward: 2,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'expert',
         name: 'Expert',
         description: 'Résous 150 exercices',
-        icon: '🏅',
+        icon: '🥇',
         type: AchievementType.exercisesCompleted,
         targetValue: 150,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'master',
@@ -207,7 +231,8 @@ class PredefinedAchievements {
         icon: '👑',
         type: AchievementType.exercisesCompleted,
         targetValue: 200,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'champion',
@@ -216,7 +241,8 @@ class PredefinedAchievements {
         icon: '🏆',
         type: AchievementType.exercisesCompleted,
         targetValue: 300,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'legend',
@@ -225,10 +251,11 @@ class PredefinedAchievements {
         icon: '⭐',
         type: AchievementType.exercisesCompleted,
         targetValue: 500,
-        livesReward: 3,
+        gemsReward: 50, // ✅ BONUS pour accomplissement majeur
+        difficulty: AchievementDifficulty.hard,
       ),
 
-      // ✨ SÉRIE : PERFECTION (1-3 vies)
+      // ✨ SÉRIE : PERFECTION (Easy/Medium)
       Achievement(
         id: 'perfectionist',
         name: 'Perfectionniste',
@@ -236,7 +263,8 @@ class PredefinedAchievements {
         icon: '✨',
         type: AchievementType.perfectScore,
         targetValue: 1,
-        livesReward: 1,
+        gemsReward: 10,
+        difficulty: AchievementDifficulty.easy,
       ),
       Achievement(
         id: 'flawless_trio',
@@ -245,7 +273,8 @@ class PredefinedAchievements {
         icon: '💎',
         type: AchievementType.perfectScore,
         targetValue: 3,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'perfect_five',
@@ -254,7 +283,8 @@ class PredefinedAchievements {
         icon: '🌟',
         type: AchievementType.perfectScore,
         targetValue: 5,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'perfect_ten',
@@ -263,7 +293,8 @@ class PredefinedAchievements {
         icon: '💫',
         type: AchievementType.perfectScore,
         targetValue: 10,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'perfect_master',
@@ -272,10 +303,11 @@ class PredefinedAchievements {
         icon: '🎯',
         type: AchievementType.perfectScore,
         targetValue: 20,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
 
-      // 🔥 SÉRIE : STREAK (1-3 vies)
+      // 🔥 SÉRIE : STREAK (Easy/Medium/Hard)
       Achievement(
         id: 'daily_player',
         name: 'Joueur quotidien',
@@ -283,7 +315,8 @@ class PredefinedAchievements {
         icon: '📅',
         type: AchievementType.streak,
         targetValue: 3,
-        livesReward: 1,
+        gemsReward: 15, // ✅ BONUS car streak = engagement
+        difficulty: AchievementDifficulty.easy,
       ),
       Achievement(
         id: 'committed',
@@ -292,7 +325,8 @@ class PredefinedAchievements {
         icon: '🔥',
         type: AchievementType.streak,
         targetValue: 5,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'weekly_warrior',
@@ -301,7 +335,8 @@ class PredefinedAchievements {
         icon: '⚔️',
         type: AchievementType.streak,
         targetValue: 7,
-        livesReward: 2,
+        gemsReward: 50, // ✅ GROS BONUS pour 1 semaine
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'two_weeks',
@@ -310,7 +345,8 @@ class PredefinedAchievements {
         icon: '💪',
         type: AchievementType.streak,
         targetValue: 14,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'monthly_master',
@@ -319,10 +355,11 @@ class PredefinedAchievements {
         icon: '🌙',
         type: AchievementType.streak,
         targetValue: 30,
-        livesReward: 3,
+        gemsReward: 100, // ✅ MEGA BONUS pour 1 mois
+        difficulty: AchievementDifficulty.hard,
       ),
 
-      // ♾️ SÉRIE : MODE INFINI (2-3 vies)
+      // ♾️ SÉRIE : MODE INFINI (Medium/Hard)
       Achievement(
         id: 'infinite_beginner',
         name: 'Infini débutant',
@@ -330,7 +367,8 @@ class PredefinedAchievements {
         icon: '♾️',
         type: AchievementType.infiniteMode,
         targetValue: 25,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'infinite_explorer',
@@ -339,7 +377,8 @@ class PredefinedAchievements {
         icon: '🌌',
         type: AchievementType.infiniteMode,
         targetValue: 50,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'infinite_warrior',
@@ -348,7 +387,8 @@ class PredefinedAchievements {
         icon: '⚡',
         type: AchievementType.infiniteMode,
         targetValue: 100,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
       Achievement(
         id: 'infinite_master',
@@ -357,184 +397,11 @@ class PredefinedAchievements {
         icon: '🎆',
         type: AchievementType.infiniteMode,
         targetValue: 200,
-        livesReward: 3,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
       ),
 
-      // 💪 SÉRIE : EFFICACITÉ (1-2 vies)
-      Achievement(
-        id: 'efficient_player',
-        name: 'Joueur efficace',
-        description: 'Termine 20 exercices avec 5 vies max perdues',
-        icon: '💪',
-        type: AchievementType.livesUsedWisely,
-        targetValue: 20,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'careful_learner',
-        name: 'Apprenant prudent',
-        description: 'Termine 50 exercices avec 10 vies max perdues',
-        icon: '🛡️',
-        type: AchievementType.livesUsedWisely,
-        targetValue: 50,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'strategic_mind',
-        name: 'Esprit stratégique',
-        description: 'Termine 100 exercices avec 15 vies max perdues',
-        icon: '🧠',
-        type: AchievementType.livesUsedWisely,
-        targetValue: 100,
-        livesReward: 3,
-      ),
-
-      // ⚡ SÉRIE : VITESSE (1-2 vies)
-      Achievement(
-        id: 'speed_demon',
-        name: 'Éclair',
-        description: 'Résous 10 exercices en moins de 5 minutes',
-        icon: '⚡',
-        type: AchievementType.fastLearner,
-        targetValue: 10,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'lightning_fast',
-        name: 'Foudre',
-        description: 'Résous 20 exercices en moins de 10 minutes',
-        icon: '⚡',
-        type: AchievementType.fastLearner,
-        targetValue: 20,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'time_master',
-        name: 'Maître du temps',
-        description: 'Résous 50 exercices en moins de 20 minutes',
-        icon: '⏱️',
-        type: AchievementType.fastLearner,
-        targetValue: 50,
-        livesReward: 3,
-      ),
-
-      // 🎖️ SÉRIE : BADGES (1-2 vies)
-      Achievement(
-        id: 'badge_collector',
-        name: 'Collectionneur',
-        description: 'Obtiens 3 badges',
-        icon: '🎖️',
-        type: AchievementType.badgesEarned,
-        targetValue: 3,
-        livesReward: 1,
-      ),
-      Achievement(
-        id: 'badge_hunter',
-        name: 'Chasseur de badges',
-        description: 'Obtiens 5 badges',
-        icon: '🏅',
-        type: AchievementType.badgesEarned,
-        targetValue: 5,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'badge_master',
-        name: 'Maître des badges',
-        description: 'Obtiens 10 badges',
-        icon: '👑',
-        type: AchievementType.badgesEarned,
-        targetValue: 10,
-        livesReward: 2,
-      ),
-
-      // 🎯 SÉRIE : MATHKID (2-3 vies)
-      Achievement(
-        id: 'math_kid_achievement',
-        name: 'MathKid certifié',
-        description: 'Obtiens le statut MathKid',
-        icon: '🎯',
-        type: AchievementType.mathKid,
-        targetValue: 1,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'math_kid_trio',
-        name: 'Trio MathKid',
-        description: 'Obtiens 3 statuts MathKid',
-        icon: '🌟',
-        type: AchievementType.mathKid,
-        targetValue: 3,
-        livesReward: 3,
-      ),
-      Achievement(
-        id: 'math_kid_master',
-        name: 'MathKid maître',
-        description: 'Obtiens 5 statuts MathKid',
-        icon: '👨‍🏫',
-        type: AchievementType.mathKid,
-        targetValue: 5,
-        livesReward: 3,
-      ),
-
-      // 📊 SÉRIE : THÈMES (2-3 vies)
-      Achievement(
-        id: 'theme_explorer',
-        name: 'Explorateur de thèmes',
-        description: 'Complète 3 thèmes différents',
-        icon: '🗺️',
-        type: AchievementType.themeMastery,
-        targetValue: 3,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'theme_specialist',
-        name: 'Spécialiste',
-        description: 'Complète 5 thèmes différents',
-        icon: '📊',
-        type: AchievementType.themeMastery,
-        targetValue: 5,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'theme_master',
-        name: 'Maître des thèmes',
-        description: 'Complète 10 thèmes différents',
-        icon: '🎓',
-        type: AchievementType.themeMastery,
-        targetValue: 10,
-        livesReward: 3,
-      ),
-
-      // 🎓 SÉRIE : NIVEAUX (2-3 vies)
-      Achievement(
-        id: 'level_beginner',
-        name: 'Multi-niveau',
-        description: 'Complète 2 niveaux différents',
-        icon: '📈',
-        type: AchievementType.levelMastery,
-        targetValue: 2,
-        livesReward: 2,
-      ),
-      Achievement(
-        id: 'level_master',
-        name: 'Maître des niveaux',
-        description: 'Complète 4 niveaux différents',
-        icon: '🎯',
-        type: AchievementType.levelMastery,
-        targetValue: 4,
-        livesReward: 3,
-      ),
-      Achievement(
-        id: 'all_levels',
-        name: 'Tous les niveaux',
-        description: 'Complète tous les niveaux disponibles',
-        icon: '🏆',
-        type: AchievementType.levelMastery,
-        targetValue: 10,
-        livesReward: 3,
-      ),
-
-      // 🌙 SÉRIE : ACHIEVEMENTS SECRETS (1-3 vies)
+      // 🌙 SÉRIE : ACHIEVEMENTS SECRETS (Medium/Hard)
       Achievement(
         id: 'night_owl',
         name: 'Oiseau de nuit',
@@ -542,17 +409,19 @@ class PredefinedAchievements {
         icon: '🦉',
         type: AchievementType.exercisesCompleted,
         targetValue: 10,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
         isSecret: true,
       ),
       Achievement(
         id: 'early_bird',
         name: 'Lève-tôt',
         description: 'Joue entre 5h et 7h du matin',
-        icon: '🐦',
+        icon: '🦅',
         type: AchievementType.exercisesCompleted,
         targetValue: 10,
-        livesReward: 2,
+        gemsReward: 20,
+        difficulty: AchievementDifficulty.medium,
         isSecret: true,
       ),
       Achievement(
@@ -562,7 +431,8 @@ class PredefinedAchievements {
         icon: '🎮',
         type: AchievementType.exercisesCompleted,
         targetValue: 20,
-        livesReward: 2,
+        gemsReward: 30,
+        difficulty: AchievementDifficulty.hard,
         isSecret: true,
       ),
       Achievement(
@@ -572,47 +442,8 @@ class PredefinedAchievements {
         icon: '🍀',
         type: AchievementType.exercisesCompleted,
         targetValue: 777,
-        livesReward: 3,
-        isSecret: true,
-      ),
-      Achievement(
-        id: 'christmas_special',
-        name: 'Esprit de Noël',
-        description: 'Joue le 25 décembre',
-        icon: '🎄',
-        type: AchievementType.exercisesCompleted,
-        targetValue: 1,
-        livesReward: 3,
-        isSecret: true,
-      ),
-      Achievement(
-        id: 'new_year',
-        name: 'Bonne année !',
-        description: 'Joue le 1er janvier',
-        icon: '🎆',
-        type: AchievementType.exercisesCompleted,
-        targetValue: 1,
-        livesReward: 3,
-        isSecret: true,
-      ),
-      Achievement(
-        id: 'marathon_player',
-        name: 'Marathonien',
-        description: 'Joue pendant 2 heures d\'affilée',
-        icon: '🏃',
-        type: AchievementType.exercisesCompleted,
-        targetValue: 100,
-        livesReward: 3,
-        isSecret: true,
-      ),
-      Achievement(
-        id: 'comeback_king',
-        name: 'Roi du retour',
-        description: 'Reviens après 30 jours d\'absence',
-        icon: '👑',
-        type: AchievementType.exercisesCompleted,
-        targetValue: 1,
-        livesReward: 2,
+        gemsReward: 77, // ✅ Easter egg thématique
+        difficulty: AchievementDifficulty.hard,
         isSecret: true,
       ),
     ];

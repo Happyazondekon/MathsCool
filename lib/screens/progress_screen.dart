@@ -92,14 +92,14 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -114,9 +114,9 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   const SizedBox(height: 16),
                   Expanded(
                     child: _isLoading
-                        ? const Center(
+                        ? Center(
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         strokeWidth: 3,
                       ),
                     )
@@ -126,7 +126,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         margin: const EdgeInsets.all(20),
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppColors.surface,
                           borderRadius: BorderRadius.circular(25),
                           boxShadow: [
                             BoxShadow(
@@ -136,21 +136,22 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                             ),
                           ],
                         ),
-                        child: const Column(
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
                               Icons.error_outline,
                               size: 60,
-                              color: Colors.red,
+                              color: AppColors.error,
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Text(
                               'Erreur lors du chargement',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'ComicNeue',
+                                color: AppColors.textPrimary,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -194,13 +195,13 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 numberOfParticles: 30,
                 gravity: 0.1,
                 shouldLoop: false,
-                colors: const [
-                  Colors.green,
-                  Colors.blue,
-                  Colors.pink,
-                  Colors.orange,
-                  Colors.purple,
-                  Colors.yellow,
+                colors: [
+                  AppColors.success,
+                  AppColors.info,
+                  AppColors.gradientEnd,
+                  AppColors.accent,
+                  AppColors.secondary,
+                  AppColors.warning,
                 ],
               ),
             ),
@@ -215,7 +216,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -228,10 +229,10 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
                 Text(
@@ -239,7 +240,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
@@ -247,7 +248,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   'Suis ton évolution ! 📊',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -263,7 +264,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -286,8 +287,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   gradient: !showGradeProgress
-                      ? const LinearGradient(
-                    colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+                      ? LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
                   )
                       : null,
                   borderRadius: const BorderRadius.horizontal(left: Radius.circular(25)),
@@ -298,7 +299,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     Icon(
                       Icons.category_rounded,
                       size: 20,
-                      color: !showGradeProgress ? Colors.white : Colors.grey,
+                      color: !showGradeProgress ? AppColors.textLight : AppColors.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -307,7 +308,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
                         fontSize: 14,
-                        color: !showGradeProgress ? Colors.white : Colors.grey,
+                        color: !showGradeProgress ? AppColors.textLight : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -318,7 +319,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
           Container(
             width: 1,
             height: 40,
-            color: Colors.grey.shade300,
+            color: AppColors.divider,
           ),
           Expanded(
             child: GestureDetector(
@@ -331,8 +332,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
                   gradient: showGradeProgress
-                      ? const LinearGradient(
-                    colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+                      ? LinearGradient(
+                    colors: [AppColors.primary, AppColors.secondary],
                   )
                       : null,
                   borderRadius: const BorderRadius.horizontal(right: Radius.circular(25)),
@@ -343,7 +344,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     Icon(
                       Icons.school_rounded,
                       size: 20,
-                      color: showGradeProgress ? Colors.white : Colors.grey,
+                      color: showGradeProgress ? AppColors.textLight : AppColors.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -352,7 +353,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
                         fontSize: 14,
-                        color: showGradeProgress ? Colors.white : Colors.grey,
+                        color: showGradeProgress ? AppColors.textLight : AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -382,15 +383,15 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.purple.shade300,
-              Colors.purple.shade500,
-              Colors.deepPurple.shade600,
+              AppColors.secondary,
+              AppColors.primary,
+              Color(0xFF5B21B6),
             ],
           ),
           borderRadius: BorderRadius.circular(25),
           boxShadow: [
             BoxShadow(
-              color: Colors.purple.withOpacity(0.5),
+              color: AppColors.secondary.withOpacity(0.5),
               blurRadius: 20,
               spreadRadius: 5,
               offset: const Offset(0, 8),
@@ -404,7 +405,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: AppColors.surface,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),
@@ -419,14 +420,14 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   Icon(
                     Icons.emoji_events_rounded,
                     size: 70,
-                    color: Colors.yellow.shade600,
+                    color: AppColors.accent,
                   ),
-                  const Positioned(
+                  Positioned(
                     bottom: 20,
                     child: Text(
                       "80%",
                       style: TextStyle(
-                        color: Colors.deepPurple,
+                        color: AppColors.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                         fontFamily: 'ComicNeue',
@@ -437,15 +438,15 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               '🎯 MATHKID 🎯',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: AppColors.textLight,
                 fontFamily: 'ComicNeue',
                 letterSpacing: 2,
-                shadows: [
+                shadows: const [
                   Shadow(
                     color: Colors.black26,
                     blurRadius: 4,
@@ -461,11 +462,11 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 color: Colors.white.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
+              child: Text(
                 'Super Champion !',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white,
+                  color: AppColors.textLight,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
                 ),
@@ -487,7 +488,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -508,21 +509,21 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+                    gradient: LinearGradient(
+                      colors: [AppColors.primary, AppColors.secondary],
                     ),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.red.withOpacity(0.3),
+                        color: AppColors.primary.withOpacity(0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.emoji_events_rounded,
-                    color: Colors.white,
+                    color: AppColors.textLight,
                     size: 28,
                   ),
                 ),
@@ -530,13 +531,13 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Mes Badges',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
-                        color: Color(0xFFD32F2F),
+                        color: AppColors.primary,
                       ),
                     ),
                     Text(
@@ -544,7 +545,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                         fontFamily: 'ComicNeue',
                       ),
                     ),
@@ -558,7 +559,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
             Container(
               height: 14,
               decoration: BoxDecoration(
-                color: Colors.grey.shade200,
+                color: AppColors.background,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: ClipRRect(
@@ -566,7 +567,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 child: LinearProgressIndicator(
                   value: totalBadges > 0 ? earnedBadges / totalBadges : 0.0,
                   backgroundColor: Colors.transparent,
-                  valueColor: const AlwaysStoppedAnimation(Color(0xFFD32F2F)),
+                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
                   minHeight: 14,
                 ),
               ),
@@ -579,8 +580,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: earnedBadges == totalBadges
-                      ? [Colors.green.shade100, Colors.green.shade200]
-                      : [Colors.orange.shade100, Colors.orange.shade200],
+                      ? [AppColors.success.withOpacity(0.2), AppColors.success.withOpacity(0.3)]
+                      : [AppColors.warning.withOpacity(0.2), AppColors.warning.withOpacity(0.3)],
                 ),
                 borderRadius: BorderRadius.circular(15),
               ),
@@ -591,8 +592,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         ? Icons.celebration_rounded
                         : Icons.trending_up_rounded,
                     color: earnedBadges == totalBadges
-                        ? Colors.green.shade700
-                        : Colors.orange.shade700,
+                        ? AppColors.success
+                        : AppColors.warning,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
@@ -605,8 +606,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: earnedBadges == totalBadges
-                            ? Colors.green.shade800
-                            : Colors.orange.shade800,
+                            ? AppColors.success
+                            : AppColors.warning,
                         fontFamily: 'ComicNeue',
                       ),
                     ),
@@ -653,11 +654,14 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue.shade50, Colors.indigo.shade50],
+                  colors: [
+                    AppColors.info.withOpacity(0.1),
+                    AppColors.secondary.withOpacity(0.1),
+                  ],
                 ),
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(
-                  color: Colors.blue.shade200,
+                  color: AppColors.info.withOpacity(0.3),
                   width: 1,
                 ),
               ),
@@ -665,7 +669,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 children: [
                   Icon(
                     Icons.lightbulb_rounded,
-                    color: Colors.blue.shade600,
+                    color: AppColors.info,
                     size: 24,
                   ),
                   const SizedBox(width: 12),
@@ -679,7 +683,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Colors.blue.shade700,
+                        color: AppColors.info,
                         fontFamily: 'ComicNeue',
                       ),
                     ),

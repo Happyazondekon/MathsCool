@@ -8,8 +8,6 @@ import '../models/exercise_model.dart';
 class ExerciseGeneratorService {
   final Random _random = Random();
 
-  static const String _apiKey = '';
-  static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
   // Cache pour optimiser les performances
   final Map<String, List<Exercise>> _cache = {};

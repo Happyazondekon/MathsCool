@@ -77,7 +77,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     if (await Permission.scheduleExactAlarm.isDenied) {
       final result = await Permission.scheduleExactAlarm.request();
       if (result.isDenied || result.isPermanentlyDenied) {
-        _showSnackBar('Veuillez autoriser les alarmes exactes dans vos paramètres.', Colors.red);
+        _showSnackBar('Veuillez autoriser les alarmes exactes dans vos paramètres.', AppColors.error);
         openAppSettings();
       }
     }
@@ -102,8 +102,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  AppColors.christ.withOpacity(0.05),
-                  Colors.white,
+                  AppColors.background,
+                  AppColors.surface,
                 ],
               ),
             ),
@@ -111,17 +111,16 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header avec icône
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.christ.withOpacity(0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     Icons.alarm_add,
                     size: 32,
-                    color: AppColors.christ,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -131,7 +130,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     fontFamily: 'ComicNeue',
                     fontWeight: FontWeight.bold,
                     fontSize: 20,
-                    color: AppColors.christ,
+                    color: AppColors.primary,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -140,27 +139,26 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   key: _formKey,
                   child: Column(
                     children: [
-                      // Time picker section
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[50],
+                          color: AppColors.background,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.grey[200]!),
+                          border: Border.all(color: AppColors.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Icon(Icons.access_time, color: AppColors.christ, size: 20),
+                                Icon(Icons.access_time, color: AppColors.primary, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Heure de rappel',
                                   style: TextStyle(
                                     fontFamily: 'ComicNeue',
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.christ,
+                                    color: AppColors.primary,
                                   ),
                                 ),
                               ],
@@ -182,7 +180,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.christ,
+                                    color: AppColors.primary,
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -202,17 +200,16 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
                       const SizedBox(height: 16),
 
-                      // Switch pour répétition
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.green[50],
+                          color: AppColors.success.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.green[100]!),
+                          border: Border.all(color: AppColors.success.withOpacity(0.3)),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.repeat, color: Colors.green[600], size: 20),
+                            Icon(Icons.repeat, color: AppColors.success, size: 20),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
@@ -220,7 +217,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                 style: TextStyle(
                                   fontFamily: 'ComicNeue',
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.green[600],
+                                  color: AppColors.success,
                                 ),
                               ),
                             ),
@@ -234,7 +231,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                   _isRepeating = value;
                                 });
                               },
-                              activeColor: Colors.green[600],
+                              activeColor: AppColors.success,
                             ),
                           ],
                         ),
@@ -245,7 +242,6 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
 
                 const SizedBox(height: 24),
 
-                // Action buttons
                 Row(
                   children: [
                     Expanded(
@@ -260,7 +256,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                         child: Text(
                           'Annuler',
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                             fontFamily: 'ComicNeue',
                             fontWeight: FontWeight.w600,
                           ),
@@ -276,8 +272,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           _addCustomNotification();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.christ,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textLight,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -326,7 +322,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           borderSide: BorderSide.none,
         ),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.surface,
         contentPadding: const EdgeInsets.all(12),
       ),
       keyboardType: TextInputType.number,
@@ -371,14 +367,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       if (mounted) Navigator.pop(context);
       await _loadCustomNotifications();
 
-      _showSnackBar('Notification programmée pour ${hour}h${minute.toString().padLeft(2, '0')} ! ⏰', Colors.green);
+      _showSnackBar('Notification programmée pour ${hour}h${minute.toString().padLeft(2, '0')} ! ⏰', AppColors.success);
     }
   }
 
   Future<void> _removeCustomNotification(String id) async {
     await _notificationService.removeCustomNotification(int.parse(id));
     await _loadCustomNotifications();
-    _showSnackBar('Notification supprimée', Colors.orange);
+    _showSnackBar('Notification supprimée', AppColors.warning);
   }
 
   void _showSnackBar(String message, Color color) {
@@ -387,7 +383,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         content: Row(
           children: [
             Icon(
-              color == Colors.green ? Icons.check_circle : Icons.info,
+              color == AppColors.success ? Icons.check_circle : Icons.info,
               color: Colors.white,
               size: 20,
             ),
@@ -414,8 +410,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: AppColors.christ,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textLight,
         elevation: 0,
         centerTitle: true,
         flexibleSpace: Container(
@@ -423,15 +419,15 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [AppColors.christ, AppColors.christ.withOpacity(0.8)],
+              colors: [AppColors.primary, AppColors.secondary],
             ),
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddNotificationDialog,
-        backgroundColor: AppColors.christ,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textLight,
         icon: const Icon(Icons.add_alarm),
         label: const Text(
           'Nouveau rappel',
@@ -446,7 +442,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppColors.christ, Colors.white],
+                colors: [AppColors.primary, AppColors.background],
               ),
             ),
           ),
@@ -470,14 +466,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   _buildStatsCard(),
                   const SizedBox(height: 16),
                   _buildTipsCard(),
-                  const SizedBox(height: 100), // Space for FAB
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
           ),
         ],
       ),
-
     );
   }
 
@@ -489,25 +484,25 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withOpacity(0.1),
-            AppColors.secondary.withOpacity(0.05),
+            Colors.white.withOpacity(0.2),
+            AppColors.secondary.withOpacity(0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.surface,
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.notifications_active,
               size: 32,
-              color: AppColors.christ,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(width: 16),
@@ -521,7 +516,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'ComicNeue',
-                    color: Colors.white,
+                    color: AppColors.textLight,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -530,7 +525,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   style: TextStyle(
                     fontSize: 13,
                     fontFamily: 'ComicNeue',
-                    color: Colors.white.withOpacity(0.7),
+                    color: AppColors.textLight.withOpacity(0.9),
                   ),
                 ),
               ],
@@ -544,7 +539,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Widget _buildMainToggleCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -562,13 +557,13 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: _notificationsEnabled
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.1),
+                    ? AppColors.success.withOpacity(0.1)
+                    : AppColors.disabled.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 _notificationsEnabled ? Icons.notifications_active : Icons.notifications_off,
-                color: _notificationsEnabled ? Colors.green : Colors.grey,
+                color: _notificationsEnabled ? AppColors.success : AppColors.disabled,
                 size: 24,
               ),
             ),
@@ -579,10 +574,11 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 children: [
                   Text(
                     _notificationsEnabled ? 'Notifications activées' : 'Notifications désactivées',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'ComicNeue',
+                      color: AppColors.textPrimary,
                     ),
                   ),
                   Text(
@@ -592,7 +588,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     style: TextStyle(
                       fontSize: 12,
                       fontFamily: 'ComicNeue',
-                      color: Colors.grey[600],
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -607,10 +603,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 });
                 _showSnackBar(
                   value ? 'Notifications activées ! 📱' : 'Notifications désactivées',
-                  value ? Colors.green : Colors.orange,
+                  value ? AppColors.success : AppColors.warning,
                 );
               },
-              activeColor: Colors.green,
+              activeColor: AppColors.success,
             ),
           ],
         ),
@@ -621,7 +617,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Widget _buildSectionTitle(String title, IconData icon, String? badge) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white, size: 24),
+        Icon(icon, color: AppColors.textLight, size: 24),
         const SizedBox(width: 8),
         Text(
           title,
@@ -629,7 +625,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             fontSize: 18,
             fontWeight: FontWeight.bold,
             fontFamily: 'ComicNeue',
-            color: Colors.white,
+            color: AppColors.textLight,
           ),
         ),
         if (badge != null) ...[
@@ -645,7 +641,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: AppColors.christ,
+                color: AppColors.primary,
                 fontFamily: 'ComicNeue',
               ),
             ),
@@ -666,7 +662,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
@@ -683,12 +679,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.christ.withOpacity(0.1),
+                    color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.access_time,
-                    color: AppColors.christ,
+                    color: AppColors.primary,
                     size: 20,
                   ),
                 ),
@@ -699,10 +695,11 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                     children: [
                       Text(
                         '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'ComicNeue',
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -711,14 +708,14 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           Icon(
                             isRepeating ? Icons.repeat : Icons.schedule,
                             size: 14,
-                            color: Colors.grey[600],
+                            color: AppColors.textSecondary,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             isRepeating ? 'Quotidien' : 'Une fois',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                               fontFamily: 'ComicNeue',
                             ),
                           ),
@@ -731,7 +728,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           style: TextStyle(
                             fontSize: 12,
                             fontStyle: FontStyle.italic,
-                            color: Colors.blue[600],
+                            color: AppColors.info,
                             fontFamily: 'ComicNeue',
                           ),
                           maxLines: 2,
@@ -742,7 +739,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Colors.red),
+                  icon: Icon(Icons.delete_outline, color: AppColors.error),
                   onPressed: () => _removeCustomNotification(notification['id']!),
                 ),
               ],
@@ -760,8 +757,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.blue[50]!,
-            Colors.indigo[50]!,
+            AppColors.info.withOpacity(0.1),
+            AppColors.secondary.withOpacity(0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -773,7 +770,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         children: [
           Row(
             children: [
-              Icon(Icons.insights, color: Colors.blue[600], size: 24),
+              Icon(Icons.insights, color: AppColors.info, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Statistiques',
@@ -781,7 +778,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: Colors.blue[600],
+                  color: AppColors.surface,
                 ),
               ),
             ],
@@ -794,7 +791,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   'Rappels actifs',
                   '${_customNotifications.length}',
                   Icons.alarm_on,
-                  Colors.green,
+                  AppColors.success,
                 ),
               ),
               const SizedBox(width: 16),
@@ -803,7 +800,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   'Quotidiens',
                   '${_customNotifications.where((n) => n['isRepeating'] == 'true').length}',
                   Icons.repeat,
-                  Colors.blue,
+                  AppColors.info,
                 ),
               ),
             ],
@@ -817,7 +814,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -837,7 +834,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             label,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey[600],
+              color: AppColors.textSecondary,
               fontFamily: 'ComicNeue',
             ),
             textAlign: TextAlign.center,
@@ -854,12 +851,12 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.amber[50]!,
-            Colors.orange[50]!,
+            AppColors.accent.withOpacity(0.1),
+            AppColors.warning.withOpacity(0.1),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.amber[100]!),
+        border: Border.all(color: AppColors.accent.withOpacity(0.3)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -867,7 +864,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb, color: Colors.amber[600], size: 24),
+              Icon(Icons.lightbulb, color: Colors.yellowAccent, size: 24),
               const SizedBox(width: 8),
               Text(
                 'Conseils pour bien utiliser tes rappels',
@@ -875,7 +872,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: Colors.amber[700],
+                  color: AppColors.surface,
                 ),
               ),
             ],
@@ -891,7 +888,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               style: TextStyle(
                 fontSize: 14,
                 fontFamily: 'ComicNeue',
-                color: Colors.grey[700],
+                color: AppColors.textSecondary,
               ),
             ),
           )),

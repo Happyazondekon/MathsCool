@@ -6,9 +6,11 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import '../services/billing_service.dart';
 import '../services/chatbot_service.dart';
 import '../services/lives_service.dart';
+import '../services/gems_service.dart'; // ✅ AJOUTÉ
 import '../models/user_model.dart';
 import '../models/lives_model.dart';
 import '../utils/colors.dart';
+import '../widgets/gems_display_widget.dart'; // ✅ AJOUTÉ
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({Key? key}) : super(key: key);
@@ -21,6 +23,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
   final BillingService _billingService = BillingService();
   late AnimationController _animController;
   bool _isLoading = false;
+  int _selectedTab = 0; // ✅ NOUVEAU : 0 = Vies & Boosts, 1 = Gems
 
   @override
   void initState() {
@@ -56,11 +59,19 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     if (user == null) return;
 
     final livesService = Provider.of<LivesService>(context, listen: false);
-    // NOUVEAU : On récupère le service du chatbot
     final chatbotService = Provider.of<ChatbotService>(context, listen: false);
+    final gemsService = Provider.of<GemsService>(context, listen: false);
 
-    // Gestion des différents types d'achats
-    if (productId == BillingService.UNLIMITED_LIVES_WEEK_ID) {
+    // ✅ GESTION DES PACKS DE GEMS
+    if (productId == BillingService.GEMS_PACK_SMALL ||
+        productId == BillingService.GEMS_PACK_MEDIUM ||
+        productId == BillingService.GEMS_PACK_LARGE ||
+        productId == BillingService.GEMS_PACK_MEGA) {
+      gemsService.purchaseGemsPack(user.uid, productId);
+      _showSuccessDialog(type: 'gems', productId: productId);
+    }
+    // Gestion des vies
+    else if (productId == BillingService.UNLIMITED_LIVES_WEEK_ID) {
       livesService.activateUnlimitedWeek(user.uid);
       _showSuccessDialog(type: 'unlimited');
     }
@@ -68,14 +79,12 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
       livesService.refillLives(user.uid);
       _showSuccessDialog(type: 'refill');
     }
-    // --- LOGIQUE CHATBOT AJOUTÉE ---
+    // Gestion du chatbot
     else if (productId == BillingService.CHATBOT_SUBSCRIPTION_MONTHLY) {
-      // Activation pour 30 jours
       chatbotService.activateSubscription(user.uid, const Duration(days: 30));
       _showSuccessDialog(type: 'chatbot');
     }
     else if (productId == BillingService.CHATBOT_SUBSCRIPTION_YEARLY) {
-      // Activation pour 365 jours
       chatbotService.activateSubscription(user.uid, const Duration(days: 365));
       _showSuccessDialog(type: 'chatbot');
     }
@@ -99,7 +108,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     );
   }
 
-  void _showSuccessDialog({required String type}) {
+  void _showSuccessDialog({required String type, String? productId}) {
     String title;
     String message;
     Color color;
@@ -114,6 +123,13 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
         title = 'Assistant Activé ! 🤖';
         message = 'MathKid est prêt à t\'aider !';
         color = Colors.blue;
+        break;
+      case 'gems': // ✅ NOUVEAU
+        final packInfo = _billingService.getGemPackInfo(productId ?? '');
+        final totalGems = (packInfo?['gems'] ?? 0) + (packInfo?['bonus'] ?? 0);
+        title = 'Gems Reçus ! ${packInfo?['icon'] ?? '💎'}';
+        message = 'Tu as reçu $totalGems gems !';
+        color = Colors.amber;
         break;
       default:
         title = 'Vies rechargées ! 🎉';
@@ -189,8 +205,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFFF9A9E), // Rose doux
-              Color(0xFFFECFEF), // Rose très pâle
+              Color(0xFFFF9A9E),
+              Color(0xFFFECFEF),
               Colors.white,
             ],
           ),
@@ -199,6 +215,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           child: Column(
             children: [
               _buildHeader(),
+
+              // ✅ NOUVEAU : Onglets
+              _buildTabBar(),
+
               Expanded(
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator(color: AppColors.christ))
@@ -206,16 +226,31 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      FadeTransition(
-                        opacity: _animController,
-                        child: _buildLivesStatusCard(livesData),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildSectionTitle('💎 Boosters & Vies'),
-                      const SizedBox(height: 12),
-                      _buildProductsList(),
-                      const SizedBox(height: 24),
-                      _buildInfoCard(),
+                      if (_selectedTab == 0) ...[
+                        // Onglet Vies & Boosts
+                        FadeTransition(
+                          opacity: _animController,
+                          child: _buildLivesStatusCard(livesData),
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionTitle('💖 Vies & Boosts'),
+                        const SizedBox(height: 12),
+                        _buildLifeProductsList(),
+                        const SizedBox(height: 24),
+                        _buildInfoCard(),
+                      ] else ...[
+                        // Onglet Gems
+                        FadeTransition(
+                          opacity: _animController,
+                          child: const GemsStatsCard(), // ✅ Widget du gems_display_widget.dart
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionTitle('💎 Packs de Gems'),
+                        const SizedBox(height: 12),
+                        _buildGemsPacksList(),
+                        const SizedBox(height: 24),
+                        _buildGemsInfoCard(),
+                      ],
                     ],
                   ),
                 ),
@@ -223,6 +258,100 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  // ✅ NOUVEAU : TabBar pour switcher entre Vies et Gems
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTab = 0),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: _selectedTab == 0
+                      ? LinearGradient(
+                    colors: [Colors.red.shade400, Colors.pink.shade300],
+                  )
+                      : null,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite,
+                      color: _selectedTab == 0 ? Colors.white : Colors.grey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Vies',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _selectedTab == 0 ? Colors.white : Colors.grey,
+                        fontFamily: 'ComicNeue',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedTab = 1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: _selectedTab == 1
+                      ? LinearGradient(
+                    colors: [Colors.amber.shade400, Colors.orange.shade300],
+                  )
+                      : null,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.diamond,
+                      color: _selectedTab == 1 ? Colors.white : Colors.grey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Gems',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: _selectedTab == 1 ? Colors.white : Colors.grey,
+                        fontFamily: 'ComicNeue',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -247,20 +376,24 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           ),
           const Expanded(
             child: Text(
-              'Boutique Magique ✨',
+              '🪙 BOUTIQUE',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
                 fontFamily: 'ComicNeue',
                 shadows: [
-                  Shadow(color: Colors.black12, offset: Offset(1, 2), blurRadius: 4),
+                  Shadow(
+                    color: Colors.black12,
+                    offset: Offset(1, 2),
+                    blurRadius: 4,
+                  ),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 48), // Balance layout
+          const SizedBox(width: 48),
         ],
       ),
     );
@@ -279,8 +412,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isUnlimited
-              ? [const Color(0xFF9C27B0), const Color(0xFFE040FB)] // Violet vibrant
-              : [const Color(0xFFFF5252), const Color(0xFFFF8A80)], // Rouge vibrant
+              ? [const Color(0xFF9C27B0), const Color(0xFFE040FB)]
+              : [const Color(0xFFFF5252), const Color(0xFFFF8A80)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -390,41 +523,22 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildProductsList() {
-    final products = _billingService.products;
+  // ✅ SÉPARÉ : Liste des produits VIES uniquement
+  Widget _buildLifeProductsList() {
+    final lifeProducts = _billingService.getLifeProducts();
+    final chatbotProducts = _billingService.getChatbotSubscriptions();
+    final allProducts = [...lifeProducts, ...chatbotProducts];
 
-    if (products.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(30),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.storefront_outlined, size: 50, color: Colors.grey.shade400),
-            const SizedBox(height: 10),
-            Text(
-              'La boutique est vide...',
-              style: TextStyle(color: Colors.grey.shade600, fontFamily: 'ComicNeue'),
-            ),
-            TextButton(
-              onPressed: _setupBilling,
-              child: const Text('Réessayer'),
-            )
-          ],
-        ),
-      );
+    if (allProducts.isEmpty) {
+      return _buildEmptyState();
     }
 
     return ListView.separated(
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
-      itemCount: products.length,
+      itemCount: allProducts.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        // Animation d'entrée pour chaque carte
         return TweenAnimationBuilder<double>(
           duration: Duration(milliseconds: 400 + (index * 100)),
           tween: Tween(begin: 0.0, end: 1.0),
@@ -432,18 +546,69 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           builder: (context, value, child) {
             return Transform.scale(scale: value, child: child);
           },
-          child: _buildProductCard(products[index]),
+          child: _buildProductCard(allProducts[index]),
         );
       },
     );
   }
 
+  // ✅ NOUVEAU : Liste des packs de GEMS uniquement
+  Widget _buildGemsPacksList() {
+    final gemPacks = _billingService.getGemPacks();
+
+    if (gemPacks.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.separated(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: gemPacks.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        return TweenAnimationBuilder<double>(
+          duration: Duration(milliseconds: 400 + (index * 100)),
+          tween: Tween(begin: 0.0, end: 1.0),
+          curve: Curves.easeOutBack,
+          builder: (context, value, child) {
+            return Transform.scale(scale: value, child: child);
+          },
+          child: _buildProductCard(gemPacks[index]),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.storefront_outlined, size: 50, color: Colors.grey.shade400),
+          const SizedBox(height: 10),
+          Text(
+            'Aucun produit disponible...',
+            style: TextStyle(color: Colors.grey.shade600, fontFamily: 'ComicNeue'),
+          ),
+          TextButton(
+            onPressed: _setupBilling,
+            child: const Text('Réessayer'),
+          )
+        ],
+      ),
+    );
+  }
+
   Widget _buildProductCard(ProductDetails product) {
-    // Déterminer le style en fonction de l'ID du produit
     bool isUnlimited = product.id == BillingService.UNLIMITED_LIVES_WEEK_ID;
     bool isChatbot = product.id.contains('chatbot');
+    bool isGems = product.id.contains('gems_pack');
 
-    // Configuration visuelle par défaut (Recharge)
     List<Color> gradientColors = [const Color(0xFFFF7043), const Color(0xFFFFAB91)];
     IconData icon = Icons.favorite_rounded;
     String badgeText = "Populaire 🔥";
@@ -459,6 +624,18 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
       icon = Icons.smart_toy_rounded;
       badgeText = "Nouveau 🤖";
       showBadge = true;
+    } else if (isGems) {
+      gradientColors = [const Color(0xFFFFD700), const Color(0xFFFFA500)];
+      icon = Icons.diamond;
+
+      final packInfo = _billingService.getGemPackInfo(product.id);
+      if (packInfo?['popular'] == true) {
+        badgeText = "Populaire 🔥";
+        showBadge = true;
+      } else if (packInfo?['bestValue'] == true) {
+        badgeText = "Meilleure Valeur 💎";
+        showBadge = true;
+      }
     }
 
     return Stack(
@@ -485,7 +662,6 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   children: [
-                    // Icône du produit
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -506,7 +682,6 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                       child: Icon(icon, color: Colors.white, size: 32),
                     ),
                     const SizedBox(width: 16),
-                    // Détails
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,20 +696,59 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            product.description,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade600,
-                              fontFamily: 'ComicNeue',
+                          if (isGems) ...[
+                            Builder(
+                              builder: (context) {
+                                final packInfo = _billingService.getGemPackInfo(product.id);
+                                if (packInfo == null) return const SizedBox.shrink();
+
+                                return Row(
+                                  children: [
+                                    Text(
+                                      '${packInfo['gems']} gems',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey.shade700,
+                                        fontFamily: 'ComicNeue',
+                                      ),
+                                    ),
+                                    if (packInfo['bonus'] > 0) ...[
+                                      const SizedBox(width: 4),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          '+${packInfo['bonus']} bonus',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                );
+                              },
                             ),
-                          ),
+                          ] else ...[
+                            Text(
+                              product.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade600,
+                                fontFamily: 'ComicNeue',
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
-                    // Prix
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
@@ -587,7 +801,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFE3F2FD), // Bleu très pâle
+        color: const Color(0xFFE3F2FD),
         borderRadius: BorderRadius.circular(25),
         border: Border.all(color: const Color(0xFFBBDEFB)),
       ),
@@ -618,6 +832,43 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     );
   }
 
+  // ✅ NOUVEAU : Card d'info pour les Gems
+  Widget _buildGemsInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(25),
+        border: Border.all(color: const Color(0xFFFFE082)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.diamond, color: Color(0xFFFFA000)),
+              SizedBox(width: 8),
+              Text(
+                'À quoi servent les Gems ?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFF57F17),
+                  fontFamily: 'ComicNeue',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow('💡', 'Indice : 20 gems'),
+          _buildInfoRow('⏭️', 'Passer une question : 30 gems'),
+          _buildInfoRow('⚡', 'Recharge rapide vies : 50 gems'),
+          _buildInfoRow('🎨', 'Débloquer thèmes : 100 gems'),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInfoRow(String emoji, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -630,7 +881,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               text,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.blue.shade900,
+                color: _selectedTab == 0 ? Colors.blue.shade900 : Colors.orange.shade900,
                 fontFamily: 'ComicNeue',
               ),
             ),

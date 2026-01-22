@@ -125,9 +125,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         setState(() => _isEditing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil mis à jour avec succès !'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Profil mis à jour avec succès !'),
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -195,14 +195,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.green[50],
+                    color: AppColors.success.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Icon(Icons.add_a_photo, size: 30, color: Colors.green),
-                      Text('Galerie', style: TextStyle(fontFamily: 'ComicNeue')),
+                    children: [
+                      Icon(Icons.add_a_photo, size: 30, color: AppColors.success),
+                      const Text('Galerie', style: TextStyle(fontFamily: 'ComicNeue')),
                     ],
                   ),
                 ),
@@ -230,14 +230,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
             ],
           ),
         ),
@@ -285,23 +285,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+                icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
                 onPressed: () => Navigator.pop(context),
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Mon Profil',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.logout_rounded, color: Color(0xFFD32F2F)),
+                icon: Icon(Icons.logout_rounded, color: AppColors.error),
                 onPressed: () async {
                   await authService.signOut();
                   if (mounted) Navigator.pop(context);
@@ -314,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange.shade300, Colors.yellow.shade400],
+                colors: [AppColors.warning, AppColors.accent],
               ),
               borderRadius: BorderRadius.circular(15),
             ),
@@ -441,14 +441,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.purple.shade400,
-                Colors.blue.shade600,
+                AppColors.primary,
+                AppColors.secondary,
               ],
             ),
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
-                color: Colors.purple.withOpacity(0.4),
+                color: AppColors.primary.withOpacity(0.4),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -567,9 +567,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.edit_rounded,
-                            color: Colors.purple,
+                            color: AppColors.primary,
                             size: 20,
                           ),
                         ),
@@ -686,13 +686,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Center(
+                Center(
                   child: Text(
                     'Modifier le Profil',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFD32F2F),
+                      color: AppColors.primary,
                       fontFamily: 'ComicNeue',
                     ),
                   ),
@@ -732,7 +732,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: AppColors.primary,
                               shape: BoxShape.circle,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
@@ -804,7 +804,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
@@ -834,7 +834,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      prefixIcon: Icon(icon, color: Colors.red),
+      prefixIcon: Icon(icon, color: AppColors.primary),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade400),
@@ -845,7 +845,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.red, width: 2),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
       ),
       filled: true,
       fillColor: Colors.grey.shade50,
@@ -891,37 +891,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     {
       'title': 'Classements ',
       'icon': Icons.emoji_events_rounded,
-      'color': Colors.amber,
+      'color': AppColors.warning,
       'route': (BuildContext context) => const LeaderboardScreen(),
     },
     {
       'title': 'Ma Progression',
       'icon': Icons.bar_chart_rounded,
-      'color': Colors.blue,
+      'color': AppColors.info,
       'route': (BuildContext context) => const ProgressScreen(),
     },
     {
       'title': 'Boutique',
-      'icon': Icons.shopping_bag_rounded, // Icône de sac de shopping
-      'color': Colors.orangeAccent,       // Couleur vive pour attirer l'attention
-      'route': (BuildContext context) => const StoreScreen(), // Remplacez par votre écran de boutique
+      'icon': Icons.shopping_bag_rounded,
+      'color': AppColors.accent,
+      'route': (BuildContext context) => const StoreScreen(),
     },
     {
       'title': 'Centre d\'Aide',
       'icon': Icons.help_outline_rounded,
-      'color': Colors.green,
+      'color': AppColors.success,
       'route': (BuildContext context) => const HelpScreen(),
     },
     {
       'title': 'Sons & Musique',
       'icon': Icons.volume_up_rounded,
-      'color': Colors.deepPurple,
+      'color': AppColors.secondary,
       'route': (BuildContext context) => const SoundSettingsScreen(),
     },
     {
       'title': 'Retour Accueil',
       'icon': Icons.home_rounded,
-      'color': Colors.red,
+      'color': AppColors.primary,
       'route': (BuildContext context) => const HomeScreen(),
     },
   ];
@@ -961,8 +961,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                option['color'].withOpacity(0.8),
-                option['color'].withOpacity(0.6),
+                option['color'],
+                option['color'].withOpacity(0.7),
               ],
             ),
             borderRadius: BorderRadius.circular(25),

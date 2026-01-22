@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class GroqService {
-  static const String _apiKey = '';
-  static const String _baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
   Future<String> getMathExplanation(String question, String level) async {
     try {

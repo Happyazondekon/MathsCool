@@ -9,6 +9,7 @@ import '../services/daily_challenge_service.dart';
 import '../services/hybrid_exercise_service.dart';
 import '../services/lives_service.dart';
 import '../services/sound_service.dart';
+import '../utils/colors.dart';
 import '../widgets/chatbot_floating_button.dart';
 import 'daily_challenge_result_screen.dart';
 import 'store_screen.dart';
@@ -144,7 +145,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 5),
           ),
         );
@@ -160,7 +161,6 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
     final exercise = _exercises[_currentIndex];
     final isCorrect = selectedIndex == exercise.correctAnswer;
-    // ✅ AJOUTER LE SON
     final soundService = SoundService();
 
     final livesService = Provider.of<LivesService>(context, listen: false);
@@ -256,7 +256,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.red.shade50, Colors.white],
+              colors: [AppColors.error.withOpacity(0.1), Colors.white],
             ),
           ),
           child: Column(
@@ -265,20 +265,20 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.shade100,
+                  color: AppColors.error.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Text("💔", style: TextStyle(fontSize: 40)),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "Aïe ! Plus de vies 💔",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: Color(0xFFD32F2F),
+                  color: AppColors.error,
                 ),
               ),
               const SizedBox(height: 12),
@@ -296,10 +296,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                         Navigator.of(context).pop();
                         Navigator.of(context).pop();
                       },
-                      child: const Text(
+                      child: Text(
                         "Quitter",
                         style: TextStyle(
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                           fontFamily: 'ComicNeue',
                           fontWeight: FontWeight.bold,
                         ),
@@ -310,7 +310,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD32F2F),
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -347,9 +347,15 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     if (_isLoading) {
       return Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.gradientStart,
+                AppColors.gradientMiddle,
+                AppColors.gradientEnd,
+              ],
             ),
           ),
           child: const Center(
@@ -373,9 +379,24 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        // Fond avec l'image MathsCool
+        decoration: BoxDecoration(
+        image: DecorationImage(
+        image: const AssetImage('assets/images/bgc_math.png'),
+    fit: BoxFit.cover,
+    opacity: 0.15, // Opacité légère pour la lisibilité
+    ),
+    ),
+    child :Container(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
+            ],
           ),
         ),
         child: Stack(
@@ -410,15 +431,22 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           ],
         ),
       ),
+    )
     );
   }
 
   Widget _buildAlreadyCompletedScreen() {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
+            ],
           ),
         ),
         child: Center(
@@ -429,20 +457,23 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
               children: [
                 Lottie.asset('assets/animations/success.json', height: 200),
                 const SizedBox(height: 20),
-                const Text(
+                Text(
                   'Défi déjà complété ! 🎉',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.textLight,
                     fontFamily: 'ComicNeue',
                   ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
-                const Text(
+                Text(
                   'Reviens demain pour un nouveau défi !',
-                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textLight.withOpacity(0.8),
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
@@ -450,7 +481,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: Colors.red,
+                    foregroundColor: AppColors.primary,
                     padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -469,27 +500,37 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
   Widget _buildNoChallengeScreen() {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
+            ],
           ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 80, color: Colors.white),
+              Icon(Icons.error_outline, size: 80, color: AppColors.textLight),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Aucun défi disponible',
-                style: TextStyle(fontSize: 24, color: Colors.white, fontFamily: 'ComicNeue'),
+                style: TextStyle(
+                  fontSize: 24,
+                  color: AppColors.textLight,
+                  fontFamily: 'ComicNeue',
+                ),
               ),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: Colors.red,
+                  foregroundColor: AppColors.primary,
                 ),
                 child: const Text('Retour'),
               ),
@@ -503,9 +544,15 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
   Widget _buildLevelSelectionScreen() {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F), Colors.red],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.gradientStart,
+              AppColors.gradientMiddle,
+              AppColors.gradientEnd,
+            ],
           ),
         ),
         child: SafeArea(
@@ -558,17 +605,17 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+                icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
                 onPressed: () => Navigator.pop(context),
               ),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Défi Quotidien 🏆',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
@@ -581,7 +628,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.orange.shade300, Colors.yellow.shade400],
+                colors: [AppColors.warning, AppColors.accent],
               ),
               borderRadius: BorderRadius.circular(15),
             ),
@@ -622,16 +669,16 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
   Widget _buildLevelCard(int index) {
     final List<List<Color>> gradientColors = [
-      [Colors.amber.shade300, Colors.amber.shade500],
-      [Colors.blue.shade300, Colors.blue.shade500],
-      [Colors.green.shade300, Colors.green.shade500],
-      [Colors.pink.shade300, Colors.pink.shade500],
-      [Colors.purple.shade300, Colors.purple.shade500],
-      [Colors.red.shade300, Colors.red.shade500],
-      [Colors.cyan.shade300, Colors.cyan.shade500],
-      [Colors.teal.shade300, Colors.teal.shade500],
-      [Colors.orange.shade300, Colors.orange.shade500],
-      [Colors.blueGrey.shade300, Colors.blueGrey.shade500],
+      [AppColors.accent, AppColors.warning],                    // CI
+      [AppColors.info, AppColors.secondary],                    // CP
+      [AppColors.success, Color(0xFF059669)],                   // CE1
+      [AppColors.gradientEnd, Color(0xFFEC4899)],               // CE2
+      [AppColors.secondary, Color(0xFF7C3AED)],                 // CM1
+      [AppColors.error, Color(0xFFDC2626)],                     // CM2
+      [Color(0xFF06B6D4), Color(0xFF0891B2)],                   // 6ème
+      [Color(0xFF14B8A6), Color(0xFF0D9488)],                   // 5ème
+      [AppColors.warning, Color(0xFFF97316)],                   // 4ème
+      [Color(0xFF64748B), Color(0xFF475569)],
     ];
 
     final List<IconData> icons = [
@@ -797,7 +844,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.green,
+              color: AppColors.success,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -860,7 +907,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                             margin: const EdgeInsets.all(2),
                             decoration: BoxDecoration(
                               color: index <= _currentIndex
-                                  ? Colors.yellow.shade400
+                                  ? AppColors.accent
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -881,11 +928,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
                 gradient: LinearGradient(
-                  colors: [Colors.orange.shade300, Colors.yellow.shade500],
+                  colors: [AppColors.warning, AppColors.accent],
                 ),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -928,26 +974,24 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.yellow.shade100,
+                        color: AppColors.accent.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.lightbulb_outline,
                         size: 40,
-                        color: Color(0xFFFFC107),
+                        color: AppColors.accent,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      exercise.question,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFD32F2F),
-                        fontFamily: 'ComicNeue',
-                      ),
-                    ),
+              RichText(
+                textAlign: TextAlign.center,
+                text: buildMathText(
+                  exercise.question,
+                  fontSize: 26,
+                  color: AppColors.primary,
+                ),
+              ),
                   ],
                 ),
               ),
@@ -1010,7 +1054,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [color, Color.lerp(color, Colors.white, 0.2)!],
+              colors: [color, color.withOpacity(0.8)],
             ),
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
@@ -1026,14 +1070,12 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text(
-                exercise.options[index],
+              child: RichText(
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                text: buildMathText(
+                  exercise.options[index],
                   fontSize: 22,
-                  fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'ComicNeue',
                 ),
               ),
             ),
@@ -1171,4 +1213,72 @@ class _MathBackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+// Après la classe _MathBackgroundPainter, ajoutez :
+
+InlineSpan buildMathText(
+    String input, {
+      double fontSize = 22,
+      Color color = Colors.black,
+    }) {
+  final Map<String, String> expo = {
+    "0": "⁰",
+    "1": "¹",
+    "2": "²",
+    "3": "³",
+    "4": "⁴",
+    "5": "⁵",
+    "6": "⁶",
+    "7": "⁷",
+    "8": "⁸",
+    "9": "⁹",
+    "-": "⁻",
+  };
+
+  List<InlineSpan> spans = [];
+
+  for (int i = 0; i < input.length; i++) {
+    if (input[i] == '^' && i + 1 < input.length) {
+      String exp = "";
+      int j = i + 1;
+
+      while (j < input.length && expo.containsKey(input[j])) {
+        exp += expo[input[j]]!;
+        j++;
+      }
+
+      spans.add(
+        WidgetSpan(
+          child: Transform.translate(
+            offset: const Offset(0, -8),
+            child: Text(
+              exp,
+              style: TextStyle(
+                fontSize: fontSize * 0.65,
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontFamily: 'ComicNeue',
+              ),
+            ),
+          ),
+        ),
+      );
+
+      i = j - 1;
+    } else {
+      spans.add(
+        TextSpan(
+          text: input[i],
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: color,
+            fontFamily: 'ComicNeue',
+          ),
+        ),
+      );
+    }
+  }
+
+  return TextSpan(children: spans);
 }

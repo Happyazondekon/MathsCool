@@ -56,21 +56,19 @@ class _AchievementsScreenState extends State<AchievementsScreen>
 
     try {
       final achievementService = Provider.of<AchievementService>(context, listen: false);
-      final livesService = Provider.of<LivesService>(context, listen: false);
 
-      final livesReward = await achievementService.claimAchievement(user.uid, achievement.id);
-      await livesService.addLivesFromAchievement(user.uid, livesReward);
+      // ✅ Réclamer l'achievement (donne maintenant des gems au lieu de vies)
+      final gemsReward = await achievementService.claimAchievement(user.uid, achievement.id);
 
-      // ✅ AJOUTER LE SON
-      await SoundService().playAchievement(); // 🎵 Son badge
+      await SoundService().playAchievement();
       _confettiController.play();
-      _showSuccessDialog(achievement, livesReward);
+      _showSuccessDialog(achievement, gemsReward); // ✅ CHANGÉ : gemsReward au lieu de livesReward
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
@@ -78,7 +76,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     }
   }
 
-  void _showSuccessDialog(Achievement achievement, int lives) {
+  void _showSuccessDialog(Achievement achievement, int gems) { // ✅ CHANGÉ : gems au lieu de lives
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -90,7 +88,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.green.shade50, Colors.white],
+              colors: [AppColors.background, AppColors.surface],
             ),
           ),
           child: Column(
@@ -102,11 +100,11 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [Colors.yellow.shade300, Colors.orange.shade400],
+                    colors: [AppColors.accent, AppColors.warning],
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.orange.withOpacity(0.4),
+                      color: AppColors.accent.withOpacity(0.4),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
@@ -120,37 +118,38 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Récompense réclamée ! 🎉',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: Colors.green,
+                  color: AppColors.success,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
               Text(
                 achievement.name,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
-                  color: Colors.black87,
+                  color: AppColors.textPrimary,
                   fontFamily: 'ComicNeue',
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
+              // ✅ CHANGÉ : Afficher les gems au lieu des vies
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.red.shade400, Colors.pink.shade400],
+                    colors: [Colors.amber, Colors.orange],
                   ),
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.red.withOpacity(0.3),
+                      color: Colors.amber.withOpacity(0.3),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -159,14 +158,14 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.favorite, color: Colors.white, size: 24),
+                    const Text('💎', style: TextStyle(fontSize: 24)),
                     const SizedBox(width: 8),
                     Text(
-                      '+$lives vies',
-                      style: const TextStyle(
+                      '+$gems gems',
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         fontFamily: 'ComicNeue',
                       ),
                     ),
@@ -177,8 +176,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.success,
+                  foregroundColor: AppColors.textLight,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -205,20 +204,31 @@ class _AchievementsScreenState extends State<AchievementsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFF6B6B),
-              Color(0xFFD32F2F),
-              Colors.red,
-            ],
+        // Fond avec l'image MathsCool
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const AssetImage('assets/images/bgc_math.png'),
+            fit: BoxFit.cover,
+            opacity: 0.15, // Ajusté pour ne pas gêner la lisibilité
           ),
         ),
-        child: Stack(
-          children: [
-            SafeArea(
+        child: Container(
+          // Superposition du dégradé pour garder le style de l'app
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.gradientStart.withOpacity(0.8),
+                AppColors.gradientMiddle.withOpacity(0.7),
+                AppColors.gradientEnd.withOpacity(0.6),
+                AppColors.background.withOpacity(0.5),
+              ],
+            ),
+          ),
+          child: Stack(
+              children: [
+          SafeArea(
               child: Column(
                 children: [
                   _buildHeader(),
@@ -229,9 +239,9 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   const SizedBox(height: 16),
                   Expanded(
                     child: _isLoading
-                        ? const Center(
+                        ? Center(
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: AppColors.textLight,
                         strokeWidth: 3,
                       ),
                     )
@@ -259,19 +269,20 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 numberOfParticles: 30,
                 gravity: 0.1,
                 shouldLoop: false,
-                colors: const [
-                  Colors.green,
-                  Colors.blue,
-                  Colors.pink,
-                  Colors.orange,
-                  Colors.purple,
-                  Colors.yellow,
+                colors: [
+                  AppColors.success,
+                  AppColors.info,
+                  AppColors.gradientEnd,
+                  AppColors.accent,
+                  AppColors.secondary,
+                  AppColors.warning,
                 ],
               ),
             ),
           ],
         ),
       ),
+    )
     );
   }
 
@@ -280,7 +291,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -293,10 +304,10 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
                 Text(
@@ -304,7 +315,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.primary,
                     fontFamily: 'ComicNeue',
                   ),
                 ),
@@ -312,7 +323,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   'Collecte tes récompenses ! 🏆',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -328,13 +339,13 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     return Consumer<AchievementService>(
       builder: (context, service, _) {
         final stats = service.getAchievementStats();
-        final unclaimedLives = service.getTotalUnclaimedLives();
+        final unclaimedGems = service.getTotalUnclaimedGems(); // ✅ CHANGÉ
 
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 20),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(25),
             boxShadow: [
               BoxShadow(
@@ -353,29 +364,30 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                     '${stats['completed']}',
                     'Complétés',
                     Icons.emoji_events_rounded,
-                    Colors.green,
+                    AppColors.success,
                   ),
                   Container(
                     width: 1,
                     height: 50,
-                    color: Colors.grey.shade300,
+                    color: AppColors.divider,
                   ),
                   _buildStatItem(
                     '${stats['unclaimed']}',
                     'À réclamer',
                     Icons.card_giftcard_rounded,
-                    Colors.orange,
+                    AppColors.warning,
                   ),
                   Container(
                     width: 1,
                     height: 50,
-                    color: Colors.grey.shade300,
+                    color: AppColors.divider,
                   ),
+                  // ✅ CHANGÉ : Afficher les gems au lieu des vies
                   _buildStatItem(
-                    '$unclaimedLives',
-                    'Vies dispo',
-                    Icons.favorite_rounded,
-                    Colors.red,
+                    '$unclaimedGems',
+                    'Gems dispo',
+                    Icons.diamond,
+                    Colors.amber,
                   ),
                 ],
               ),
@@ -383,7 +395,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               Container(
                 height: 12,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
+                  color: AppColors.background,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: ClipRRect(
@@ -391,9 +403,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   child: LinearProgressIndicator(
                     value: stats['completionRate'],
                     backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation(
-                      Color(0xFFD32F2F),
-                    ),
+                    valueColor: AlwaysStoppedAnimation(AppColors.primary),
                     minHeight: 12,
                   ),
                 ),
@@ -406,16 +416,16 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                     'Progression globale',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: AppColors.textSecondary,
                       fontFamily: 'ComicNeue',
                     ),
                   ),
                   Text(
                     '${(stats['completionRate'] * 100).toInt()}%',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFD32F2F),
+                      color: AppColors.primary,
                       fontFamily: 'ComicNeue',
                     ),
                   ),
@@ -451,9 +461,9 @@ class _AchievementsScreenState extends State<AchievementsScreen>
         ),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: Colors.grey,
+            color: AppColors.textSecondary,
             fontFamily: 'ComicNeue',
           ),
         ),
@@ -465,7 +475,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -480,11 +490,11 @@ class _AchievementsScreenState extends State<AchievementsScreen>
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(25),
           gradient: LinearGradient(
-            colors: [Color(0xFFFF6B6B), Color(0xFFD32F2F)],
+            colors: [AppColors.primary, AppColors.secondary],
           ),
         ),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey,
+        labelColor: AppColors.textLight,
+        unselectedLabelColor: AppColors.textSecondary,
         labelStyle: const TextStyle(
           fontWeight: FontWeight.bold,
           fontFamily: 'ComicNeue',
@@ -533,7 +543,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   child: Icon(
                     showUnclaimed ? Icons.done_all_rounded : Icons.emoji_events_outlined,
                     size: 80,
-                    color: Colors.white,
+                    color: AppColors.textLight,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -543,9 +553,9 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                       : showCompleted
                       ? 'Aucun achievement complété'
                       : 'Commence à jouer pour débloquer !',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white,
+                    color: AppColors.textLight,
                     fontFamily: 'ComicNeue',
                     fontWeight: FontWeight.bold,
                   ),
@@ -558,7 +568,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                       : 'Les achievements apparaîtront ici',
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.7),
+                    color: AppColors.textLight.withOpacity(0.7),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -605,12 +615,12 @@ class _AchievementsScreenState extends State<AchievementsScreen>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: isCompleted
-                ? [Colors.white, Colors.grey.shade50]
-                : [Colors.white.withOpacity(0.95), Colors.grey.shade100],
+                ? [AppColors.surface, AppColors.background]
+                : [AppColors.surface.withOpacity(0.95), AppColors.background],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isCompleted ? Colors.green.withOpacity(0.3) : Colors.transparent,
+            color: isCompleted ? AppColors.success.withOpacity(0.3) : Colors.transparent,
             width: 2,
           ),
           boxShadow: [
@@ -632,17 +642,17 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 decoration: BoxDecoration(
                   gradient: isCompleted
                       ? LinearGradient(
-                    colors: [Colors.yellow.shade300, Colors.orange.shade400],
+                    colors: [AppColors.accent, AppColors.warning],
                   )
                       : LinearGradient(
-                    colors: [Colors.grey.shade300, Colors.grey.shade400],
+                    colors: [AppColors.disabled, AppColors.border],
                   ),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: isCompleted
-                          ? Colors.orange.withOpacity(0.4)
-                          : Colors.grey.withOpacity(0.3),
+                          ? AppColors.accent.withOpacity(0.4)
+                          : AppColors.disabled.withOpacity(0.3),
                       blurRadius: 10,
                       spreadRadius: 2,
                     ),
@@ -653,7 +663,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                     isSecret ? '🔒' : achievement.icon,
                     style: TextStyle(
                       fontSize: 36,
-                      color: isSecret ? Colors.grey.shade600 : null,
+                      color: isSecret ? AppColors.textSecondary : null,
                     ),
                   ),
                 ),
@@ -673,7 +683,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: isCompleted ? Colors.black : Colors.grey.shade600,
+                              color: isCompleted ? AppColors.textPrimary : AppColors.textSecondary,
                               fontFamily: 'ComicNeue',
                             ),
                           ),
@@ -683,21 +693,21 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Colors.red.shade400, Colors.pink.shade400],
+                                colors: [Colors.amber, Colors.orange],
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.favorite, color: Colors.white, size: 14),
+                                const Text('💎', style: TextStyle(fontSize: 14)),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '+${achievement.livesReward}',
-                                  style: const TextStyle(
+                                  '+${achievement.gemsReward}',
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                                    color: AppColors.textLight,
                                     fontFamily: 'ComicNeue',
                                   ),
                                 ),
@@ -711,7 +721,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                       isSecret ? 'Achievement secret à découvrir...' : achievement.description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textSecondary,
                         fontFamily: 'ComicNeue',
                       ),
                     ),
@@ -723,7 +733,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                             child: Container(
                               height: 8,
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
+                                color: AppColors.background,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: ClipRRect(
@@ -732,7 +742,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                                   value: progress,
                                   backgroundColor: Colors.transparent,
                                   valueColor: AlwaysStoppedAnimation(
-                                    isCompleted ? Colors.green : Color(0xFFD32F2F),
+                                    isCompleted ? AppColors.success : AppColors.primary,
                                   ),
                                   minHeight: 8,
                                 ),
@@ -745,7 +755,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade600,
+                              color: AppColors.textSecondary,
                               fontFamily: 'ComicNeue',
                             ),
                           ),
@@ -763,8 +773,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   child: ElevatedButton(
                     onPressed: () => _claimAchievement(achievement),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.success,
+                      foregroundColor: AppColors.textLight,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
@@ -792,12 +802,12 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   margin: const EdgeInsets.only(left: 8),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.2),
+                    color: AppColors.success.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.check_circle_rounded,
-                    color: Colors.green,
+                    color: AppColors.success,
                     size: 32,
                   ),
                 ),

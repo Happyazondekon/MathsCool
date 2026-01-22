@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/remote_config_service.dart';
+import '../utils/colors.dart';
 
 class UpdateRequiredScreen extends StatelessWidget {
   const UpdateRequiredScreen({Key? key}) : super(key: key);
@@ -24,12 +25,12 @@ class UpdateRequiredScreen extends StatelessWidget {
           width: double.infinity,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
               colors: [
-                Color(0xFFFF6B6B),
-                Color(0xFFD32F2F),
-                Colors.red,
+                AppColors.gradientStart,
+                AppColors.gradientMiddle,
+                AppColors.gradientEnd,
               ],
             ),
           ),

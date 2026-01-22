@@ -21,6 +21,7 @@ import '../services/achievement_service.dart';
 import '../services/sound_service.dart';
 import '../widgets/chatbot_floating_button.dart';
 import '../widgets/daily_challenge_button.dart';
+import '../widgets/gems_display_widget.dart';
 import 'achievements_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -97,61 +98,49 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       body: Stack(
         children: [
-          // Fond avec dégradé de Noël
-          AnimatedBuilder(
-            animation: _backgroundAnimation,
-            builder: (context, child) {
-              return Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xDBA30E0E),
-                      Color(0xDBD12C2C),
-                      Color(0xDBD15959),
-                      Color(0xFFE8F4F8),
-                    ],
-                    stops: [0.0, 0.3, 0.6, 1.0],
-                  ),
+          // Fond avec dégradé moderne
+          // Fond avec image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bgc_math.png'),
+                fit: BoxFit.cover,
+                opacity: 0.15, // Ajustez l'opacité (0.1 = très transparent, 1.0 = opaque)
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                    AppColors.background.withOpacity(0.5),
+                  ],
                 ),
-                child: CustomPaint(
-                  painter: _ChristmasMathBackgroundPainter(animationValue: _backgroundAnimation.value),
-                  size: Size(size.width, size.height),
-                ),
-              );
-            },
+              ),
+            ),
           ),
 
-          // Éléments décoratifs de Noël
+          // Éléments décoratifs flottants
           if (size.height > 600) ...[
-            ...List.generate(8, (index) => _buildSnowflake(size, index)),
-
+            ...List.generate(8, (index) => _buildFloatingElement(size, index)),
             Positioned(
               top: 80,
               left: 40,
-              child: _buildTwinklingStar(30, delay: 0),
+              child: _buildTwinklingIcon(Icons.star, 30, delay: 0),
             ),
             Positioned(
               top: 120,
               right: 60,
-              child: _buildTwinklingStar(25, delay: 500),
+              child: _buildTwinklingIcon(Icons.auto_awesome, 25, delay: 500),
             ),
             Positioned(
               bottom: 200,
               left: 30,
-              child: _buildTwinklingStar(20, delay: 1000),
-            ),
-
-            Positioned(
-              bottom: 100,
-              left: -10,
-              child: _buildGiftBox(50, Colors.red),
-            ),
-            Positioned(
-              bottom: 120,
-              right: -10,
-              child: _buildGiftBox(45, Colors.green),
+              child: _buildTwinklingIcon(Icons.star_border, 20, delay: 1000),
             ),
           ],
 
@@ -163,230 +152,78 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
                 child: Column(
                   children: [
-                    // En-tête avec thème de Noël
+
+// En-tête moderne
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          // Logo avec décoration de Noël
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              AnimatedScale(
-                                scale: 1.1,
-                                duration: const Duration(seconds: 2),
-                                curve: Curves.elasticOut,
-                                child: RichText(
-                                  text: TextSpan(
-                                    style: TextStyle(
-                                      fontSize: size.width < 350 ? 24 : 26,
-                                      fontWeight: FontWeight.bold,
-                                      fontFamily: 'ComicNeue',
-                                    ),
-                                    children: [
-                                      TextSpan(
-                                        text: 'Maths',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.red.withOpacity(0.5),
-                                              blurRadius: 15,
-                                              offset: const Offset(2, 2),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: 'Cool',
-                                        style: TextStyle(
-                                          color: const Color(0xFFFFD700),
-                                          fontStyle: FontStyle.italic,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.red.withOpacity(0.5),
-                                              blurRadius: 15,
-                                              offset: const Offset(2, 2),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                          // LOGO : Flexible pour éviter qu'il ne pousse les icônes dehors
+                          Flexible(
+                            child: RichText(
+                              overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 22, // Taille réduite pour l'espace
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'ComicNeue',
                                 ),
+                                children: [
+                                  TextSpan(text: 'Maths', style: TextStyle(color: AppColors.textLight)),
+                                  TextSpan(text: 'Cool', style: TextStyle(color: AppColors.accent, fontStyle: FontStyle.italic)),
+                                ],
                               ),
-                              const Positioned(
-                                top: -15,
-                                right: -5,
-                                child: Text(
-                                  '🎅',
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
 
+                          // GROUPE D'ACTIONS : Très compact
                           Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Bouton Achievements avec badge
-                              Consumer<AchievementService>(
-                                builder: (context, achievementService, _) {
-                                  final unclaimedCount = achievementService.getUnclaimedAchievements().length;
-
-                                  return Stack(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(builder: (_) => const AchievementsScreen()),
-                                        ),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(8),
-                                          margin: const EdgeInsets.only(right: 12),
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              colors: [
-                                                Colors.orange.shade400.withOpacity(0.8),
-                                                Colors.yellow.shade400.withOpacity(0.8),
-                                              ],
-                                            ),
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.orange.withOpacity(0.3),
-                                                blurRadius: 8,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: const Icon(
-                                            Icons.emoji_events,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                      if (unclaimedCount > 0)
-                                        Positioned(
-                                          top: 0,
-                                          right: 8,
-                                          child: Container(
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                              border: Border.all(color: Colors.white, width: 2),
-                                            ),
-                                            constraints: const BoxConstraints(
-                                              minWidth: 20,
-                                              minHeight: 20,
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                '$unclaimedCount',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  );
-                                },
+                              // GEMS : On cache le bouton "+" sur les petits écrans ( < 360px )
+                              GemsDisplayWidget(
+                                showPlusButton: MediaQuery.of(context).size.width > 360,
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StoreScreen())),
                               ),
+                              const SizedBox(width: 6),
 
-                              // Bouton notifications
-                              GestureDetector(
+                              // Trophée (Achievements)
+                              _buildCompactAction(
+                                icon: Icons.emoji_events,
+                                color: AppColors.accent,
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AchievementsScreen())),
+                                badgeCount: Provider.of<AchievementService>(context).getUnclaimedAchievements().length,
+                              ),
+                              const SizedBox(width: 6),
+
+                              // Cloche (Notifications) - AJOUTÉ ICI
+                              _buildCompactAction(
+                                icon: Icons.notifications,
+                                color: AppColors.info,
                                 onTap: () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                    builder: (context) => NotificationSettingsScreen(
-                                      userName: displayName,
-                                    ),
-                                  ),
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  margin: const EdgeInsets.only(right: 12),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.red.withOpacity(0.8),
-                                        Colors.green.withOpacity(0.8),
-                                      ],
-                                    ),
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.yellow.withOpacity(0.3),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                    Icons.notifications,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
+                                  MaterialPageRoute(builder: (context) => NotificationSettingsScreen(userName: displayName)),
                                 ),
                               ),
+                              const SizedBox(width: 6),
 
-                              // Avatar
+                              // Profil / Avatar
                               GestureDetector(
                                 onTap: () async {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                                  );
-
+                                  await Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
                                   if (mounted) {
                                     await _loadSavedAvatar();
                                     await authService.reloadUser();
                                     setState(() {});
                                   }
                                 },
-                                child: AnimatedScale(
-                                  scale: _isPressed ? 0.9 : 1.0,
-                                  duration: const Duration(milliseconds: 200),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Colors.red,
-                                          Colors.green,
-                                          Color(0xFFFFD700),
-                                        ],
-                                      ),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.yellow.withOpacity(0.4),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(3),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: CircleAvatar(
-                                        radius: 20,
-                                        backgroundColor: Color.alphaBlend(
-                                          AppColors.christ.withOpacity(0.1),
-                                          Colors.white,
-                                        ),
-                                        backgroundImage: _getProfileImage(photoURL),
-                                      ),
-                                    ),
+                                child: CircleAvatar(
+                                  radius: 17,
+                                  backgroundColor: AppColors.primary,
+                                  child: CircleAvatar(
+                                    radius: 15,
+                                    backgroundImage: _getProfileImage(photoURL),
                                   ),
                                 ),
                               ),
@@ -396,14 +233,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
 
-                    // Message de bienvenue festif
+                    // Message de bienvenue moderne
                     AnimatedSlide(
                       offset: const Offset(0, -0.2),
                       duration: const Duration(milliseconds: 800),
                       curve: Curves.elasticOut,
                       child: Container(
                         margin: const EdgeInsets.only(top: 5, bottom: 5),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
@@ -413,21 +250,32 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           ),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Text(
-                          '🎄 HoHoHo $displayName! 🎅',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontFamily: 'ComicNeue',
-                            shadows: [
-                              Shadow(
-                                color: Colors.red.withOpacity(0.3),
-                                blurRadius: 10,
-                                offset: const Offset(2, 2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.waving_hand,
+                              color: AppColors.accent,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Bonjour $displayName !',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textLight,
+                                fontFamily: 'ComicNeue',
+                                shadows: [
+                                  Shadow(
+                                    color: AppColors.primary.withOpacity(0.3),
+                                    blurRadius: 10,
+                                    offset: const Offset(2, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -440,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                     const SizedBox(height: 10),
 
-                    // Contenu principal - RÉORGANISÉ
+                    // Contenu principal
                     Column(
                       children: [
                         // Animation Lottie
@@ -453,10 +301,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                         const SizedBox(height: 20),
 
-                        // Bouton principal "Déballer les maths"
+                        // Bouton principal "Commencer"
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: ChristmasToggleButton(size: size),
+                          child: ModernToggleButton(size: size),
                         ),
 
                         const SizedBox(height: 16),
@@ -487,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildSnowflake(Size screenSize, int index) {
+  Widget _buildFloatingElement(Size screenSize, int index) {
     final random = Random(index);
     final left = random.nextDouble() * screenSize.width;
 
@@ -498,12 +346,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         return Positioned(
           left: left + sin(value / 50) * 30,
           top: value,
-          child: Text(
-            ['❄️', '❅', '❆'][random.nextInt(3)],
-            style: TextStyle(
-              fontSize: 20 + random.nextDouble() * 15,
-              color: Colors.white.withOpacity(0.7),
-            ),
+          child: Icon(
+            [Icons.circle, Icons.star_border, Icons.add][random.nextInt(3)],
+            size: 20 + random.nextDouble() * 15,
+            color: [
+              AppColors.primary.withOpacity(0.3),
+              AppColors.accent.withOpacity(0.3),
+              AppColors.textLight.withOpacity(0.3),
+            ][random.nextInt(3)],
           ),
         );
       },
@@ -515,16 +365,56 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildTwinklingStar(double size, {required int delay}) {
+  Widget _buildCompactAction({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    int badgeCount = 0,
+  }) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white, size: 18),
+          ),
+        ),
+        if (badgeCount > 0)
+          Positioned(
+            top: -2,
+            right: -2,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+              constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+              child: Text(
+                '$badgeCount',
+                style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildTwinklingIcon(IconData icon, double size, {required int delay}) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.3, end: 1.0),
       duration: const Duration(milliseconds: 1500),
       builder: (context, value, child) {
         return Opacity(
           opacity: value,
-          child: Text(
-            '⭐',
-            style: TextStyle(fontSize: size),
+          child: Icon(
+            icon,
+            size: size,
+            color: AppColors.accent.withOpacity(0.6),
           ),
         );
       },
@@ -535,54 +425,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           });
         }
       },
-    );
-  }
-
-  Widget _buildGiftBox(double size, Color color) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 8,
-            offset: const Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          Center(
-            child: Container(
-              width: size * 0.2,
-              height: size,
-              color: const Color(0xFFFFD700),
-            ),
-          ),
-          Center(
-            child: Container(
-              width: size,
-              height: size * 0.2,
-              color: const Color(0xDBD15959),
-            ),
-          ),
-          Positioned(
-            top: size * 0.3,
-            left: size * 0.3,
-            child: Container(
-              width: size * 0.4,
-              height: size * 0.4,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFFD700),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -616,22 +458,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 }
 
-// Classe pour le bouton toggle animé
-class ChristmasToggleButton extends StatefulWidget {
+// Classe pour le bouton toggle moderne
+class ModernToggleButton extends StatefulWidget {
   final Size size;
 
-  const ChristmasToggleButton({super.key, required this.size});
+  const ModernToggleButton({super.key, required this.size});
 
   @override
-  State<ChristmasToggleButton> createState() => _ChristmasToggleButtonState();
+  State<ModernToggleButton> createState() => _ModernToggleButtonState();
 }
 
-class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
+class _ModernToggleButtonState extends State<ModernToggleButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
-  late Animation<BorderRadius> _borderRadiusAnimation;
   bool _isClosed = false;
 
   @override
@@ -657,14 +498,6 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: const Interval(0.4, 1.0, curve: Curves.easeOut),
-    ));
-
-    _borderRadiusAnimation = Tween<BorderRadius>(
-      begin: BorderRadius.circular(40),
-      end: BorderRadius.circular(100),
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
     ));
   }
 
@@ -706,11 +539,11 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.favorite_border, color: Colors.red),
-            SizedBox(width: 10),
-            Text("Plus de vies !", style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
+            Icon(Icons.favorite_border, color: AppColors.error),
+            const SizedBox(width: 10),
+            const Text("Plus de vies !", style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
           ],
         ),
         content: const Column(
@@ -731,11 +564,11 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Plus tard", style: TextStyle(color: Colors.grey)),
+            child: Text("Plus tard", style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.christ,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
@@ -752,6 +585,7 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
       ),
     );
   }
+
 
   @override
   void dispose() {
@@ -770,58 +604,32 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
             opacity: _opacityAnimation.value,
             child: InkWell(
               onTap: _toggleButton,
-              borderRadius: BorderRadius.circular(40),
+              borderRadius: BorderRadius.circular(16),
               child: Container(
                 width: double.infinity,
                 height: 75,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
+                  gradient: LinearGradient(
                     colors: [
-                      Color(0xFFC62828),
-                      Color(0xFFD32F2F),
-                      Color(0xFF2E7D32),
+                      AppColors.primary,
+                      AppColors.secondary,
+                      AppColors.gradientEnd,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    stops: [0.0, 0.5, 1.0],
                   ),
-                  borderRadius: _borderRadiusAnimation.value,
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFFFFFFF).withOpacity(0.6),
+                      color: AppColors.primary.withOpacity(0.4),
                       blurRadius: 20 * _scaleAnimation.value,
                       offset: Offset(0, 10 * _scaleAnimation.value),
                       spreadRadius: 2,
                     ),
-                    BoxShadow(
-                      color: const Color(0xFFF1CC39).withOpacity(0.4),
-                      blurRadius: 15 * _scaleAnimation.value,
-                      offset: Offset(0, 5 * _scaleAnimation.value),
-                    ),
                   ],
-                  border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                    width: 1.5,
-                  ),
                 ),
                 child: Stack(
                   children: [
-                    Positioned(
-                      top: -10 * _scaleAnimation.value,
-                      left: -10 * _scaleAnimation.value,
-                      child: Opacity(
-                        opacity: _opacityAnimation.value,
-                        child: Container(
-                          width: 30 * _scaleAnimation.value,
-                          height: 30 * _scaleAnimation.value,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.2),
-                          ),
-                        ),
-                      ),
-                    ),
-
                     Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -834,14 +642,10 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
                               shape: BoxShape.circle,
                               color: Colors.white.withOpacity(0.2 * _opacityAnimation.value),
                             ),
-                            child: Transform.rotate(
-                              angle: _animationController.value * 2 * pi,
-                              child: Text(
-                                '🎄',
-                                style: TextStyle(
-                                  fontSize: 28 * _scaleAnimation.value,
-                                ),
-                              ),
+                            child: Icon(
+                              Icons.play_circle_filled,
+                              size: 28 * _scaleAnimation.value,
+                              color: AppColors.accent,
                             ),
                           ),
 
@@ -851,15 +655,16 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
                             child: Opacity(
                               opacity: _opacityAnimation.value,
                               child: Text(
-                                'Déballer les maths !',
+                                'Commencer à jouer',
                                 maxLines: 1,
                                 overflow: TextOverflow.fade,
                                 softWrap: false,
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: AppColors.textLight,
                                   fontSize: 20 * _scaleAnimation.value,
                                   fontWeight: FontWeight.w800,
                                   fontFamily: 'ComicNeue',
+                                  letterSpacing: 0.5,
                                 ),
                               ),
                             ),
@@ -869,33 +674,13 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
 
                           Opacity(
                             opacity: _opacityAnimation.value,
-                            child: Container(
-                              padding: EdgeInsets.all(6 * _scaleAnimation.value),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.15),
-                              ),
-                              child: Text(
-                                '❄️',
-                                style: TextStyle(
-                                  fontSize: 16 * _scaleAnimation.value,
-                                ),
-                              ),
+                            child: Icon(
+                              Icons.arrow_forward,
+                              size: 24 * _scaleAnimation.value,
+                              color: AppColors.textLight,
                             ),
                           ),
                         ],
-                      ),
-                    ),
-
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: _borderRadiusAnimation.value,
-                          border: Border.all(
-                            color: Colors.white.withOpacity(0.1 * _opacityAnimation.value),
-                            width: 2,
-                          ),
-                        ),
                       ),
                     ),
                   ],
@@ -909,11 +694,11 @@ class _ChristmasToggleButtonState extends State<ChristmasToggleButton>
   }
 }
 
-// Painter pour le fond mathématique de Noël
-class _ChristmasMathBackgroundPainter extends CustomPainter {
+// Painter pour le fond mathématique moderne
+class _MathBackgroundPainter extends CustomPainter {
   final double animationValue;
 
-  _ChristmasMathBackgroundPainter({required this.animationValue});
+  _MathBackgroundPainter({required this.animationValue});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -924,10 +709,10 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
     final random = Random(seedValue);
 
     final colors = [
-      Colors.red.withOpacity(0.1),
-      Colors.green.withOpacity(0.1),
-      Colors.white.withOpacity(0.08),
-      const Color(0xFFFFD700).withOpacity(0.1),
+      AppColors.primary.withOpacity(0.1),
+      AppColors.secondary.withOpacity(0.1),
+      AppColors.accent.withOpacity(0.08),
+      AppColors.textLight.withOpacity(0.1),
     ];
 
     for (int i = 0; i < 30; i++) {
@@ -942,7 +727,7 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
       } else if (i % 3 == 0) {
         canvas.drawCircle(Offset(x, y), radius, paint);
       } else {
-        final symbols = ['+', '-', '×', '÷', '=', '🎄', '⭐', '❄️'];
+        final symbols = ['+', '-', '×', '÷', '=', '²', '√', 'π'];
         final textPainter = TextPainter(
           text: TextSpan(
             text: symbols[random.nextInt(symbols.length)],
@@ -981,5 +766,5 @@ class _ChristmasMathBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ChristmasMathBackgroundPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _MathBackgroundPainter oldDelegate) => true;
 }

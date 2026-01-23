@@ -606,19 +606,27 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   Widget build(BuildContext context) {
     if (_isLoadingExercises) {
       return Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.gradientStart,
-                AppColors.gradientMiddle,
-                AppColors.gradientEnd,
-                AppColors.background,
-              ],
+          body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bgc_math.png'),
+                fit: BoxFit.cover,
+                opacity: 0.15,
+              ),
             ),
-          ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                    AppColors.background.withOpacity(0.5),
+                  ],
+                ),
+              ),
           child: SafeArea(
             child: Column(
               children: [
@@ -652,23 +660,33 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
           ),
         ),
+      )
       );
     }
 
     if (_exercises.isEmpty) {
       return Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.gradientStart,
-                AppColors.gradientMiddle,
-                AppColors.gradientEnd,
-              ],
+          body: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bgc_math.png'),
+                fit: BoxFit.cover,
+                opacity: 0.15,
+              ),
             ),
-          ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                    AppColors.background.withOpacity(0.5),
+                  ],
+                ),
+              ),
           child: SafeArea(
             child: Column(
               children: [
@@ -748,22 +766,32 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
           ),
         ),
+      )
       );
     }
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.gradientStart,
-              AppColors.gradientMiddle,
-              AppColors.gradientEnd,
-            ],
+        body: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/bgc_math.png'),
+              fit: BoxFit.cover,
+              opacity: 0.15,
+            ),
           ),
-        ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.gradientStart.withOpacity(0.8),
+                  AppColors.gradientMiddle.withOpacity(0.7),
+                  AppColors.gradientEnd.withOpacity(0.6),
+                  AppColors.background.withOpacity(0.5),
+                ],
+              ),
+            ),
         child: Stack(
           children: [
             CustomPaint(
@@ -812,6 +840,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           ],
         ),
       ),
+    )
     );
   }
 

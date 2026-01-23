@@ -29,18 +29,27 @@ class LevelSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.gradientStart,
-              AppColors.gradientMiddle,
-              AppColors.gradientEnd,
-            ],
+        body: Container(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/bgc_math.png'),
+              fit: BoxFit.cover,
+              opacity: 0.15,
+            ),
           ),
-        ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.gradientStart.withOpacity(0.8),
+                  AppColors.gradientMiddle.withOpacity(0.7),
+                  AppColors.gradientEnd.withOpacity(0.6),
+                  AppColors.background.withOpacity(0.5),
+                ],
+              ),
+            ),
         child: SafeArea(
           child: Column(
             children: [
@@ -68,6 +77,7 @@ class LevelSelectionScreen extends StatelessWidget {
           ),
         ),
       ),
+    )
     );
   }
 

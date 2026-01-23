@@ -91,16 +91,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Stack(
         children: [
           // Background avec gradient moderne
+          // Background avec image
           Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.gradientStart,
-                  AppColors.gradientMiddle,
-                  AppColors.gradientEnd,
-                ],
+              image: DecorationImage(
+                image: AssetImage('assets/images/bgc_math.png'),
+                fit: BoxFit.cover,
+                opacity: 0.15,
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                  ],
+                ),
               ),
             ),
           ),

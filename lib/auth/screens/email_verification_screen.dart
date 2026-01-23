@@ -171,8 +171,28 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       backgroundColor: AppColors.primary,
       body: Stack(
         children: [
-          // Arrière-plan (facultatif)
-          // ...
+          // Arrière-plan avec image
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bgc_math.png'),
+                fit: BoxFit.cover,
+                opacity: 0.15,
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.primary.withOpacity(0.8),
+                    AppColors.secondary.withOpacity(0.6),
+                  ],
+                ),
+              ),
+            ),
+          ),
 
           Center(
             child: SingleChildScrollView(

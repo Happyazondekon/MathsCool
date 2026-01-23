@@ -346,22 +346,31 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.gradientStart,
-                AppColors.gradientMiddle,
-                AppColors.gradientEnd,
-              ],
+          body: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/bgc_math.png'),
+                fit: BoxFit.cover,
+                opacity: 0.15,
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                  ],
+                ),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
             ),
           ),
-          child: const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          ),
-        ),
       );
     }
 
@@ -378,28 +387,27 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     }
 
     return Scaffold(
-      body: Container(
-        // Fond avec l'image MathsCool
+        body: Container(
         decoration: BoxDecoration(
         image: DecorationImage(
-        image: const AssetImage('assets/images/bgc_math.png'),
+        image: AssetImage('assets/images/bgc_math.png'),
     fit: BoxFit.cover,
-    opacity: 0.15, // Opacité légère pour la lisibilité
+    opacity: 0.15,
     ),
     ),
-    child :Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.gradientStart,
-              AppColors.gradientMiddle,
-              AppColors.gradientEnd,
-            ],
-          ),
-        ),
-        child: Stack(
+    child: Container(
+    decoration: BoxDecoration(
+    gradient: LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+    AppColors.gradientStart.withOpacity(0.8),
+    AppColors.gradientMiddle.withOpacity(0.7),
+    AppColors.gradientEnd.withOpacity(0.6),
+    ],
+    ),
+    ),
+    child: Stack(
           children: [
             CustomPaint(
               painter: _MathBackgroundPainter(),
@@ -437,18 +445,26 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
   Widget _buildAlreadyCompletedScreen() {
     return Scaffold(
-      body: Container(
+        body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.gradientStart,
-              AppColors.gradientMiddle,
-              AppColors.gradientEnd,
-            ],
-          ),
-        ),
+        image: DecorationImage(
+        image: AssetImage('assets/images/bgc_math.png'),
+    fit: BoxFit.cover,
+    opacity: 0.15,
+    ),
+    ),
+    child: Container(
+    decoration: BoxDecoration(
+    gradient: LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+    AppColors.gradientStart.withOpacity(0.8),
+    AppColors.gradientMiddle.withOpacity(0.7),
+    AppColors.gradientEnd.withOpacity(0.6),
+    ],
+    ),
+    ),
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -494,23 +510,32 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           ),
         ),
       ),
+    )
     );
   }
 
   Widget _buildNoChallengeScreen() {
     return Scaffold(
-      body: Container(
+        body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.gradientStart,
-              AppColors.gradientMiddle,
-              AppColors.gradientEnd,
-            ],
-          ),
-        ),
+        image: DecorationImage(
+        image: AssetImage('assets/images/bgc_math.png'),
+    fit: BoxFit.cover,
+    opacity: 0.15,
+    ),
+    ),
+    child: Container(
+    decoration: BoxDecoration(
+    gradient: LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+    AppColors.gradientStart.withOpacity(0.8),
+    AppColors.gradientMiddle.withOpacity(0.7),
+    AppColors.gradientEnd.withOpacity(0.6),
+    ],
+    ),
+    ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -538,23 +563,32 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           ),
         ),
       ),
+    )
     );
   }
 
   Widget _buildLevelSelectionScreen() {
     return Scaffold(
-      body: Container(
+        body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.gradientStart,
-              AppColors.gradientMiddle,
-              AppColors.gradientEnd,
-            ],
-          ),
-        ),
+        image: DecorationImage(
+        image: AssetImage('assets/images/bgc_math.png'),
+    fit: BoxFit.cover,
+    opacity: 0.15,
+    ),
+    ),
+    child: Container(
+    decoration: BoxDecoration(
+    gradient: LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+    AppColors.gradientStart.withOpacity(0.8),
+    AppColors.gradientMiddle.withOpacity(0.7),
+    AppColors.gradientEnd.withOpacity(0.6),
+    ],
+    ),
+    ),
         child: SafeArea(
           child: Column(
             children: [
@@ -582,6 +616,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           ),
         ),
       ),
+    )
     );
   }
 
@@ -984,14 +1019,14 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                       ),
                     ),
                     const SizedBox(height: 16),
-              RichText(
-                textAlign: TextAlign.center,
-                text: buildMathText(
-                  exercise.question,
-                  fontSize: 26,
-                  color: AppColors.primary,
-                ),
-              ),
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: buildMathText(
+                        exercise.question,
+                        fontSize: 26,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ],
                 ),
               ),

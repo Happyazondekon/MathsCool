@@ -259,20 +259,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              'Bonjour $displayName !',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textLight,
-                                fontFamily: 'ComicNeue',
-                                shadows: [
-                                  Shadow(
-                                    color: AppColors.primary.withOpacity(0.3),
-                                    blurRadius: 10,
-                                    offset: const Offset(2, 2),
+                            Flexible(
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown, // Réduit la taille si le nom est trop long
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Bonjour $displayName !',
+                                  style: TextStyle(
+                                    fontSize: 20, // Taille idéale par défaut
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textLight,
+                                    fontFamily: 'ComicNeue',
+                                    shadows: [
+                                      Shadow(
+                                        color: AppColors.primary.withOpacity(0.3),
+                                        blurRadius: 10,
+                                        offset: const Offset(2, 2),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                  maxLines: 1, // Garde le nom sur une seule ligne
+                                ),
                               ),
                             ),
                           ],
@@ -645,7 +652,7 @@ class _ModernToggleButtonState extends State<ModernToggleButton>
                             child: Icon(
                               Icons.play_circle_filled,
                               size: 28 * _scaleAnimation.value,
-                              color: AppColors.accent,
+                              color: AppColors.surface,
                             ),
                           ),
 

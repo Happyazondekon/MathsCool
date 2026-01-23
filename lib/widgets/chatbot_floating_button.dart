@@ -268,7 +268,7 @@ class _ChatbotFloatingButtonState extends State<ChatbotFloatingButton>
                     child: Icon(
                       Icons.chat_bubble_rounded,
                       size: 30,
-                      color: AppColors.textLight.withOpacity(0.7 + (0.3 * _glowAnimation.value)),
+                      color: Colors.white,
                     ),
                   ),
                   // Indicateur de connexion

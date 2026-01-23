@@ -438,7 +438,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       body: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/bgc_math.png'),
                 fit: BoxFit.cover,
@@ -451,8 +451,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.primary.withOpacity(0.8),
-                    AppColors.background.withOpacity(0.7),
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                    AppColors.background.withOpacity(0.5),
                   ],
                 ),
               ),
@@ -884,7 +886,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'ComicNeue',
-                  color: AppColors.surface,
+                  color: AppColors.accent,
                 ),
               ),
             ],

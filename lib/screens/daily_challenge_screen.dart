@@ -9,11 +9,13 @@ import '../services/daily_challenge_service.dart';
 import '../services/hybrid_exercise_service.dart';
 import '../services/lives_service.dart';
 import '../services/sound_service.dart';
+import '../services/gems_service.dart';
 import '../utils/colors.dart';
 import '../widgets/chatbot_floating_button.dart';
 import 'daily_challenge_result_screen.dart';
 import 'store_screen.dart';
 import 'dart:math';
+import 'dart:async';
 
 class DailyChallengeScreen extends StatefulWidget {
   const DailyChallengeScreen({Key? key}) : super(key: key);
@@ -35,6 +37,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
   // Timer
   late DateTime _startTime;
   int _elapsedSeconds = 0;
+  Timer? _timer;
+  int _remainingSeconds = 300; // 5 minutes par défaut
+  bool _isTimerRunning = false;
 
   // Sauvegarde des réponses
   Map<String, bool> _answers = {};
@@ -77,8 +82,413 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
   @override
   void dispose() {
+    _timer?.cancel();
     _animationController.dispose();
     super.dispose();
+  }
+
+  void _startTimer() {
+    _isTimerRunning = true;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          if (_remainingSeconds > 0) {
+            _remainingSeconds--;
+            _elapsedSeconds++;
+          } else {
+            _timer?.cancel();
+            _isTimerRunning = false;
+            _showTimeUpDialog();
+          }
+        });
+      }
+    });
+  }
+
+  void _pauseTimer() {
+    _timer?.cancel();
+    _isTimerRunning = false;
+  }
+
+  void _resumeTimer() {
+    if (_remainingSeconds > 0) {
+      _startTimer();
+    }
+  }
+
+  Future<void> _addTimeWithGems() async {
+    final user = Provider.of<AppUser?>(context, listen: false);
+    if (user == null) return;
+
+    final gemsService = Provider.of<GemsService>(context, listen: false);
+
+    // Vérifier si l'utilisateur a assez de gems
+    if (!gemsService.canAfford(5)) {
+      _showInsufficientGemsDialog();
+      return;
+    }
+
+    // Pause le timer pendant la confirmation
+    _pauseTimer();
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildAddTimeDialog(gemsService.currentGems),
+    );
+
+    if (confirmed == true) {
+      final success = await gemsService.spendGems(
+        user.uid,
+        5,
+        purpose: 'add_time_challenge',
+        metadata: {'seconds_added': 5},
+      );
+
+      if (success) {
+        setState(() {
+          _remainingSeconds += 5;
+        });
+
+        SoundService().playCorrectAnswer();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.access_time, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('⏰ +5 secondes ajoutées ! (-5 💎)'),
+                ],
+              ),
+              backgroundColor: AppColors.success,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+
+    // Reprendre le timer
+    _resumeTimer();
+  }
+
+  void _showInsufficientGemsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.warning.withOpacity(0.1), Colors.white],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.warning.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text("💎", style: TextStyle(fontSize: 40)),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Pas assez de gems ! 💎",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'ComicNeue',
+                  color: AppColors.warning,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "Il te faut 5 gems pour ajouter 5 secondes.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        "Annuler",
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontFamily: 'ComicNeue',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const StoreScreen()),
+                        );
+                      },
+                      child: const Text(
+                        "Boutique 💎",
+                        style: TextStyle(
+                          fontFamily: 'ComicNeue',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddTimeDialog(int currentGems) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.info.withOpacity(0.1), Colors.white],
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.info, AppColors.primary],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.access_time, color: Colors.white, size: 40),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "Ajouter du temps ? ⏰",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'ComicNeue',
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.accent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "+5 secondes",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.success,
+                          fontFamily: 'ComicNeue',
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text("⏱️", style: TextStyle(fontSize: 24)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("💎", style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 4),
+                      Text(
+                        "5 gems",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.warning,
+                          fontFamily: 'ComicNeue',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("💎", style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 4),
+                  Text(
+                    "Tes gems: $currentGems",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontFamily: 'ComicNeue',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: Text(
+                      "Annuler",
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontFamily: 'ComicNeue',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text(
+                      "Confirmer ✨",
+                      style: TextStyle(
+                        fontFamily: 'ComicNeue',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showTimeUpDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.error.withOpacity(0.1), Colors.white],
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Text("⏰", style: TextStyle(fontSize: 40)),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Temps écoulé ! ⏰",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'ComicNeue',
+                  color: AppColors.error,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                "Le temps est écoulé pour ce défi.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _finishChallenge();
+                },
+                child: const Text(
+                  "Voir le résultat",
+                  style: TextStyle(
+                    fontFamily: 'ComicNeue',
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _checkIfAlreadyCompleted() async {
@@ -118,10 +528,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     final service = Provider.of<DailyChallengeService>(context, listen: false);
 
     try {
-      // Récupérer le défi
       final challenge = await service.getTodayChallenge(level);
-
-      // Charger les exercices
       final exerciseService = HybridExerciseService();
       final exercises = await exerciseService.getExercises(
         level: challenge.level,
@@ -137,6 +544,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           _startTime = DateTime.now();
         });
         _animationController.forward();
+        _startTimer(); // Démarrer le minuteur
       }
     } catch (e) {
       print('❌ Erreur chargement défi: $e');
@@ -176,7 +584,6 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
       });
     } else {
       await soundService.playWrongAnswer();
-      // Perte de vie
       bool stillHasLives = await livesService.loseLife(user.uid);
 
       if (!stillHasLives) {
@@ -204,6 +611,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           _animationController.reset();
           _animationController.forward();
         } else {
+          _timer?.cancel();
           _finishChallenge();
         }
       });
@@ -214,6 +622,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     final user = Provider.of<AppUser?>(context, listen: false);
     if (user == null || _challenge == null) return;
 
+    _timer?.cancel();
     _elapsedSeconds = DateTime.now().difference(_startTime).inSeconds;
 
     final result = DailyChallengeResult(
@@ -342,35 +751,110 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     );
   }
 
+  Widget _buildTimerDisplay() {
+    final minutes = _remainingSeconds ~/ 60;
+    final seconds = _remainingSeconds % 60;
+    final isLowTime = _remainingSeconds <= 30;
+
+    return Consumer<GemsService>(
+      builder: (context, gemsService, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isLowTime
+                  ? [AppColors.error, AppColors.error.withOpacity(0.8)]
+                  : [AppColors.info, AppColors.primary],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: (isLowTime ? AppColors.error : AppColors.info).withOpacity(0.4),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isLowTime ? Icons.timer_off : Icons.timer,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  fontFamily: 'ComicNeue',
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: _addTimeWithGems,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('💎', style: TextStyle(fontSize: 14)),
+                      const SizedBox(width: 4),
+                      Text(
+                        '+5s',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'ComicNeue',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/bgc_math.png'),
-                fit: BoxFit.cover,
-                opacity: 0.15,
-              ),
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.gradientStart.withOpacity(0.8),
-                    AppColors.gradientMiddle.withOpacity(0.7),
-                    AppColors.gradientEnd.withOpacity(0.6),
-                  ],
-                ),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/bgc_math.png'),
+              fit: BoxFit.cover,
+              opacity: 0.15,
             ),
           ),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.gradientStart.withOpacity(0.8),
+                  AppColors.gradientMiddle.withOpacity(0.7),
+                  AppColors.gradientEnd.withOpacity(0.6),
+                ],
+              ),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ),
+        ),
       );
     }
 
@@ -387,455 +871,54 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     }
 
     return Scaffold(
-        body: Container(
+      body: Container(
         decoration: BoxDecoration(
-        image: DecorationImage(
-        image: AssetImage('assets/images/bgc_math.png'),
-    fit: BoxFit.cover,
-    opacity: 0.15,
-    ),
-    ),
-    child: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-    AppColors.gradientStart.withOpacity(0.8),
-    AppColors.gradientMiddle.withOpacity(0.7),
-    AppColors.gradientEnd.withOpacity(0.6),
-    ],
-    ),
-    ),
-    child: Stack(
-          children: [
-            CustomPaint(
-              painter: _MathBackgroundPainter(),
-              size: MediaQuery.of(context).size,
-            ),
-            SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: _buildExerciseScreen(),
-                  ),
-                ],
-              ),
-            ),
-            if (_showFeedback) _buildFeedbackOverlay(),
-            if (_isSaving && !_showFeedback)
-              Container(
-                color: Colors.black26,
-                child: const Center(
-                  child: CircularProgressIndicator(color: Colors.white),
-                ),
-              ),
-            const Positioned(
-              bottom: 20,
-              right: 20,
-              child: ChatbotFloatingButton(),
-            ),
-          ],
-        ),
-      ),
-    )
-    );
-  }
-
-  Widget _buildAlreadyCompletedScreen() {
-    return Scaffold(
-        body: Container(
-        decoration: BoxDecoration(
-        image: DecorationImage(
-        image: AssetImage('assets/images/bgc_math.png'),
-    fit: BoxFit.cover,
-    opacity: 0.15,
-    ),
-    ),
-    child: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-    AppColors.gradientStart.withOpacity(0.8),
-    AppColors.gradientMiddle.withOpacity(0.7),
-    AppColors.gradientEnd.withOpacity(0.6),
-    ],
-    ),
-    ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Lottie.asset('assets/animations/success.json', height: 200),
-                const SizedBox(height: 20),
-                Text(
-                  'Défi déjà complété ! 🎉',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textLight,
-                    fontFamily: 'ComicNeue',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'Reviens demain pour un nouveau défi !',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppColors.textLight.withOpacity(0.8),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: const Text('Retour', style: TextStyle(fontSize: 18, fontFamily: 'ComicNeue')),
-                ),
-              ],
-            ),
+          image: DecorationImage(
+            image: AssetImage('assets/images/bgc_math.png'),
+            fit: BoxFit.cover,
+            opacity: 0.15,
           ),
         ),
-      ),
-    )
-    );
-  }
-
-  Widget _buildNoChallengeScreen() {
-    return Scaffold(
-        body: Container(
-        decoration: BoxDecoration(
-        image: DecorationImage(
-        image: AssetImage('assets/images/bgc_math.png'),
-    fit: BoxFit.cover,
-    opacity: 0.15,
-    ),
-    ),
-    child: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-    AppColors.gradientStart.withOpacity(0.8),
-    AppColors.gradientMiddle.withOpacity(0.7),
-    AppColors.gradientEnd.withOpacity(0.6),
-    ],
-    ),
-    ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 80, color: AppColors.textLight),
-              const SizedBox(height: 20),
-              Text(
-                'Aucun défi disponible',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: AppColors.textLight,
-                  fontFamily: 'ComicNeue',
-                ),
-              ),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: AppColors.primary,
-                ),
-                child: const Text('Retour'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    )
-    );
-  }
-
-  Widget _buildLevelSelectionScreen() {
-    return Scaffold(
-        body: Container(
-        decoration: BoxDecoration(
-        image: DecorationImage(
-        image: AssetImage('assets/images/bgc_math.png'),
-    fit: BoxFit.cover,
-    opacity: 0.15,
-    ),
-    ),
-    child: Container(
-    decoration: BoxDecoration(
-    gradient: LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-    AppColors.gradientStart.withOpacity(0.8),
-    AppColors.gradientMiddle.withOpacity(0.7),
-    AppColors.gradientEnd.withOpacity(0.6),
-    ],
-    ),
-    ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildSelectionHeader(),
-              const SizedBox(height: 24),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.85,
-                    ),
-                    itemCount: _levels.length,
-                    itemBuilder: (context, index) {
-                      return _buildLevelCard(index);
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    )
-    );
-  }
-
-  Widget _buildSelectionHeader() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
-                onPressed: () => Navigator.pop(context),
-              ),
-              Expanded(
-                child: Text(
-                  'Défi Quotidien 🏆',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                    fontFamily: 'ComicNeue',
-                  ),
-                ),
-              ),
-              const SizedBox(width: 48),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.warning, AppColors.accent],
-              ),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.emoji_events_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    'Choisis ton niveau de défi',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'ComicNeue',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLevelCard(int index) {
-    final List<List<Color>> gradientColors = [
-      [AppColors.accent, AppColors.warning],                    // CI
-      [AppColors.info, AppColors.secondary],                    // CP
-      [AppColors.success, Color(0xFF059669)],                   // CE1
-      [AppColors.gradientEnd, Color(0xFFEC4899)],               // CE2
-      [AppColors.secondary, Color(0xFF7C3AED)],                 // CM1
-      [AppColors.error, Color(0xFFDC2626)],                     // CM2
-      [Color(0xFF06B6D4), Color(0xFF0891B2)],                   // 6ème
-      [Color(0xFF14B8A6), Color(0xFF0D9488)],                   // 5ème
-      [AppColors.warning, Color(0xFFF97316)],                   // 4ème
-      [Color(0xFF64748B), Color(0xFF475569)],
-    ];
-
-    final List<IconData> icons = [
-      Icons.child_care_rounded,
-      Icons.emoji_people_rounded,
-      Icons.school_rounded,
-      Icons.psychology_rounded,
-      Icons.emoji_objects_rounded,
-      Icons.workspace_premium_rounded,
-      Icons.menu_book_rounded,
-      Icons.calculate_rounded,
-      Icons.architecture_rounded,
-      Icons.history_edu_rounded,
-    ];
-
-    final bool isCollege = index >= 6;
-
-    return TweenAnimationBuilder(
-      tween: Tween<double>(begin: 0, end: 1),
-      duration: Duration(milliseconds: 400 + (index * 80)),
-      curve: Curves.easeOutBack,
-      builder: (context, double value, child) {
-        return Transform.scale(
-          scale: value.clamp(0.0, 1.0),
-          child: Opacity(
-            opacity: value.clamp(0.0, 1.0),
-            child: child,
-          ),
-        );
-      },
-      child: GestureDetector(
-        onTap: () => _loadChallengeWithLevel(_levels[index]),
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: gradientColors[index],
+              colors: [
+                AppColors.gradientStart.withOpacity(0.8),
+                AppColors.gradientMiddle.withOpacity(0.7),
+                AppColors.gradientEnd.withOpacity(0.6),
+              ],
             ),
-            borderRadius: BorderRadius.circular(25),
-            boxShadow: [
-              BoxShadow(
-                color: gradientColors[index][1].withOpacity(0.4),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
           child: Stack(
             children: [
-              if (isCollege)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'Collège',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: gradientColors[index][1],
-                        fontFamily: 'ComicNeue',
-                      ),
-                    ),
-                  ),
-                ),
-              Center(
+              CustomPaint(
+                painter: _MathBackgroundPainter(),
+                size: MediaQuery.of(context).size,
+              ),
+              SafeArea(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        icons[index],
-                        size: 44,
-                        color: gradientColors[index][1],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _levels[index],
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'ComicNeue',
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text(
-                        _descriptions[index],
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'ComicNeue',
-                        ),
-                      ),
+                    _buildHeader(),
+                    Expanded(
+                      child: _buildExerciseScreen(),
                     ),
                   ],
                 ),
+              ),
+              if (_showFeedback) _buildFeedbackOverlay(),
+              if (_isSaving && !_showFeedback)
+                Container(
+                  color: Colors.black26,
+                  child: const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                ),
+              const Positioned(
+                bottom: 20,
+                right: 20,
+                child: ChatbotFloatingButton(),
               ),
             ],
           ),
@@ -851,53 +934,60 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
         color: Colors.white.withOpacity(0.2),
         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(25)),
       ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Text(
-                  '${_challenge!.theme} - ${_challenge!.level}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontFamily: 'ComicNeue',
-                  ),
-                ),
-                Text(
-                  'Question ${_currentIndex + 1}/${_exercises.length}',
-                  style: const TextStyle(fontSize: 14, color: Colors.white70),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.success,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.star, color: Colors.white, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  '$_score',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+      child: Column(
+          children: [
+      Row(
+      children: [
+      IconButton(
+      icon: const Icon(Icons.close, color: Colors.white),
+      onPressed: () => Navigator.pop(context),
+    ),
+    Expanded(
+    child: Column(
+    children: [
+    Text(
+    '${_challenge!.theme} - ${_challenge!.level}',
+    style: const TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+    fontFamily: 'ComicNeue',
+    ),
+    ),
+    Text(
+    'Question ${_currentIndex + 1}/${_exercises.length}',
+    style: const TextStyle(fontSize: 14, color: Colors.white70),
+    ),
+    ],
+    ),
+    ),
+    Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+    color: AppColors.success,
+    borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+    children: [
+    const Icon(Icons.star, color: Colors.white, size: 20),
+    const SizedBox(width: 4),
+    Text(
+    '$_score',
+    style: const TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+    ),
+    ),
+    ],
+    ),
+    ),
+    ],
+      ),
+            const SizedBox(height: 12),
+            // Minuteur
+            _buildTimerDisplay(),
+          ],
       ),
     );
   }
@@ -1188,6 +1278,407 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlreadyCompletedScreen() {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bgc_math.png'),
+            fit: BoxFit.cover,
+            opacity: 0.15,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.gradientStart.withOpacity(0.8),
+                AppColors.gradientMiddle.withOpacity(0.7),
+                AppColors.gradientEnd.withOpacity(0.6),
+              ],
+            ),
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Lottie.asset('assets/animations/success.json', height: 200),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Défi déjà complété ! 🎉',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textLight,
+                      fontFamily: 'ComicNeue',
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Reviens demain pour un nouveau défi !',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textLight.withOpacity(0.8),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text('Retour', style: TextStyle(fontSize: 18, fontFamily: 'ComicNeue')),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoChallengeScreen() {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bgc_math.png'),
+            fit: BoxFit.cover,
+            opacity: 0.15,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.gradientStart.withOpacity(0.8),
+                AppColors.gradientMiddle.withOpacity(0.7),
+                AppColors.gradientEnd.withOpacity(0.6),
+              ],
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 80, color: AppColors.textLight),
+                const SizedBox(height: 20),
+                Text(
+                  'Aucun défi disponible',
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: AppColors.textLight,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                  ),
+                  child: const Text('Retour'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLevelSelectionScreen() {
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/bgc_math.png'),
+            fit: BoxFit.cover,
+            opacity: 0.15,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppColors.gradientStart.withOpacity(0.8),
+                AppColors.gradientMiddle.withOpacity(0.7),
+                AppColors.gradientEnd.withOpacity(0.6),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                _buildSelectionHeader(),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: GridView.builder(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: _levels.length,
+                      itemBuilder: (context, index) {
+                        return _buildLevelCard(index);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectionHeader() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary),
+                onPressed: () => Navigator.pop(context),
+              ),
+              Expanded(
+                child: Text(
+                  'Défi Quotidien 🏆',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                    fontFamily: 'ComicNeue',
+                  ),
+                ),
+              ),
+              const SizedBox(width: 48),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.warning, AppColors.accent],
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.emoji_events_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Text(
+                    'Choisis ton niveau de défi',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'ComicNeue',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLevelCard(int index) {
+    final List<List<Color>> gradientColors = [
+      [AppColors.accent, AppColors.warning],                    // CI
+      [AppColors.info, AppColors.secondary],                    // CP
+      [AppColors.success, Color(0xFF059669)],                   // CE1
+      [AppColors.gradientEnd, Color(0xFFEC4899)],               // CE2
+      [AppColors.secondary, Color(0xFF7C3AED)],                 // CM1
+      [AppColors.error, Color(0xFFDC2626)],                     // CM2
+      [Color(0xFF06B6D4), Color(0xFF0891B2)],                   // 6ème
+      [Color(0xFF14B8A6), Color(0xFF0D9488)],                   // 5ème
+      [AppColors.warning, Color(0xFFF97316)],                   // 4ème
+      [Color(0xFF64748B), Color(0xFF475569)],
+    ];
+
+    final List<IconData> icons = [
+      Icons.child_care_rounded,
+      Icons.emoji_people_rounded,
+      Icons.school_rounded,
+      Icons.psychology_rounded,
+      Icons.emoji_objects_rounded,
+      Icons.workspace_premium_rounded,
+      Icons.menu_book_rounded,
+      Icons.calculate_rounded,
+      Icons.architecture_rounded,
+      Icons.history_edu_rounded,
+    ];
+
+    final bool isCollege = index >= 6;
+
+    return TweenAnimationBuilder(
+      tween: Tween<double>(begin: 0, end: 1),
+      duration: Duration(milliseconds: 400 + (index * 80)),
+      curve: Curves.easeOutBack,
+      builder: (context, double value, child) {
+        return Transform.scale(
+          scale: value.clamp(0.0, 1.0),
+          child: Opacity(
+            opacity: value.clamp(0.0, 1.0),
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: () => _loadChallengeWithLevel(_levels[index]),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: gradientColors[index],
+            ),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: gradientColors[index][1].withOpacity(0.4),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              if (isCollege)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Collège',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: gradientColors[index][1],
+                        fontFamily: 'ComicNeue',
+                      ),
+                    ),
+                  ),
+                ),
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 10,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        icons[index],
+                        size: 44,
+                        color: gradientColors[index][1],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      _levels[index],
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'ComicNeue',
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text(
+                        _descriptions[index],
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'ComicNeue',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

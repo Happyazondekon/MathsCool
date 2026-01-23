@@ -376,7 +376,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           ),
           const Expanded(
             child: Text(
-              '🪙 BOUTIQUE',
+              '🏪 BOUTIQUE',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 28,

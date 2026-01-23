@@ -87,31 +87,92 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: // Fond avec image MathsCool et superposition
-      Stack(
+      body: Stack(
         children: [
+          // Fond avec image et gradient
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: const AssetImage('assets/images/bgc_math.png'),
+                image: AssetImage('assets/images/bgc_math.png'),
                 fit: BoxFit.cover,
-                opacity: 0.2, // Opacité légère pour laisser voir les motifs mathématiques
+                opacity: 0.15,
+              ),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.gradientStart.withOpacity(0.8),
+                    AppColors.gradientMiddle.withOpacity(0.7),
+                    AppColors.gradientEnd.withOpacity(0.6),
+                  ],
+                ),
               ),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.gradientStart.withOpacity(0.85),
-                  AppColors.gradientMiddle.withOpacity(0.75),
-                  AppColors.gradientEnd.withOpacity(0.65),
+
+          // Éléments décoratifs tournants
+          AnimatedBuilder(
+            animation: _rotateController,
+            builder: (context, child) {
+              return CustomPaint(
+                size: size,
+                painter: _FloatingElementsPainter(_rotateController.value),
+              );
+            },
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                _buildTopBar(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 20),
+                        _buildTrophySection(isSuccess),
+                        const SizedBox(height: 30),
+                        _buildScoreCard(),
+                        const SizedBox(height: 20),
+                        _buildStarsSection(),
+                        const SizedBox(height: 20),
+                        _buildStatsCards(),
+                        const SizedBox(height: 30),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildBottomActions(),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+
+          // Confettis
+          if (isSuccess) ...[
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConfettiWidget(
+                confettiController: _confettiController,
+                blastDirectionality: BlastDirectionality.explosive,
+                numberOfParticles: 60,
+                colors: const [
+                  Colors.white,
+                  Colors.yellow,
+                  Colors.pink,
+                  Colors.blue,
+                  Colors.orange,
+                  Colors.purple,
                 ],
+                gravity: 0.3,
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

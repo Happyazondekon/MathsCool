@@ -4,6 +4,7 @@ import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/models/chatbot_model.dart';
 import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatbotScreen extends StatefulWidget {
   final String userId;
@@ -390,6 +391,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
   }
 
   Widget _buildWelcomeScreen() {
+    final l10n = AppLocalizations.of(context)!;
+
     return ScaleTransition(
       scale: _welcomeAnimation,
       child: Center(
@@ -435,7 +438,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                 child: Column(
                   children: [
                     Text(
-                      "Salut champion ! 👋",
+                      l10n.helloChampion,
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -446,7 +449,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      "Je suis MathKid, ton assistant mathématiques personnel !",
+                      l10n.iAmMathKid,
                       style: TextStyle(
                         fontSize: 16,
                         fontFamily: 'ComicNeue',
@@ -460,14 +463,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               const SizedBox(height: 30),
               _buildSuggestionCard(
                 icon: Icons.quiz_rounded,
-                title: "Pose-moi une question",
-                description: "Sur n'importe quel sujet de maths !",
+                title: l10n.askMeQuestion,
+                description: l10n.aboutAnyMathTopic,
               ),
               const SizedBox(height: 12),
               _buildSuggestionCard(
                 icon: Icons.lightbulb_outline_rounded,
-                title: "Explications simples",
-                description: "Je t'explique tout de façon amusante",
+                title: l10n.simpleExplanations,
+                description: l10n.iExplainComplex,
               ),
               const SizedBox(height: 12),
               _buildSuggestionCard(
@@ -475,7 +478,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                 title: "Exemples concrets",
                 description: "Avec des exemples de la vie réelle",
               ),
-            ],
+              ],
           ),
         ),
       ),

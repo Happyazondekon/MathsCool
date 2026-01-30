@@ -1,0 +1,18 @@
+{
+  "appTitle": "MathsCool",
+  "helloChampion": "Hello champion! 👋",
+  "helloUser": "Hello {name}!",
+  "goodMorning": "Good morning {name}!",
+  "settings": "Settings",
+  "language": "Language",
+  "english": "English",
+  "french": "French",
+  "selectLanguage": "Select Language",
+  "save": "Save",
+  "cancel": "Cancel",
+  "iAmMathKid": "I am MathKid, your personal math assistant!",
+  "askMeQuestion": "Ask me a question",
+  "aboutAnyMathTopic": "About any math topic!",
+  "simpleExplanations": "Simple explanations",
+  "iExplainComplex": "I explain complex concepts simply"
+}

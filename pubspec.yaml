@@ -35,6 +35,9 @@ dependencies:
   http: ^1.1.0
   connectivity_plus: ^6.1.1
   audioplayers: ^5.2.1
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
 
 
@@ -45,6 +48,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/images/
     - assets/animations/

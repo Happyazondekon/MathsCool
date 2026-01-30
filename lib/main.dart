@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/services/sound_service.dart';
@@ -24,6 +25,10 @@ import 'package:mathscool/services/gems_service.dart';
 // Imports pour le Kill Switch
 import 'package:mathscool/services/remote_config_service.dart';
 import 'package:mathscool/screens/update_required_screen.dart';
+
+// Import pour l'internationalisation
+import 'package:mathscool/services/localization_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +78,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => UsernameService()),
         Provider(create: (_) => ChatbotService()),
         Provider.value(value: notificationService),
+        ChangeNotifierProvider(create: (_) => LocalizationService()),
       ],
       child: MathsCoolApp(showUpdateScreen: updateRequired),
     ),
@@ -136,6 +142,8 @@ class _MathsCoolAppState extends State<MathsCoolApp> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
+    final localizationService = Provider.of<LocalizationService>(context);
+
     return MaterialApp(
       title: 'MathsCool',
       debugShowCheckedModeBanner: false,
@@ -144,6 +152,17 @@ class _MathsCoolAppState extends State<MathsCoolApp> with WidgetsBindingObserver
         fontFamily: 'ComicNeue',
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
+      locale: localizationService.currentLocale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'), // English
+        Locale('fr'), // French
+      ],
       home: widget.showUpdateScreen
           ? const UpdateRequiredScreen()
           : const AuthWrapper(),

@@ -1,0 +1,18 @@
+{
+  "appTitle": "MathsCool",
+  "helloChampion": "Salut champion ! 👋",
+  "helloUser": "Salut {name} !",
+  "goodMorning": "Bonjour {name} !",
+  "settings": "Paramètres",
+  "language": "Langue",
+  "english": "Anglais",
+  "french": "Français",
+  "selectLanguage": "Sélectionner la langue",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "iAmMathKid": "Je suis MathKid, ton assistant mathématiques personnel !",
+  "askMeQuestion": "Pose-moi une question",
+  "aboutAnyMathTopic": "Sur n'importe quel sujet de maths !",
+  "simpleExplanations": "Explications simples",
+  "iExplainComplex": "J'explique les concepts complexes simplement"
+}

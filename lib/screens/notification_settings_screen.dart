@@ -3,6 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   final String userName;
@@ -491,6 +492,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   }
 
   Widget _buildHeaderSection() {
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -525,7 +528,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Salut ${widget.userName} ! 👋',
+                  l10n.helloUser(widget.userName),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

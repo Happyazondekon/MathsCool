@@ -10,6 +10,7 @@ import 'package:mathscool/screens/home_screen.dart';
 import 'package:mathscool/screens/notification_settings_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
 import 'package:mathscool/screens/leaderboard_screen.dart';
+import 'package:mathscool/screens/language_settings_screen.dart';
 import 'package:mathscool/screens/sound_settings_screen.dart';
 import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
@@ -927,6 +928,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'icon': Icons.volume_up_rounded,
       'color': AppColors.secondary,
       'route': (BuildContext context) => const SoundSettingsScreen(),
+    },
+    {
+      'title': 'Langue',
+      'icon': Icons.language_rounded,
+      'color': AppColors.warning,
+      'route': (BuildContext context) => const LanguageSettingsScreen(),
     },
     {
       'title': 'Retour Accueil',

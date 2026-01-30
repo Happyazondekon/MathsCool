@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
@@ -264,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 fit: BoxFit.scaleDown, // Réduit la taille si le nom est trop long
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  'Bonjour $displayName !',
+                                  AppLocalizations.of(context)!.goodMorning(displayName),
                                   style: TextStyle(
                                     fontSize: 20, // Taille idéale par défaut
                                     fontWeight: FontWeight.bold,

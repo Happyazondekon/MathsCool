@@ -200,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.emailAddress,
                         style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          labelText: 'Adresse Email',
+                          labelText: AppLocalizations.of(context)!.emailAddress,
                           labelStyle: TextStyle(color: AppColors.textSecondary),
                           prefixIcon: Icon(Icons.email, color: AppColors.primary),
                           filled: true,
@@ -231,7 +231,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: _obscurePassword,
                         style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          labelText: 'Mot de passe',
+                          labelText: AppLocalizations.of(context)!.password,
                           labelStyle: TextStyle(color: AppColors.textSecondary),
                           prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                           suffixIcon: IconButton(
@@ -263,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (value) =>
-                        value!.length >= 6 ? null : '6 caractères minimum',
+                        value!.length >= 6 ? null : AppLocalizations.of(context)!.min6Chars,
                       ),
                       const SizedBox(height: 16),
                       // Champ Confirmer le mot de passe
@@ -388,7 +388,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Text(
-                                'OU',
+                                AppLocalizations.of(context)!.or,
                                 style: TextStyle(
                                   color: AppColors.textLight.withOpacity(0.95),
                                   fontWeight: FontWeight.w600,
@@ -420,8 +420,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             'assets/images/google_logo.png',
                             height: 24,
                           ),
-                          label: const Text(
-                            'Continuer avec Google',
+                          label: Text(
+                            AppLocalizations.of(context)!.continueWithGoogle,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

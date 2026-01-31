@@ -7,7 +7,7 @@ class LivesData {
   final DateTime? unlimitedUntil; // NOUVEAU : Date de fin de l'illimité
 
   static const int MAX_LIVES = 5;
-  static const Duration REGENERATION_TIME = Duration(minutes: 10);
+  static const Duration REGENERATION_TIME = Duration(minutes: 5);
 
   LivesData({
     required this.currentLives,

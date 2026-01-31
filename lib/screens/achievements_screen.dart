@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:confetti/confetti.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../models/user_model.dart';
 import '../models/achievement_model.dart';
 import '../services/achievement_service.dart';
@@ -67,7 +68,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erreur: ${e.toString()}'),
+          content: Text('${AppLocalizations.of(context)!.error}${e.toString()}'),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -119,7 +120,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               ),
               const SizedBox(height: 20),
               Text(
-                'Récompense réclamée ! 🎉',
+                AppLocalizations.of(context)!.rewardClaimed,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -161,7 +162,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                     const Text('💎', style: TextStyle(fontSize: 24)),
                     const SizedBox(width: 8),
                     Text(
-                      '+$gems gems',
+                      // On remplace .replaceAll(...) par l'appel de fonction direct
+                      AppLocalizations.of(context)!.gemsEarned,
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -184,9 +186,9 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   ),
                   elevation: 5,
                 ),
-                child: const Text(
-                  'Super ! 🎉',
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context)!.awesome,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'ComicNeue',
@@ -311,7 +313,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
             child: Column(
               children: [
                 Text(
-                  'Achievements',
+                  AppLocalizations.of(context)!.achievements,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -320,7 +322,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   ),
                 ),
                 Text(
-                  'Collecte tes récompenses ! 🏆',
+                  AppLocalizations.of(context)!.collectRewards,
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -362,7 +364,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 children: [
                   _buildStatItem(
                     '${stats['completed']}',
-                    'Complétés',
+                    AppLocalizations.of(context)!.completed,
                     Icons.emoji_events_rounded,
                     AppColors.success,
                   ),
@@ -373,7 +375,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   ),
                   _buildStatItem(
                     '${stats['unclaimed']}',
-                    'À réclamer',
+                    AppLocalizations.of(context)!.toClaim,
                     Icons.card_giftcard_rounded,
                     AppColors.warning,
                   ),
@@ -385,7 +387,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                   // ✅ CHANGÉ : Afficher les gems au lieu des vies
                   _buildStatItem(
                     '$unclaimedGems',
-                    'Gems dispo',
+                    AppLocalizations.of(context)!.gemsAvailable,
                     Icons.diamond,
                     Colors.amber,
                   ),
@@ -413,7 +415,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Progression globale',
+                    AppLocalizations.of(context)!.overallProgress,
                     style: TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
@@ -502,10 +504,10 @@ class _AchievementsScreenState extends State<AchievementsScreen>
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
-        tabs: const [
-          Tab(text: 'Tous'),
-          Tab(text: 'Complétés'),
-          Tab(text: 'À réclamer'),
+        tabs: [
+          Tab(text: AppLocalizations.of(context)!.all),
+          Tab(text: AppLocalizations.of(context)!.completed),
+          Tab(text: AppLocalizations.of(context)!.toClaim),
         ],
       ),
     );
@@ -549,10 +551,10 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 const SizedBox(height: 20),
                 Text(
                   showUnclaimed
-                      ? 'Aucun achievement à réclamer'
+                      ? AppLocalizations.of(context)!.noAchievementsToClaim
                       : showCompleted
-                      ? 'Aucun achievement complété'
-                      : 'Commence à jouer pour débloquer !',
+                      ? AppLocalizations.of(context)!.noCompletedAchievements
+                      : AppLocalizations.of(context)!.startPlayingToUnlock,
                   style: TextStyle(
                     fontSize: 16,
                     color: AppColors.textLight,
@@ -564,8 +566,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 const SizedBox(height: 8),
                 Text(
                   showUnclaimed
-                      ? 'Continue à jouer pour en gagner !'
-                      : 'Les achievements apparaîtront ici',
+                      ? AppLocalizations.of(context)!.keepPlayingToEarn
+                      : AppLocalizations.of(context)!.achievementsWillAppearHere,
                   style: TextStyle(
                     fontSize: 13,
                     color: AppColors.textLight.withOpacity(0.7),
@@ -660,7 +662,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                 ),
                 child: Center(
                   child: Text(
-                    isSecret ? '🔒' : achievement.icon,
+                    isSecret ? AppLocalizations.of(context)!.secretAchievement : achievement.icon,
                     style: TextStyle(
                       fontSize: 36,
                       color: isSecret ? AppColors.textSecondary : null,
@@ -718,7 +720,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      isSecret ? 'Achievement secret à découvrir...' : achievement.description,
+                      isSecret ? AppLocalizations.of(context)!.secretAchievementDescription : achievement.description,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -781,13 +783,13 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       elevation: 5,
                     ),
-                    child: const Column(
+                    child:  Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(Icons.card_giftcard_rounded, size: 24),
                         SizedBox(height: 2),
                         Text(
-                          'Réclamer',
+                          AppLocalizations.of(context)!.claim,
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,

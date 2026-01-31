@@ -16,6 +16,7 @@ import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -127,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() => _isEditing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Profil mis à jour avec succès !'),
+            content: Text(AppLocalizations.of(context)!.profileUpdateSuccess),
             backgroundColor: AppColors.success,
           ),
         );
@@ -163,7 +164,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choisis ta photo', style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
+        title:  Text(AppLocalizations.of(context)!.profileChoosePhoto,  style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
         content: SizedBox(
           width: double.maxFinite,
           height: 300,
@@ -203,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.add_a_photo, size: 30, color: AppColors.success),
-                      const Text('Galerie', style: TextStyle(fontFamily: 'ComicNeue')),
+                       Text(AppLocalizations.of(context)!.profileGallery, style: TextStyle(fontFamily: 'ComicNeue')),
                     ],
                   ),
                 ),
@@ -301,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               Expanded(
                 child: Text(
-                  'Mon Profil',
+                  AppLocalizations.of(context)!.profileTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -345,9 +346,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                 Expanded(
                   child: Text(
-                    'Gère tes informations et accède à tes statistiques',
+                    AppLocalizations.of(context)!.profileManageInfo,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -391,8 +392,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Menu Principal',
+                 Text(
+                  AppLocalizations.of(context)!.profileMenu,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -559,7 +560,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
-                                  _selectedLevel ?? 'Niveau non défini',
+                                  _selectedLevel ?? AppLocalizations.of(context)!.profileLevelNotDefined,
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Colors.white,
@@ -599,8 +600,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Informations Scolaires',
+                           Text(
+                            AppLocalizations.of(context)!.profileSchoolInfo,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -609,11 +610,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _buildInfoRow('Établissement', _schoolController.text.isNotEmpty ? _schoolController.text : 'MathsCool'),
+                          _buildInfoRow(AppLocalizations.of(context)!.profileInstitution, _schoolController.text.isNotEmpty ? _schoolController.text : 'MathsCool'),
                           const SizedBox(height: 8),
-                          _buildInfoRow('N° Élève', studentId),
+                          _buildInfoRow(AppLocalizations.of(context)!.profileStudentNumber, studentId),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Année Scolaire', '${now.year}-${now.year + 1}'),
+                          _buildInfoRow(AppLocalizations.of(context)!.profileSchoolYear, '${now.year}-${now.year + 1}'),
                           if (_bioController.text.isNotEmpty) ...[
                             const SizedBox(height: 8),
                             _buildInfoRow('Devise', _bioController.text),
@@ -699,7 +700,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Center(
                   child: Text(
-                    'Modifier le Profil',
+                    AppLocalizations.of(context)!.profileEdit,
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -764,14 +765,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Champs de formulaire
                 TextFormField(
                   controller: _displayNameController,
-                  decoration: _inputDecoration('Prénom / Pseudo', Icons.person_outline),
-                  validator: (v) => v!.isEmpty ? 'Ce champ est requis' : null,
+                  decoration: _inputDecoration(AppLocalizations.of(context)!.profileFirstnamePseudo, Icons.person_outline),
+                  validator: (v) => v!.isEmpty ? AppLocalizations.of(context)!.profileFieldRequired : null,
                 ),
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<String>(
                   value: _selectedLevel,
-                  decoration: _inputDecoration('Classe', Icons.school_outlined),
+                  decoration: _inputDecoration(AppLocalizations.of(context)!.profileClass, Icons.school_outlined),
                   items: _levels.map((level) => DropdownMenuItem(
                     value: level,
                     child: Text(level),
@@ -782,13 +783,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 TextFormField(
                   controller: _schoolController,
-                  decoration: _inputDecoration('École', Icons.location_city_outlined),
+                  decoration: _inputDecoration(AppLocalizations.of(context)!.profileSchool, Icons.location_city_outlined),
                 ),
                 const SizedBox(height: 16),
 
                 TextFormField(
                   controller: _bioController,
-                  decoration: _inputDecoration('Devise ou Hobby', Icons.favorite_outline),
+                  decoration: _inputDecoration(AppLocalizations.of(context)!.profileMottoHobby, Icons.favorite_outline),
                   maxLength: 40,
                 ),
 
@@ -808,7 +809,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                         onPressed: () => setState(() => _isEditing = false),
-                        child: const Text('Annuler'),
+                        child:  Text(AppLocalizations.of(context)!.profileCancel),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -829,7 +830,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           width: 20,
                           child: CircularProgressIndicator(color: Colors.white),
                         )
-                            : const Text('Sauvegarder'),
+                            :  Text(AppLocalizations.of(context)!.profileSave),
                       ),
                     ),
                   ],
@@ -898,50 +899,48 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // Options de menu
-  final List<Map<String, dynamic>> _menuOptions = [
+  // Ligne 745-782, remplacer tous les 'title' par les clés de traduction :
+  List<Map<String, dynamic>> get _menuOptions {
+    return [
     {
-      'title': 'Classements ',
+      'title': AppLocalizations.of(context)!.profileLeaderboards,
       'icon': Icons.emoji_events_rounded,
       'color': AppColors.warning,
       'route': (BuildContext context) => const LeaderboardScreen(),
     },
     {
-      'title': 'Ma Progression',
+      'title': AppLocalizations.of(context)!.profileMyProgress,
       'icon': Icons.bar_chart_rounded,
       'color': AppColors.info,
       'route': (BuildContext context) => const ProgressScreen(),
     },
     {
-      'title': 'Boutique',
+      'title': AppLocalizations.of(context)!.profileStore,
       'icon': Icons.shopping_bag_rounded,
       'color': AppColors.accent,
       'route': (BuildContext context) => const StoreScreen(),
     },
+
     {
-      'title': 'Centre d\'Aide',
-      'icon': Icons.help_outline_rounded,
-      'color': AppColors.success,
-      'route': (BuildContext context) => const HelpScreen(),
-    },
-    {
-      'title': 'Sons & Musique',
+      'title': AppLocalizations.of(context)!.profileSoundMusic,
       'icon': Icons.volume_up_rounded,
       'color': AppColors.secondary,
       'route': (BuildContext context) => const SoundSettingsScreen(),
     },
     {
-      'title': 'Langue',
+      'title': AppLocalizations.of(context)!.profileLanguage,
       'icon': Icons.language_rounded,
       'color': AppColors.warning,
       'route': (BuildContext context) => const LanguageSettingsScreen(),
     },
     {
-      'title': 'Retour Accueil',
+      'title': AppLocalizations.of(context)!.profileBackHome,
       'icon': Icons.home_rounded,
       'color': AppColors.primary,
       'route': (BuildContext context) => const HomeScreen(),
     },
   ];
+  }
 
   Widget _buildMenuCard(BuildContext context, Map<String, dynamic> option, int index) {
     return TweenAnimationBuilder(
@@ -959,7 +958,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
       child: GestureDetector(
         onTap: () {
-          if (option['title'] == 'Retour Accueil') {
+          if (option['title'] == AppLocalizations.of(context)!.profileBackHome) {
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: option['route']),
@@ -1061,4 +1060,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
 }

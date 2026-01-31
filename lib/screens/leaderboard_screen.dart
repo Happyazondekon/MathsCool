@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../models/user_model.dart';
 import '../models/daily_challenge_model.dart';
 import '../services/daily_challenge_service.dart';
@@ -159,8 +160,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                           child: const Text('🏆', style: TextStyle(fontSize: 50)),
                         ),
                         const SizedBox(height: 24),
-                        const Text(
-                          'Bienvenue Champion !',
+                         Text(
+                          AppLocalizations.of(context)!.leaderboardWelcomeChampion,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 28,
@@ -170,8 +171,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Pour apparaître dans le classement',
+                         Text(
+                          AppLocalizations.of(context)!.leaderboardToAppearInRanking,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 15,
@@ -189,7 +190,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                           child: Column(
                             children: [
                               Text(
-                                'Choisis ton nom d\'utilisateur !',
+                                AppLocalizations.of(context)!.leaderboardChooseUsername,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 16,
@@ -206,7 +207,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Ton nom sera visible par tous',
+                                      AppLocalizations.of(context)!.leaderboardNameVisibleToAll,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 13,
@@ -232,8 +233,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                     color: Colors.white.withOpacity(0.25),
                                     borderRadius: BorderRadius.circular(15),
                                   ),
-                                  child: const Text(
-                                    'Plus tard',
+                                  child:  Text(
+                                    AppLocalizations.of(context)!.leaderboardLater,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.white,
@@ -272,7 +273,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                                       Icon(Icons.edit_rounded, color: AppColors.primary, size: 18),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Choisir mon nom',
+                                        AppLocalizations.of(context)!.leaderboardChooseMyName,
                                         style: TextStyle(
                                           color: AppColors.primary,
                                           fontSize: 15,
@@ -431,8 +432,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            '🏆 Chargement du classement...',
+           Text(
+            AppLocalizations.of(context)!.leaderboardLoading,
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -475,8 +476,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                       shaderCallback: (bounds) => LinearGradient(
                         colors: [AppColors.primary, AppColors.primary],
                       ).createShader(bounds),
-                      child: const Text(
-                        ' CLASSEMENT',
+                      child:  Text(
+                        ' ${AppLocalizations.of(context)!.leaderboardTitle}',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 24,
@@ -581,10 +582,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
           fontFamily: 'ComicNeue',
           fontSize: 13,
         ),
-        tabs: const [
-          Tab(text: '🏅 TOP 20'),
-          Tab(text: '👤 MOI'),
-          Tab(text: '📊 STATS'),
+        tabs:  [
+          Tab(text: AppLocalizations.of(context)!.leaderboardTabTop),
+          Tab(text: AppLocalizations.of(context)!.leaderboardTabMe),
+          Tab(text: AppLocalizations.of(context)!.leaderboardTabStats),
         ],
       ),
     );
@@ -593,8 +594,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
   Widget _buildLeaderboardList() {
     if (_topPlayers.isEmpty) {
       return _buildEmptyState(
-        "🎯 Aucun champion",
-        "Sois le premier à relever le défi !",
+        AppLocalizations.of(context)!.leaderboardNoChampions,
+        AppLocalizations.of(context)!.leaderboardBeTheFirst,
       );
     }
 
@@ -711,7 +712,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              'TOI',
+                              AppLocalizations.of(context)!.leaderboardYou,
                               style: TextStyle(
                                 color: AppColors.warning,
                                 fontSize: 10,
@@ -733,7 +734,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${player.totalStars} étoiles',
+                          '${player.totalStars} ${AppLocalizations.of(context)!.leaderboardStars}',
                           style: TextStyle(
                             color: rank <= 3
                                 ? Colors.white70
@@ -770,7 +771,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'points',
+                    AppLocalizations.of(context)!.leaderboardPoints,
                     style: TextStyle(
                       color: rank <= 3
                           ? Colors.white70
@@ -895,8 +896,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
 
   Widget _buildUserHistory() {
     return _buildEmptyState(
-      "📜 Ton Historique",
-      "Tes exploits légendaires apparaîtront ici !",
+      AppLocalizations.of(context)!.leaderboardYourHistory,
+      AppLocalizations.of(context)!.leaderboardYourLegendsWillAppear,
     );
   }
 
@@ -913,25 +914,25 @@ class _LeaderboardScreenState extends State<LeaderboardScreen>
       child: Column(
         children: [
           _buildStatCard(
-            "🔥 Série Actuelle",
+            AppLocalizations.of(context)!.leaderboardCurrentStreak,
             "${_userStats!.currentStreak}",
-            "jours consécutifs",
+            AppLocalizations.of(context)!.leaderboardConsecutiveDays,
             Icons.local_fire_department,
             LinearGradient(colors: [AppColors.error, AppColors.warning]),
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            "⭐ Total Étoiles",
+            AppLocalizations.of(context)!.leaderboardTotalStars,
             "${_userStats!.totalStars}",
-            "étoiles collectées",
+            AppLocalizations.of(context)!.leaderboardStarsCollected,
             Icons.star_rounded,
             LinearGradient(colors: [AppColors.warning, AppColors.surface]),
           ),
           const SizedBox(height: 16),
           _buildStatCard(
-            "🏆 Record Personnel",
+            AppLocalizations.of(context)!.leaderboardPersonalRecord,
             "${_userStats!.bestStreak}",
-            "jours - ton meilleur",
+            AppLocalizations.of(context)!.leaderboardDaysYourBest,
             Icons.emoji_events,
             LinearGradient(colors: [AppColors.info, AppColors.primary]),
           ),

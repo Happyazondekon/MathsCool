@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 import '../services/billing_service.dart';
 import '../services/chatbot_service.dart';
@@ -98,8 +99,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           children: [
             const Icon(Icons.error_outline, color: Colors.white),
             const SizedBox(width: 8),
-            Expanded(child: Text('Oups: $error')),
-          ],
+            Expanded(child: // Pass the variable directly into the method
+            Text(AppLocalizations.of(context)!.storeError(error))
+            )],
         ),
         backgroundColor: Colors.red.shade400,
         behavior: SnackBarBehavior.floating,
@@ -115,25 +117,25 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
     switch (type) {
       case 'unlimited':
-        title = 'Semaine Illimitée ! ♾️';
-        message = 'Profite de 7 jours sans perdre de vies !';
+        title = AppLocalizations.of(context)!.unlimitedLivesWeek;
+        message = AppLocalizations.of(context)!.unlimitedLivesDescription;
         color = Colors.purple;
         break;
       case 'chatbot':
-        title = 'Assistant Activé ! 🤖';
-        message = 'MathKid est prêt à t\'aider !';
+        title = AppLocalizations.of(context)!.chatbotActivated;
+        message = AppLocalizations.of(context)!.chatbotReadyToHelp;
         color = Colors.blue;
         break;
-      case 'gems': // ✅ NOUVEAU
+      case 'gems':
         final packInfo = _billingService.getGemPackInfo(productId ?? '');
         final totalGems = (packInfo?['gems'] ?? 0) + (packInfo?['bonus'] ?? 0);
-        title = 'Gems Reçus ! ${packInfo?['icon'] ?? '💎'}';
-        message = 'Tu as reçu $totalGems gems !';
+        title = AppLocalizations.of(context)!.gemsReceived(packInfo?['icon'] ?? '💎');
+        message = AppLocalizations.of(context)!.gemsReceivedCount(totalGems.toString());
         color = Colors.amber;
         break;
       default:
-        title = 'Vies rechargées ! 🎉';
-        message = 'Tu es prêt à reprendre l\'aventure !';
+        title = AppLocalizations.of(context)!.livesRefilled;
+        message = AppLocalizations.of(context)!.readyToContinue;
         color = Colors.green;
     }
 
@@ -181,8 +183,8 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   elevation: 5,
                 ),
-                child: const Text(
-                  'Super !',
+                child:  Text(
+                    AppLocalizations.of(context)!.storeSuccess,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'ComicNeue'),
                 ),
               ),
@@ -233,7 +235,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           child: _buildLivesStatusCard(livesData),
                         ),
                         const SizedBox(height: 24),
-                        _buildSectionTitle('💖 Vies & Boosts'),
+                        _buildSectionTitle(AppLocalizations.of(context)!.storeSectionLivesBoosts),
                         const SizedBox(height: 12),
                         _buildLifeProductsList(),
                         const SizedBox(height: 24),
@@ -245,7 +247,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                           child: const GemsStatsCard(), // ✅ Widget du gems_display_widget.dart
                         ),
                         const SizedBox(height: 24),
-                        _buildSectionTitle('💎 Packs de Gems'),
+                        _buildSectionTitle(AppLocalizations.of(context)!.storeSectionGemPacks),
                         const SizedBox(height: 12),
                         _buildGemsPacksList(),
                         const SizedBox(height: 24),
@@ -302,7 +304,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Vies',
+                      AppLocalizations.of(context)!.storeTabLives,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -338,7 +340,7 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Gems',
+                      AppLocalizations.of(context)!.storeTabGems,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -374,9 +376,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          const Expanded(
+           Expanded(
             child: Text(
-              '🏪 BOUTIQUE',
+              AppLocalizations.of(context)!.storeTitle,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 28,
@@ -442,7 +444,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           ),
           const SizedBox(height: 16),
           Text(
-            isUnlimited ? 'Vies Illimitées !' : 'Mes Vies',
+            isUnlimited
+                ? AppLocalizations.of(context)!.storeUnlimitedLives
+                : AppLocalizations.of(context)!.storeMyLives,
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -480,7 +484,9 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
                     const Icon(Icons.timer_outlined, color: Colors.white, size: 16),
                     const SizedBox(width: 6),
                     Text(
-                      'Prochaine vie: ${Provider.of<LivesService>(context).getFormattedTimeUntilNextLife()}',
+                      AppLocalizations.of(context)!.storeNextLife(
+                          Provider.of<LivesService>(context).getFormattedTimeUntilNextLife()
+                      ),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -492,10 +498,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
               ),
             ),
           if (isUnlimited)
-            const Padding(
+             Padding(
               padding: EdgeInsets.only(top: 8),
               child: Text(
-                "Tu es invincible cette semaine ! 🦸",
+                AppLocalizations.of(context)!.storeUnlimitedDescription,
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'ComicNeue',
@@ -592,12 +598,12 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
           Icon(Icons.storefront_outlined, size: 50, color: Colors.grey.shade400),
           const SizedBox(height: 10),
           Text(
-            'Aucun produit disponible...',
+            AppLocalizations.of(context)!.storeNoProducts,
             style: TextStyle(color: Colors.grey.shade600, fontFamily: 'ComicNeue'),
           ),
           TextButton(
             onPressed: _setupBilling,
-            child: const Text('Réessayer'),
+            child:  Text(AppLocalizations.of(context)!.storeTryAgain),
           )
         ],
       ),
@@ -617,12 +623,12 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
     if (isUnlimited) {
       gradientColors = [const Color(0xFF7B1FA2), const Color(0xFFBA68C8)];
       icon = Icons.all_inclusive;
-      badgeText = "Meilleure Offre 🌟";
+      badgeText = AppLocalizations.of(context)!.storeBadgeBestOffer;
       showBadge = true;
     } else if (isChatbot) {
       gradientColors = [const Color(0xFF2196F3), const Color(0xFF64B5F6)];
       icon = Icons.smart_toy_rounded;
-      badgeText = "Nouveau 🤖";
+      badgeText = AppLocalizations.of(context)!.storeBadgeNew;
       showBadge = true;
     } else if (isGems) {
       gradientColors = [const Color(0xFFFFD700), const Color(0xFFFFA500)];
@@ -630,10 +636,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
 
       final packInfo = _billingService.getGemPackInfo(product.id);
       if (packInfo?['popular'] == true) {
-        badgeText = "Populaire 🔥";
+        badgeText = AppLocalizations.of(context)!.storeBadgePopular;
         showBadge = true;
       } else if (packInfo?['bestValue'] == true) {
-        badgeText = "Meilleure Valeur 💎";
+        badgeText = AppLocalizations.of(context)!.storeBadgeBestValue;
         showBadge = true;
       }
     }
@@ -809,11 +815,11 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children:  [
               Icon(Icons.lightbulb_rounded, color: Color(0xFF1976D2)),
               SizedBox(width: 8),
               Text(
-                'Bon à savoir',
+                AppLocalizations.of(context)!.storeInfoTitle,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -824,9 +830,15 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
             ],
           ),
           const SizedBox(height: 16),
-          _buildInfoRow('❤️', 'Max ${LivesData.MAX_LIVES} vies stockées'),
-          _buildInfoRow('⏱️', '1 vie rechargée toutes les ${LivesData.REGENERATION_TIME.inMinutes} min'),
-          _buildInfoRow('♾️', 'Mode illimité = Aucune perte de vie !'),
+          const SizedBox(height: 16),
+          // Pass LivesData.MAX_LIVES directly into the method
+          _buildInfoRow('❤️', AppLocalizations.of(context)!.storeMaxLives(LivesData.MAX_LIVES.toString())),
+
+          // Pass the minutes directly into the method
+          _buildInfoRow('⏱️', AppLocalizations.of(context)!.storeLifeRegeneration(LivesData.REGENERATION_TIME.inMinutes.toString())),
+
+          // storeUnlimitedMode has no placeholder, so it remains a getter
+          _buildInfoRow('♾️', AppLocalizations.of(context)!.storeUnlimitedMode),
         ],
       ),
     );
@@ -845,11 +857,11 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children:  [
               Icon(Icons.diamond, color: Color(0xFFFFA000)),
               SizedBox(width: 8),
               Text(
-                'À quoi servent les Gems ?',
+                AppLocalizations.of(context)!.storeGemsInfoTitle,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -860,10 +872,10 @@ class _StoreScreenState extends State<StoreScreen> with SingleTickerProviderStat
             ],
           ),
           const SizedBox(height: 16),
-          _buildInfoRow('💡', 'Indice : 20 gems'),
-          _buildInfoRow('⏭️', 'Passer une question : 30 gems'),
-          _buildInfoRow('⚡', 'Recharge rapide vies : 50 gems'),
-          _buildInfoRow('🎨', 'Débloquer thèmes : 100 gems'),
+          _buildInfoRow('💡', AppLocalizations.of(context)!.storeHintCost('20')),
+          _buildInfoRow('⏭️', AppLocalizations.of(context)!.storeSkipQuestionCost('30')),
+          _buildInfoRow('⚡', AppLocalizations.of(context)!.storeFastRechargeCost('50')),
+          _buildInfoRow('🎨', AppLocalizations.of(context)!.storeUnlockThemesCost('100')),
         ],
       ),
     );

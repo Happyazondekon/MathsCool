@@ -1,5 +1,6 @@
 // lib/widgets/username_dialog.dart
 import 'package:flutter/material.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import '../models/user_model.dart';
 import '../services/username_service.dart';
@@ -58,7 +59,7 @@ class _UsernameDialogState extends State<UsernameDialog>
 
   void _onUsernameChanged() {
     if (_controller.text.trim() != widget.currentUsername) {
-      _checkAvailability();
+      _checkAvailability(context);
     } else {
       setState(() {
         _errorMessage = null;
@@ -67,7 +68,7 @@ class _UsernameDialogState extends State<UsernameDialog>
     }
   }
 
-  Future<void> _checkAvailability() async {
+  Future<void> _checkAvailability(BuildContext context) async {
     final username = _controller.text.trim();
 
     if (username.isEmpty || username == widget.currentUsername) {
@@ -101,7 +102,7 @@ class _UsernameDialogState extends State<UsernameDialog>
     if (mounted) {
       setState(() {
         _isAvailable = isAvailable;
-        _errorMessage = isAvailable ? null : 'Ce nom est déjà utilisé';
+        _errorMessage = isAvailable ? null : AppLocalizations.of(context)!.usernameAlreadyUsed;
         _isCheckingAvailability = false;
       });
     }
@@ -145,9 +146,9 @@ class _UsernameDialogState extends State<UsernameDialog>
               children: [
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
-                const Expanded(
+                 Expanded(
                   child: Text(
-                    'Ton nom a été mis à jour ! 🎉',
+                    AppLocalizations.of(context)!.usernameUpdated,
                     style: TextStyle(
                       fontFamily: 'ComicNeue',
                       fontWeight: FontWeight.bold,
@@ -272,8 +273,8 @@ class _UsernameDialogState extends State<UsernameDialog>
                     const SizedBox(height: 20),
 
                     // Titre
-                    const Text(
-                      'Ton Nom d\'Utilisateur',
+                     Text(
+                      AppLocalizations.of(context)!.usernameTitle,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 26,
@@ -292,8 +293,8 @@ class _UsernameDialogState extends State<UsernameDialog>
 
                     const SizedBox(height: 8),
 
-                    const Text(
-                      'Choisis comment tu veux apparaître',
+                     Text(
+                      AppLocalizations.of(context)!.chooseAppearance,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -327,7 +328,7 @@ class _UsernameDialogState extends State<UsernameDialog>
                           fontFamily: 'ComicNeue',
                         ),
                         decoration: InputDecoration(
-                          hintText: 'Ex: SuperMath123',
+                          hintText: AppLocalizations.of(context)!.usernameExample,
                           hintStyle: TextStyle(
                             color: Colors.grey.shade400,
                             fontFamily: 'ComicNeue',
@@ -416,7 +417,7 @@ class _UsernameDialogState extends State<UsernameDialog>
                             width: 2,
                           ),
                         ),
-                        child: const Row(
+                        child:  Row(
                           children: [
                             Icon(
                               Icons.info_outline,
@@ -426,7 +427,7 @@ class _UsernameDialogState extends State<UsernameDialog>
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                '3-20 caractères • Visible par tous',
+                                AppLocalizations.of(context)!.usernameInfo,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -441,10 +442,10 @@ class _UsernameDialogState extends State<UsernameDialog>
                     // Suggestions
                     if (_suggestions.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      const Align(
+                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '💡 Suggestions :',
+                          AppLocalizations.of(context)!.suggestions,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -514,9 +515,9 @@ class _UsernameDialogState extends State<UsernameDialog>
                                   width: 2,
                                 ),
                               ),
-                              child: const Center(
+                              child:  Center(
                                 child: Text(
-                                  'Annuler',
+                                  AppLocalizations.of(context)!.cancel,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -580,7 +581,7 @@ class _UsernameDialogState extends State<UsernameDialog>
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Enregistrer',
+                                      AppLocalizations.of(context)!.save,
                                       style: TextStyle(
                                         color: Colors.purple.shade700,
                                         fontSize: 16,
@@ -608,8 +609,8 @@ class _UsernameDialogState extends State<UsernameDialog>
                           size: 18,
                           color: Colors.white,
                         ),
-                        label: const Text(
-                          'Générer des suggestions',
+                        label:  Text(
+                          AppLocalizations.of(context)!.generateSuggestions,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.white,

@@ -28,7 +28,7 @@ import 'package:mathscool/screens/update_required_screen.dart';
 
 // Import pour l'internationalisation
 import 'package:mathscool/services/localization_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

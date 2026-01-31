@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   final VoidCallback onLoginClicked;
@@ -101,9 +102,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             size: 80,
                           ),
                           const SizedBox(height: 24),
-                          const Text(
-                            'Email envoyé !',
-                            style: TextStyle(
+                          Text(
+                            AppLocalizations.of(context)!.emailSent,
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: AppColors.primary,
@@ -111,7 +112,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'Consultez votre boîte mail pour réinitialiser votre mot de passe.',
+                            AppLocalizations.of(context)!.checkEmailReset,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: Colors.grey[800],
@@ -130,9 +131,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 ),
                               ),
                               onPressed: widget.onLoginClicked,
-                              child: const Text(
-                                'Retour à la connexion',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.backToLogin,
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
@@ -169,19 +170,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           size: 60,
                         ),
                         const SizedBox(height: 20),
-                        const Text(
-                          'Mot de passe oublié ?',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context)!.forgotPasswordTitle,
+                          style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: AppColors.primary,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Text(
-                          'Entrez votre email pour recevoir un lien de réinitialisation',
+                        Text(
+                          AppLocalizations.of(context)!.enterEmailReset,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 16,
                             color: Colors.grey,
                           ),
@@ -190,7 +191,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         TextFormField(
                           controller: _emailController,
                           decoration: InputDecoration(
-                            labelText: 'Adresse Email',
+                            labelText: AppLocalizations.of(context)!.emailAddress,
                             prefixIcon: const Icon(Icons.email),
                             filled: true,
                             fillColor: Colors.white,
@@ -199,7 +200,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             ),
                           ),
                           validator: (value) =>
-                          value!.contains('@') ? null : 'Email invalide',
+                          value!.contains('@') ? null : AppLocalizations.of(context)!.invalidEmail,
                         ),
                         if (_errorMessage != null)
                           Padding(
@@ -225,9 +226,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               ),
                             ),
                             onPressed: _sendResetEmail,
-                            child: const Text(
-                              'Envoyer le lien',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.sendLink,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -238,9 +239,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         const SizedBox(height: 16),
                         TextButton(
                           onPressed: widget.onLoginClicked,
-                          child: const Text(
-                            'Retour à la connexion',
-                            style: TextStyle(color: AppColors.primary),
+                          child: Text(
+                            AppLocalizations.of(context)!.backToLogin,
+                            style: const TextStyle(color: AppColors.primary),
                           ),
                         ),
                       ],

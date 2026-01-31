@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   final VoidCallback onRegisterClicked;
@@ -143,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       // Titre de bienvenue
                       Text(
-                        'Bienvenue sur MathsCool',
+                        AppLocalizations.of(context)!.welcomeTitle,
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -152,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Connectez-vous pour continuer',
+                        AppLocalizations.of(context)!.connectToContinue,
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.textLight.withOpacity(0.9),
@@ -166,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          labelText: 'Adresse Email',
+                          labelText: AppLocalizations.of(context)!.emailAddress,
                           labelStyle: TextStyle(color: AppColors.textSecondary),
                           prefixIcon: Icon(Icons.email, color: AppColors.primary),
                           filled: true,
@@ -197,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: true,
                         style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          labelText: 'Mot de passe',
+                          labelText: AppLocalizations.of(context)!.password,
                           labelStyle: TextStyle(color: AppColors.textSecondary),
                           prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                           filled: true,
@@ -219,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         validator: (value) =>
-                        value!.length >= 6 ? null : '6 caractères minimum',
+                        value!.length >= 6 ? null : AppLocalizations.of(context)!.min6Chars,
                       ),
                       // Message d'erreur
                       if (_errorMessage != null)
@@ -279,9 +280,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             shadowColor: AppColors.accent.withOpacity(0.5),
                           ),
                           onPressed: _login,
-                          child: const Text(
-                            'Se connecter',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.login,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -293,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextButton(
                         onPressed: widget.onForgotPasswordClicked,
                         child: Text(
-                          'Mot de passe oublié ?',
+                          AppLocalizations.of(context)!.forgotPassword,
                           style: TextStyle(
                             color: AppColors.textLight.withOpacity(0.95),
                             fontWeight: FontWeight.w600,
@@ -315,7 +316,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Text(
-                                'OU',
+                                AppLocalizations.of(context)!.or,
                                 style: TextStyle(
                                   color: AppColors.textLight.withOpacity(0.95),
                                   fontWeight: FontWeight.w600,
@@ -347,9 +348,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             'assets/images/google_logo.png',
                             height: 24,
                           ),
-                          label: const Text(
-                            'Continuer avec Google',
-                            style: TextStyle(
+                          label: Text(
+                            AppLocalizations.of(context)!.continueWithGoogle,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
@@ -375,14 +376,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: widget.onRegisterClicked,
                         child: RichText(
                           text: TextSpan(
-                            text: 'Nouveau sur MathsCool ? ',
+                            text: AppLocalizations.of(context)!.newToMathsCool,
                             style: TextStyle(
                               color: AppColors.textLight.withOpacity(0.95),
                               fontSize: 16,
                             ),
                             children: [
                               TextSpan(
-                                text: 'Créer un compte',
+                                text: AppLocalizations.of(context)!.createAccount,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.accent,

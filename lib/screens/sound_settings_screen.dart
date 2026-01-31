@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import '../services/sound_service.dart';
 import '../utils/colors.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class SoundSettingsScreen extends StatefulWidget {
   const SoundSettingsScreen({Key? key}) : super(key: key);
@@ -99,11 +100,11 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
             icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFD32F2F)),
             onPressed: () => Navigator.pop(context),
           ),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
                 Text(
-                  'Paramètres Audio 🎵',
+                  AppLocalizations.of(context)!.soundSettingsTitle,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -112,7 +113,7 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                   ),
                 ),
                 Text(
-                  'Personnalise tes sons',
+                  AppLocalizations.of(context)!.soundSettingsSubtitle,
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
@@ -161,8 +162,8 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Sons d\'effets',
+                       Text(
+                        AppLocalizations.of(context)!.soundEffects,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -170,7 +171,9 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                         ),
                       ),
                       Text(
-                        _soundEnabled ? 'Actifs' : 'Désactivés',
+                        _soundEnabled
+                            ? AppLocalizations.of(context)!.soundEffectsActive
+                            : AppLocalizations.of(context)!.soundEffectsDisabled,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,
@@ -216,8 +219,8 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Musique de fond',
+                       Text(
+                        AppLocalizations.of(context)!.backgroundMusic,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -225,7 +228,9 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
                         ),
                       ),
                       Text(
-                        _musicEnabled ? 'Active' : 'Désactivée',
+                        _musicEnabled
+                            ? AppLocalizations.of(context)!.backgroundMusicActive
+                            : AppLocalizations.of(context)!.backgroundMusicDisabled,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,
@@ -271,8 +276,8 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
             children: [
               Icon(Icons.graphic_eq, color: Colors.green.shade600, size: 24),
               const SizedBox(width: 12),
-              const Text(
-                'Volume des effets',
+               Text(
+                AppLocalizations.of(context)!.sfxVolume,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -346,8 +351,8 @@ class _SoundSettingsScreenState extends State<SoundSettingsScreen> {
             children: [
               Icon(Icons.music_note, color: Colors.purple.shade600, size: 24),
               const SizedBox(width: 12),
-              const Text(
-                'Volume musique',
+               Text(
+                AppLocalizations.of(context)!.musicVolume,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

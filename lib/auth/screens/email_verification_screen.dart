@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});
@@ -117,7 +118,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           _isLoading = false;
           _canResendEmail = false;
           _resendCountdown = 60;
-          _successMessage = "Email de vérification envoyé. Vérifiez votre boîte de réception et vos spams.";
+          _successMessage = AppLocalizations.of(context)!.verificationEmailSent;
         });
         _startResendTimer();
       }
@@ -125,7 +126,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       if (mounted) {
         setState(() {
           _isLoading = false;
-          _errorMessage = "Erreur lors de l'envoi de l'email: ${e.toString()}";
+          _errorMessage = "${AppLocalizations.of(context)!.errorSendingEmail}${e.toString()}";
           _successMessage = null;
         });
       }
@@ -224,9 +225,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                           size: 60,
                         ),
                         const SizedBox(height: 20),
-                        const Text(
-                          'Vérifiez votre Email',
-                          style: TextStyle(
+                        Text(
+                          AppLocalizations.of(context)!.verifyYourEmail,
+                          style: const TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: AppColors.secondary,
@@ -234,7 +235,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Un lien de vérification a été envoyé à ${_getFormattedEmail() ?? 'votre adresse email'}.',
+                          // On appelle la méthode directement avec l'argument
+                          AppLocalizations.of(context)!.verificationLinkSent(_getFormattedEmail() ?? 'votre adresse email'),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 15,
@@ -266,8 +268,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                           icon: const Icon(Icons.send),
                           label: Text(
                             _canResendEmail
-                                ? 'Renvoyer l\'email'
-                                : 'Renvoyer dans ${_resendCountdown}s',
+                                ? AppLocalizations.of(context)!.resendEmail
+                                : AppLocalizations.of(context)!.resendIn(_resendCountdown.toString()), // Remplacé ici
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -293,9 +295,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                             color: Colors.red,
                             size: 20,
                           ),
-                          label: const Text(
-                            'Utiliser un autre compte',
-                            style: TextStyle(
+                          label: Text(
+                            AppLocalizations.of(context)!.useAnotherAccount,
+                            style: const TextStyle(
                               color: Colors.red,
                               fontWeight: FontWeight.w500,
                               fontSize: 16,

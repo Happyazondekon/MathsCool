@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/remote_config_service.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../utils/colors.dart';
 
 class UpdateRequiredScreen extends StatelessWidget {
@@ -89,10 +90,10 @@ class UpdateRequiredScreen extends StatelessWidget {
                     const SizedBox(height: 30),
 
                     // Titre principal
-                    const Padding(
+                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 30),
                       child: Text(
-                        "Mise à jour requise ! 🚀",
+                        AppLocalizations.of(context)!.updateRequiredTitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 28,
@@ -138,13 +139,13 @@ class UpdateRequiredScreen extends StatelessWidget {
                                 ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Row(
+                              child:  Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.new_releases_rounded, color: Colors.white, size: 18),
                                   SizedBox(width: 8),
                                   Text(
-                                    'Nouvelle version disponible',
+                                    AppLocalizations.of(context)!.updateNewVersionAvailable,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -158,10 +159,10 @@ class UpdateRequiredScreen extends StatelessWidget {
                             const SizedBox(height: 20),
 
                             // Message principal
-                            const Text(
-                              "MathsCool s'améliore !",
+                            Text(
+                              AppLocalizations.of(context)!.updateAppImproving,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                                 color: Color(0xFFD32F2F),
@@ -172,7 +173,7 @@ class UpdateRequiredScreen extends StatelessWidget {
 
                             // Description
                             Text(
-                              "Pour profiter des dernières fonctionnalités et continuer ton aventure mathématique, mets à jour l'application maintenant !",
+                              AppLocalizations.of(context)!.updateDescription,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 14,
@@ -201,7 +202,7 @@ class UpdateRequiredScreen extends StatelessWidget {
                                       Icon(Icons.star_rounded, color: Colors.orange.shade600, size: 18),
                                       const SizedBox(width: 8),
                                       Text(
-                                        'Nouveautés :',
+                                        AppLocalizations.of(context)!.updateWhatsNew,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.orange.shade800,
@@ -212,10 +213,10 @@ class UpdateRequiredScreen extends StatelessWidget {
                                     ],
                                   ),
                                   const SizedBox(height: 10),
-                                  _buildFeature('♾️', 'Mode Infini'),
-                                  _buildFeature('🏆', '60+ Achievements'),
-                                  _buildFeature('🎨', 'Design moderne'),
-                                  _buildFeature('🤖', 'Assistant IA'),
+                                  _buildFeature('♾️', AppLocalizations.of(context)!.updateFeatureInfiniteMode),
+                                  _buildFeature('🏆', AppLocalizations.of(context)!.updateFeatureAchievements),
+                                  _buildFeature('🎨', AppLocalizations.of(context)!.updateFeatureModernDesign),
+                                  _buildFeature('🤖', AppLocalizations.of(context)!.updateFeatureAIAssistant),
                                 ],
                               ),
                             ),
@@ -236,13 +237,13 @@ class UpdateRequiredScreen extends StatelessWidget {
                                   elevation: 8,
                                   shadowColor: const Color(0xFFD32F2F).withOpacity(0.5),
                                 ),
-                                child: const Row(
+                                child:  Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.download_rounded, size: 22),
                                     SizedBox(width: 12),
                                     Text(
-                                      'Mettre à jour maintenant',
+                                      AppLocalizations.of(context)!.updateButton,
                                       style: TextStyle(
                                         fontSize: 17,
                                         fontWeight: FontWeight.bold,
@@ -255,15 +256,6 @@ class UpdateRequiredScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
 
-                            // Note de version
-                            Text(
-                              'Version 2.2.3 requise',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade500,
-                                fontFamily: 'ComicNeue',
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -274,7 +266,7 @@ class UpdateRequiredScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Text(
-                        '✨ Ne rate pas les nouvelles fonctionnalités ! ✨',
+                        AppLocalizations.of(context)!.updateDontMissFeatures,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,

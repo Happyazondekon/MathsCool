@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
@@ -551,19 +551,19 @@ class _ModernToggleButtonState extends State<ModernToggleButton>
           children: [
             Icon(Icons.favorite_border, color: AppColors.error),
             const SizedBox(width: 10),
-            const Text("Plus de vies !", style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.noLivesTitle, style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold)),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Tu as besoin de repos ou d'un coup de pouce ! 💖",
+              AppLocalizations.of(context)!.needRestOrBoost,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 10),
             Text(
-              "Attends qu'elles se rechargent ou visite la boutique.",
+              AppLocalizations.of(context)!.waitForRechargeOrVisitStore,
               style: TextStyle(fontSize: 12, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
@@ -572,7 +572,7 @@ class _ModernToggleButtonState extends State<ModernToggleButton>
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text("Plus tard", style: TextStyle(color: AppColors.textSecondary)),
+            child: Text(AppLocalizations.of(context)!.later, style: TextStyle(color: AppColors.textSecondary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -587,7 +587,7 @@ class _ModernToggleButtonState extends State<ModernToggleButton>
                 MaterialPageRoute(builder: (_) => const StoreScreen()),
               );
             },
-            child: const Text("Recharger ⚡"),
+            child: Text(AppLocalizations.of(context)!.recharge),
           ),
         ],
       ),
@@ -663,7 +663,7 @@ class _ModernToggleButtonState extends State<ModernToggleButton>
                             child: Opacity(
                               opacity: _opacityAnimation.value,
                               child: Text(
-                                'Commencer à jouer',
+                                AppLocalizations.of(context)!.startPlaying,
                                 maxLines: 1,
                                 overflow: TextOverflow.fade,
                                 softWrap: false,

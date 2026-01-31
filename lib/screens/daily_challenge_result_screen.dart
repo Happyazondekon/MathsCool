@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:confetti/confetti.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../models/daily_challenge_model.dart';
 import '../services/sound_service.dart';
 import '../utils/colors.dart';
@@ -203,9 +204,9 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
                 ),
-                child: const Text(
-                  'RÉSULTAT',
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context)!.resultTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -264,7 +265,7 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
               ),
               const SizedBox(height: 20),
               Text(
-                isSuccess ? '🎉 FANTASTIQUE ! 🎉' : '💪 BIEN JOUÉ ! 💪',
+                isSuccess ? AppLocalizations.of(context)!.fantastic : AppLocalizations.of(context)!.wellPlayed,
                 style: const TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
@@ -283,8 +284,8 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
               const SizedBox(height: 8),
               Text(
                 isSuccess
-                    ? 'Tu as brillamment réussi ce défi !'
-                    : 'Continue, tu progresses chaque jour !',
+                    ? AppLocalizations.of(context)!.dailyChallengeBrilliantSuccess
+                    : AppLocalizations.of(context)!.dailyChallengeKeepProgressing,
                 style: const TextStyle(
                   fontSize: 15,
                   color: Colors.white,
@@ -333,9 +334,9 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
               ),
               child: Column(
                 children: [
-                  const Text(
-                    'TON SCORE',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.yourScore,
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -369,9 +370,9 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                               color: Colors.white.withOpacity(0.25),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Text(
-                              'PTS',
-                              style: TextStyle(
+                            child: Text(
+                              AppLocalizations.of(context)!.pts,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -420,7 +421,7 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
               child: Column(
                 children: [
                   Text(
-                    'PERFORMANCE',
+                    AppLocalizations.of(context)!.performance,
                     style: TextStyle(
                       color: AppColors.textSecondary,
                       fontSize: 13,
@@ -484,8 +485,9 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '${widget.result.stars}/3 étoiles',
-                    style: TextStyle(
+                    // On appelle la fonction starsOutOfThree avec le score en argument
+                    AppLocalizations.of(context)!.starsOutOfThree(widget.result.stars.toString()),
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -518,8 +520,8 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.timer_rounded,
-                    label: 'Temps',
-                    value: '${widget.result.timeSeconds}s',
+                    label: AppLocalizations.of(context)!.time,
+                    value: '${widget.result.timeSeconds} ${AppLocalizations.of(context)!.dailyChallengeSeconds}',
                     gradient: LinearGradient(
                       colors: [AppColors.info, AppColors.primary],
                     ),
@@ -529,8 +531,8 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                 Expanded(
                   child: _buildStatCard(
                     icon: Icons.grade_rounded,
-                    label: 'Score',
-                    value: '${widget.result.score}',
+                    label: AppLocalizations.of(context)!.score,
+                    value: '${widget.result.score} ${AppLocalizations.of(context)!.dailyChallengePoints}',
                     gradient: LinearGradient(
                       colors: [AppColors.warning, AppColors.accent],
                     ),
@@ -637,9 +639,9 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                     child: const Icon(Icons.emoji_events, color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'VOIR LE CLASSEMENT',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context)!.viewLeaderboard,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
                       fontSize: 16,
@@ -667,10 +669,10 @@ class _DailyChallengeResultScreenState extends State<DailyChallengeResultScreen>
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
               ),
-              child: const Center(
+              child: Center(
                 child: Text(
-                  'RETOUR',
-                  style: TextStyle(
+                  AppLocalizations.of(context)!.back,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                     fontSize: 15,

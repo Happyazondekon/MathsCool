@@ -4,7 +4,7 @@ import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/models/chatbot_model.dart';
 import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class ChatbotScreen extends StatefulWidget {
   final String userId;
@@ -125,7 +125,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
       } else {
         final errorMessage = ChatMessage(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          content: 'Désolé, je ne peux pas répondre pour le moment. 🤖\nEssaie de reformuler ta question !',
+          content: AppLocalizations.of(context)!.sorryCantRespond,
           isUser: false,
           timestamp: DateTime.now(),
         );
@@ -182,7 +182,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               ),
               const SizedBox(height: 16),
               Text(
-                "Pause nécessaire ! ⏸️",
+                AppLocalizations.of(context)!.pauseNeeded,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
@@ -193,7 +193,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               ),
               const SizedBox(height: 12),
               Text(
-                "Tu as utilisé tes 3 questions gratuites pour aujourd'hui.",
+                AppLocalizations.of(context)!.usedFreeQuestions,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -219,9 +219,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                   ),
                   elevation: 5,
                 ),
-                child: const Text(
-                  "Voir les offres illimitées 🚀",
-                  style: TextStyle(
+                child: Text(
+                  AppLocalizations.of(context)!.seeUnlimitedOffers,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'ComicNeue',
@@ -231,7 +231,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  "Revenir demain",
+                  AppLocalizations.of(context)!.comeBackTomorrow,
                   style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 ),
               ),
@@ -352,7 +352,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "MathKid Assistant",
+                  AppLocalizations.of(context)!.mathKidAssistant,
                   style: TextStyle(
                     color: AppColors.textLight,
                     fontFamily: 'ComicNeue',
@@ -373,7 +373,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                     Icon(Icons.circle, color: AppColors.success, size: 10),
                     const SizedBox(width: 6),
                     Text(
-                      "Toujours prêt à t'aider !",
+                      AppLocalizations.of(context)!.alwaysReadyToHelp,
                       style: TextStyle(
                         color: AppColors.textLight.withOpacity(0.9),
                         fontFamily: 'ComicNeue',
@@ -475,8 +475,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
               const SizedBox(height: 12),
               _buildSuggestionCard(
                 icon: Icons.rocket_launch_rounded,
-                title: "Exemples concrets",
-                description: "Avec des exemples de la vie réelle",
+                title: AppLocalizations.of(context)!.concreteExamples,
+                description: AppLocalizations.of(context)!.withRealLifeExamples,
               ),
               ],
           ),
@@ -725,7 +725,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  "MathKid réfléchit...",
+                  AppLocalizations.of(context)!.mathKidThinking,
                   style: TextStyle(
                     fontFamily: 'ComicNeue',
                     color: AppColors.textPrimary,
@@ -773,7 +773,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                   maxLines: null,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: InputDecoration(
-                    hintText: "Pose ta question mathématique...",
+                    hintText: AppLocalizations.of(context)!.askMathQuestion,
                     hintStyle: TextStyle(
                       fontFamily: 'ComicNeue',
                       color: AppColors.textSecondary,
@@ -835,11 +835,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     final difference = now.difference(timestamp);
 
     if (difference.inMinutes < 1) {
-      return "À l'instant";
+      return AppLocalizations.of(context)!.justNow; // Pas de variable, donc reste un getter simple [cite: 8, 21]
     } else if (difference.inHours < 1) {
-      return "Il y a ${difference.inMinutes} min";
+      // On appelle la fonction minutesAgo avec la valeur en paramètre [cite: 8, 21]
+      return AppLocalizations.of(context)!.minutesAgo(difference.inMinutes.toString());
     } else if (difference.inDays < 1) {
-      return "Il y a ${difference.inHours} h";
+      // On appelle la fonction hoursAgo avec la valeur en paramètre [cite: 8, 21]
+      return AppLocalizations.of(context)!.hoursAgo(difference.inHours.toString());
     } else {
       return "${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}";
     }

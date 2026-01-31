@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:provider/provider.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
     if (_passwordController.text != _confirmController.text) {
-      setState(() => _errorMessage = 'Les mots de passe ne correspondent pas');
+      setState(() => _errorMessage = AppLocalizations.of(context)!.passwordsDoNotMatch);
       return;
     }
 
@@ -146,7 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 24),
                       // Titre de bienvenue
                       Text(
-                        'Créer un compte',
+                        AppLocalizations.of(context)!.createAccountTitle,
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
@@ -155,7 +156,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Rejoignez MathsCool pour commencer',
+                        AppLocalizations.of(context)!.joinMathsCool,
                         style: TextStyle(
                           fontSize: 16,
                           color: AppColors.textLight.withOpacity(0.9),
@@ -168,7 +169,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: _nameController,
                         style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          labelText: 'Nom d\'utilisateur',
+                          labelText: AppLocalizations.of(context)!.username,
                           labelStyle: TextStyle(color: AppColors.textSecondary),
                           prefixIcon: Icon(Icons.person, color: AppColors.primary),
                           filled: true,
@@ -190,7 +191,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (value) =>
-                        value!.isNotEmpty ? null : 'Entrez votre nom d\'utilisateur',
+                        value!.isNotEmpty ? null : AppLocalizations.of(context)!.enterUsername,
                       ),
                       const SizedBox(height: 16),
                       // Champ Email
@@ -221,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (value) =>
-                        value!.contains('@') ? null : 'Email invalide',
+                        value!.contains('@') ? null : AppLocalizations.of(context)!.invalidEmail,
                       ),
                       const SizedBox(height: 16),
                       // Champ Mot de passe
@@ -271,7 +272,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         obscureText: _obscureConfirm,
                         style: TextStyle(color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          labelText: 'Confirmer le mot de passe',
+                          labelText: AppLocalizations.of(context)!.confirmPassword,
                           labelStyle: TextStyle(color: AppColors.textSecondary),
                           prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                           suffixIcon: IconButton(
@@ -303,7 +304,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (value) =>
-                        value!.isNotEmpty ? null : 'Confirmez votre mot de passe',
+                        value!.isNotEmpty ? null : AppLocalizations.of(context)!.confirmYourPassword,
                       ),
                       // Message d'erreur
                       if (_errorMessage != null)
@@ -363,9 +364,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             shadowColor: AppColors.accent.withOpacity(0.5),
                           ),
                           onPressed: _register,
-                          child: const Text(
-                            'Créer un compte',
-                            style: TextStyle(
+                          child: Text(
+                            AppLocalizations.of(context)!.createAccount,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 0.5,
@@ -447,14 +448,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: widget.onLoginClicked,
                         child: RichText(
                           text: TextSpan(
-                            text: 'Déjà un compte ? ',
+                            text: AppLocalizations.of(context)!.alreadyHaveAccount,
                             style: TextStyle(
                               color: AppColors.textLight.withOpacity(0.95),
                               fontSize: 16,
                             ),
                             children: [
                               TextSpan(
-                                text: 'Se connecter',
+                                text: AppLocalizations.of(context)!.login,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.accent,

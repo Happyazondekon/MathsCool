@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class ThemeBadge extends StatelessWidget {
   final String theme;
@@ -138,7 +139,7 @@ class ThemeBadge extends StatelessWidget {
                     ],
                   ),
                   child: Text(
-                    'Niv.$level',
+                    AppLocalizations.of(context)!.themeBadgeLevel(level),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -272,7 +273,7 @@ class ThemeBadge extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              'Verrouillé',
+              AppLocalizations.of(context)!.themeBadgeLocked,
               style: TextStyle(
                 color: Colors.grey.shade600,
                 fontSize: 10,

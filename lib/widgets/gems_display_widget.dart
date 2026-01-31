@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/gems_service.dart';
 import '../utils/colors.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 /// Widget pour afficher le compteur de gems (à mettre dans AppBar)
 class GemsDisplayWidget extends StatelessWidget {
@@ -128,11 +129,11 @@ class GemsStatsCard extends StatelessWidget {
           child: Column(
             children: [
               Row(
-                children: const [
+                children:  [
                   Text('💎', style: TextStyle(fontSize: 32)),
                   SizedBox(width: 12),
                   Text(
-                    'Mes Gems',
+                    AppLocalizations.of(context)!.gemsMyGems,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -146,7 +147,7 @@ class GemsStatsCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildStatItem(
-                    'Actuels',
+                    AppLocalizations.of(context)!.gemsCurrent,
                     stats['current'].toString(),
                     Icons.diamond,
                     const Color(0xFFFFD700),
@@ -157,7 +158,7 @@ class GemsStatsCard extends StatelessWidget {
                     color: Colors.grey.shade300,
                   ),
                   _buildStatItem(
-                    'Gagnés',
+                    AppLocalizations.of(context)!.gemsEarned,
                     stats['earned'].toString(),
                     Icons.trending_up,
                     Colors.green,
@@ -168,7 +169,7 @@ class GemsStatsCard extends StatelessWidget {
                     color: Colors.grey.shade300,
                   ),
                   _buildStatItem(
-                    'Dépensés',
+                    AppLocalizations.of(context)!.gemsSpent,
                     stats['spent'].toString(),
                     Icons.shopping_cart,
                     Colors.orange,

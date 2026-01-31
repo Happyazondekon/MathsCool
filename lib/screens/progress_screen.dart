@@ -5,6 +5,7 @@ import 'package:mathscool/widgets/progress_chart.dart';
 import 'package:mathscool/services/progress_service.dart';
 import 'package:mathscool/models/user_model.dart';
 import 'package:mathscool/models/user_progress_model.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import 'package:confetti/confetti.dart';
 import '../widgets/theme_badge.dart';
 
@@ -155,7 +156,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Erreur lors du chargement',
+                              AppLocalizations.of(context)!.progressScreen_loadingError,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -176,9 +177,9 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                             progressData: showGradeProgress
                                 ? _userProgress!.progressByGrade
                                 : _userProgress!.progressByCategory,
-                            title: showGradeProgress
-                                ? 'Progression par niveau'
-                                : 'Progression par catégorie',
+                              title: showGradeProgress
+                                  ? AppLocalizations.of(context)!.progressChart_byGrade
+                                  : AppLocalizations.of(context)!.progressChart_byCategory
                           ),
                           const SizedBox(height: 20),
                           if (_userProgress!.hasMathKidBadge)
@@ -246,7 +247,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
             child: Column(
               children: [
                 Text(
-                  'Ma Progression',
+                    AppLocalizations.of(context)!.progressScreen_title,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -255,7 +256,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   ),
                 ),
                 Text(
-                  'Suis ton évolution ! 📊',
+                  AppLocalizations.of(context)!.progressScreen_subtitle,
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -313,7 +314,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Par catégorie',
+                      AppLocalizations.of(context)!.progressScreen_byCategory,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
@@ -358,7 +359,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Par niveau',
+                      AppLocalizations.of(context)!.progressScreen_byGrade,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: 'ComicNeue',
@@ -449,7 +450,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
             ),
             const SizedBox(height: 16),
             Text(
-              '🎯 MATHKID 🎯',
+              AppLocalizations.of(context)!.mathKidBadge_title,
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -473,7 +474,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                'Super Champion !',
+                AppLocalizations.of(context)!.mathKidBadge_champion,
                 style: TextStyle(
                   fontSize: 16,
                   color: AppColors.textLight,
@@ -542,7 +543,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Mes Badges',
+                    AppLocalizations.of(context)!.badgesSection_title,
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -551,7 +552,7 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                       ),
                     ),
                     Text(
-                      '$earnedBadges/$totalBadges badges obtenus',
+                    '${AppLocalizations.of(context)!.badgesSection_count(earnedBadges, totalBadges)}',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -609,9 +610,8 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      earnedBadges == totalBadges
-                          ? '🎉 Tous les badges débloqués ! Champion !'
-                          : 'Continue pour débloquer ${totalBadges - earnedBadges} badge${totalBadges - earnedBadges > 1 ? 's' : ''} !',
+
+                          '$earnedBadges/$totalBadges ${totalBadges == 1 ? AppLocalizations.of(context)!.badge : AppLocalizations.of(context)!.badges} ${earnedBadges == 1 ? (AppLocalizations.of(context)!.localeName == 'fr' ? "obtenu" : "earned") : (AppLocalizations.of(context)!.localeName == 'fr' ? "obtenus" : "earned")}',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -686,10 +686,10 @@ class _ProgressScreenState extends State<ProgressScreen> with SingleTickerProvid
                   Expanded(
                     child: Text(
                       earnedBadges == 0
-                          ? 'Commence à résoudre des exercices pour gagner tes premiers badges !'
+                          ? AppLocalizations.of(context)!.badgesSection_tipStart
                           : earnedBadges == totalBadges
-                          ? 'Bravo ! Tu es un véritable champion ! 🌟'
-                          : 'Super ! Continue comme ça pour débloquer tous les badges !',
+                          ? AppLocalizations.of(context)!.badgesSection_tipChampion
+                          : AppLocalizations.of(context)!.badgesSection_tipKeepGoing,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

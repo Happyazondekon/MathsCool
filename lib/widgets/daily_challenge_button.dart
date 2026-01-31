@@ -1,6 +1,7 @@
 // lib/widgets/daily_challenge_button.dart
 import 'package:flutter/material.dart';
 import '../screens/daily_challenge_screen.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class DailyChallengeButton extends StatefulWidget {
   const DailyChallengeButton({Key? key}) : super(key: key);
@@ -98,7 +99,7 @@ class _DailyChallengeButtonState extends State<DailyChallengeButton>
                   const SizedBox(width: 12),
 
                   // Texte réduit
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
@@ -106,9 +107,9 @@ class _DailyChallengeButtonState extends State<DailyChallengeButton>
                         Row(
                           children: [
                             Text(
-                              'Défi du Jour',
+                              AppLocalizations.of(context)!.dailyChallengeButtonTitle,
                               style: TextStyle(
-                                fontSize: 18, // Réduit (était 22)
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                                 fontFamily: 'ComicNeue',
@@ -119,9 +120,9 @@ class _DailyChallengeButtonState extends State<DailyChallengeButton>
                           ],
                         ),
                         Text(
-                          '10 exercices • Gagne des étoiles !',
+                          AppLocalizations.of(context)!.dailyChallengeButtonSubtitle,
                           style: TextStyle(
-                            fontSize: 12, // Réduit (était 14)
+                            fontSize: 12,
                             color: Colors.white70,
                             fontFamily: 'ComicNeue',
                           ),
@@ -148,9 +149,9 @@ class _DailyChallengeButtonState extends State<DailyChallengeButton>
                     gradient: const LinearGradient(colors: [Colors.red, Colors.pink]),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text(
-                    'NOUVEAU',
-                    style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                  child: Text(
+                    AppLocalizations.of(context)!.dailyChallengeButtonNew,
+                    style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

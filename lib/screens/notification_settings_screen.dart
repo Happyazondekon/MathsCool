@@ -3,7 +3,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mathscool/services/notification_service.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   final String userName;
@@ -78,7 +78,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
     if (await Permission.scheduleExactAlarm.isDenied) {
       final result = await Permission.scheduleExactAlarm.request();
       if (result.isDenied || result.isPermanentlyDenied) {
-        _showSnackBar('Veuillez autoriser les alarmes exactes dans vos paramètres.', AppColors.error);
+        _showSnackBar(AppLocalizations.of(context)!.pleaseAllowExactAlarms, AppColors.error);
         openAppSettings();
       }
     }
@@ -126,7 +126,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Programmer une notification',
+                  AppLocalizations.of(context)!.programNotification,
                   style: TextStyle(
                     fontFamily: 'ComicNeue',
                     fontWeight: FontWeight.bold,
@@ -155,7 +155,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                 Icon(Icons.access_time, color: AppColors.primary, size: 20),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Heure de rappel',
+                                  AppLocalizations.of(context)!.notificationReminderTime,
                                   style: TextStyle(
                                     fontFamily: 'ComicNeue',
                                     fontWeight: FontWeight.w600,
@@ -170,7 +170,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                 Expanded(
                                   child: _buildTimeField(
                                     controller: _hourController,
-                                    label: 'Heure',
+                                    label: AppLocalizations.of(context)!.notificationHour,
                                     hint: '14',
                                     max: 23,
                                   ),
@@ -188,7 +188,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                                 Expanded(
                                   child: _buildTimeField(
                                     controller: _minuteController,
-                                    label: 'Minute',
+                                    label: AppLocalizations.of(context)!.notificationMinute,
                                     hint: '30',
                                     max: 59,
                                   ),
@@ -214,7 +214,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'Répéter chaque jour',
+                                AppLocalizations.of(context)!.notificationRepeatDaily,
                                 style: TextStyle(
                                   fontFamily: 'ComicNeue',
                                   fontWeight: FontWeight.w600,
@@ -255,7 +255,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           ),
                         ),
                         child: Text(
-                          'Annuler',
+                          AppLocalizations.of(context)!.cancel,
                           style: TextStyle(
                             color: AppColors.textSecondary,
                             fontFamily: 'ComicNeue',
@@ -286,8 +286,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           children: [
                             const Icon(Icons.alarm_on, size: 20),
                             const SizedBox(width: 8),
-                            const Text(
-                              'Programmer',
+                             Text(
+                              AppLocalizations.of(context)!.notificationSchedule,
                               style: TextStyle(
                                 fontFamily: 'ComicNeue',
                                 fontWeight: FontWeight.bold,
@@ -334,11 +334,11 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Requis';
+          return AppLocalizations.of(context)!.fieldRequired;
         }
         final number = int.tryParse(value);
         if (number == null || number < 0 || number > max) {
-          return 'Invalide';
+          return AppLocalizations.of(context)!.fieldInvalid;
         }
         return null;
       },
@@ -368,14 +368,17 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       if (mounted) Navigator.pop(context);
       await _loadCustomNotifications();
 
-      _showSnackBar('Notification programmée pour ${hour}h${minute.toString().padLeft(2, '0')} ! ⏰', AppColors.success);
+      _showSnackBar(AppLocalizations.of(context)!.notificationScheduledAt(
+          hour.toString(),
+          minute.toString().padLeft(2, '0')
+      ), AppColors.success);
     }
   }
 
   Future<void> _removeCustomNotification(String id) async {
     await _notificationService.removeCustomNotification(int.parse(id));
     await _loadCustomNotifications();
-    _showSnackBar('Notification supprimée', AppColors.warning);
+    _showSnackBar(AppLocalizations.of(context)!.notificationDeleted, AppColors.warning);
   }
 
   void _showSnackBar(String message, Color color) {
@@ -404,8 +407,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Mes Notifications',
+        title:  Text(
+          AppLocalizations.of(context)!.notificationSettingsTitle,
           style: TextStyle(
             fontFamily: 'ComicNeue',
             fontWeight: FontWeight.bold,
@@ -430,8 +433,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textLight,
         icon: const Icon(Icons.add_alarm),
-        label: const Text(
-          'Nouveau rappel',
+        label:  Text(
+          AppLocalizations.of(context)!.newReminder,
           style: TextStyle(fontFamily: 'ComicNeue', fontWeight: FontWeight.bold),
         ),
         elevation: 8,
@@ -473,7 +476,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   _buildMainToggleCard(),
                   const SizedBox(height: 20),
                   if (_customNotifications.isNotEmpty) ...[
-                    _buildSectionTitle('Rappels programmés', Icons.schedule, '${_customNotifications.length}'),
+                    _buildSectionTitle(AppLocalizations.of(context)!.scheduledReminders, Icons.schedule, '${_customNotifications.length}'),
                     const SizedBox(height: 12),
                     _buildNotificationsList(),
                     const SizedBox(height: 20),
@@ -538,7 +541,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Configure tes rappels pour ne jamais oublier tes sessions de maths !',
+                  AppLocalizations.of(context)!.notificationConfigureReminders,
                   style: TextStyle(
                     fontSize: 13,
                     fontFamily: 'ComicNeue',
@@ -590,7 +593,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _notificationsEnabled ? 'Notifications activées' : 'Notifications désactivées',
+                    _notificationsEnabled
+                        ? AppLocalizations.of(context)!.notificationsEnabled
+                        : AppLocalizations.of(context)!.notificationsDisabled,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -600,8 +605,8 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   ),
                   Text(
                     _notificationsEnabled
-                        ? 'Je recevrai des rappels'
-                        : 'Aucun rappel ne sera envoyé',
+                        ? AppLocalizations.of(context)!.iWillReceiveReminders
+                        : AppLocalizations.of(context)!.noRemindersWillBeSent,
                     style: TextStyle(
                       fontSize: 12,
                       fontFamily: 'ComicNeue',
@@ -619,7 +624,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                   _notificationsEnabled = value;
                 });
                 _showSnackBar(
-                  value ? 'Notifications activées ! 📱' : 'Notifications désactivées',
+                  value
+                      ? AppLocalizations.of(context)!.notificationsActivated
+                      : AppLocalizations.of(context)!.notificationsDeactivated,
                   value ? AppColors.success : AppColors.warning,
                 );
               },
@@ -729,7 +736,9 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            isRepeating ? 'Quotidien' : 'Une fois',
+                            isRepeating
+                                ? AppLocalizations.of(context)!.daily
+                                : AppLocalizations.of(context)!.once,
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary,
@@ -790,7 +799,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               Icon(Icons.insights, color: AppColors.info, size: 24),
               const SizedBox(width: 8),
               Text(
-                'Statistiques',
+                AppLocalizations.of(context)!.statistics,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -805,7 +814,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             children: [
               Expanded(
                 child: _buildStatItem(
-                  'Rappels actifs',
+                  AppLocalizations.of(context)!.activeReminders,
                   '${_customNotifications.length}',
                   Icons.alarm_on,
                   AppColors.success,
@@ -814,7 +823,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               const SizedBox(width: 16),
               Expanded(
                 child: _buildStatItem(
-                  'Quotidiens',
+                  AppLocalizations.of(context)!.dailyReminders,
                   '${_customNotifications.where((n) => n['isRepeating'] == 'true').length}',
                   Icons.repeat,
                   AppColors.info,
@@ -884,7 +893,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
               Icon(Icons.lightbulb, color: Colors.yellowAccent, size: 24),
               const SizedBox(width: 8),
               Text(
-                'Conseils pour bien utiliser tes rappels',
+                AppLocalizations.of(context)!.tipsForUsingReminders,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -895,9 +904,10 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
             ],
           ),
           const SizedBox(height: 16),
-          ...const [
-            '🕐 Programme tes sessions aux moments où tu es le plus concentré',
-            '🔄 Active les rappels quotidiens pour créer une routine',
+          ... [
+            // Ligne 725-726, remplacer les conseils en dur par :
+            AppLocalizations.of(context)!.tip1,
+            AppLocalizations.of(context)!.tip2,
           ].map((tip) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(

@@ -14,7 +14,7 @@ import 'package:mathscool/services/lives_service.dart';
 import 'package:mathscool/services/achievement_service.dart';
 import 'package:mathscool/services/hybrid_exercise_service.dart';
 import 'package:mathscool/models/achievement_model.dart';
-
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 // Screens
 import 'package:mathscool/screens/help_screen.dart';
 import 'package:mathscool/screens/progress_screen.dart';
@@ -123,8 +123,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               children: [
                 const Icon(Icons.lightbulb, color: Colors.amber, size: 60),
                 const SizedBox(height: 16),
-                const Text(
-                  'Indice 💡',
+                 Text(
+                    AppLocalizations.of(context)!.storeHintLabel,
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -133,14 +133,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'La bonne réponse est : $correctOption',
+                  AppLocalizations.of(context)!.correctAnswerIs(correctOption),
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Compris !'),
+                  child:  Text(AppLocalizations.of(context)!.understood),
                 ),
               ],
             ),
@@ -163,7 +163,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
     if (success) {
       setState(() {
-        _feedbackMessage = 'Question passée ! ⏭️';
+        _feedbackMessage = AppLocalizations.of(context)!.questionSkipped;
         _showFeedback = true;
       });
 
@@ -202,8 +202,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             children: [
               const Icon(Icons.diamond_outlined, color: Colors.orange, size: 60),
               const SizedBox(height: 16),
-              const Text(
-                'Pas assez de Gems 💎',
+               Text(
+                AppLocalizations.of(context)!.notEnoughGemsTitle,
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -212,7 +212,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                'Il te manque $missing gems.\nVisite la boutique pour en obtenir !',
+                AppLocalizations.of(context)!.missingGemsNeed(missing),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
               ),
@@ -222,7 +222,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Fermer'),
+                    child:  Text(AppLocalizations.of(context)!.close),
                   ),
                   ElevatedButton(
                     onPressed: () {
@@ -236,7 +236,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       backgroundColor: Colors.amber,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Boutique 🛒'),
+                    child:  Text(AppLocalizations.of(context)!.store),
                   ),
                 ],
               ),
@@ -271,12 +271,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
           if (widget.isInfiniteMode) {
             _connectionStatus = stats['hasConnection']
-                ? 'Mode Infini'
+                ? AppLocalizations.of(context)!.infiniteMode
                 : '';
           } else {
             _connectionStatus = stats['hasConnection']
                 ? ''
-                : 'Mode hors ligne';
+                : AppLocalizations.of(context)!.offlineMode;
           }
         });
 
@@ -290,7 +290,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         setState(() {
           _exercises = [];
           _isLoadingExercises = false;
-          _connectionStatus = '⚠️ Erreur de chargement';
+          _connectionStatus = AppLocalizations.of(context)!.loadingError;
         });
       }
     }
@@ -321,8 +321,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       setState(() {
         _score++;
         _feedbackMessage = isCollege
-            ? "Excellent ! Réponse correcte ✅"
-            : "Bravo ! 🥳 C'est correct 🎉";
+            ? AppLocalizations.of(context)!.goodAnswerColl
+            : AppLocalizations.of(context)!.goodAnswerPrim;
         _showFeedback = true;
       });
     } else {
@@ -335,7 +335,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       }
 
       setState(() {
-        _feedbackMessage = "Oups ! Tu perds une vie 💔";
+        _feedbackMessage = AppLocalizations.of(context)!.wrongAnswer;
         _showFeedback = true;
       });
     }
@@ -433,8 +433,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      '🎉 Achievement débloqué !',
+                     Text(
+                      AppLocalizations.of(context)!.achievementUnlocked,
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
@@ -492,8 +492,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 child: const Text("💔", style: TextStyle(fontSize: 40)),
               ),
               const SizedBox(height: 16),
-              const Text(
-                "Aïe ! Plus de vies 💔",
+               Text(
+                AppLocalizations.of(context)!.noMoreLives,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
@@ -503,14 +503,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Tu as utilisé toutes tes vies pour le moment.",
+               Text(
+                AppLocalizations.of(context)!.usedAllLives,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Tu peux attendre qu'elles se rechargent ou en récupérer tout de suite !",
+               Text(
+                AppLocalizations.of(context)!.waitOrRecover,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey, fontFamily: 'ComicNeue'),
               ),
@@ -530,8 +530,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: const Text(
-                        "Quitter",
+                      child:  Text(
+                        AppLocalizations.of(context)!.quit,
                         style: TextStyle(
                           color: Colors.grey,
                           fontFamily: 'ComicNeue',
@@ -559,13 +559,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                           MaterialPageRoute(builder: (_) => const StoreScreen()),
                         );
                       },
-                      child: const Row(
+                      child:  Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.flash_on, size: 18),
                           SizedBox(width: 8),
                           Text(
-                            "Recharger",
+                            AppLocalizations.of(context)!.recharge,
                             style: TextStyle(
                               fontFamily: 'ComicNeue',
                               fontWeight: FontWeight.bold,
@@ -643,8 +643,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                         const SizedBox(height: 20),
                         Text(
                           widget.isInfiniteMode
-                              ? 'Génération infinie...'
-                              : 'Préparation des exercices...',
+                              ? AppLocalizations.of(context)!.generatingInfinite
+                              : AppLocalizations.of(context)!.preparingExercises,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -734,8 +734,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                             ),
                             child: Column(
                               children: [
-                                const Text(
-                                  "Exercices en préparation ! 🚧",
+                                 Text(
+                                  AppLocalizations.of(context)!.exercisesInPreparation,
                                   style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
@@ -746,7 +746,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                                 ),
                                 const SizedBox(height: 12),
                                 Text(
-                                  "Le professeur prépare les sujets de ${widget.theme}",
+                                  AppLocalizations.of(context)!.teacherPreparing(widget.theme),
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontFamily: 'ComicNeue',
@@ -1013,7 +1013,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Question ${_currentIndex + 1}',
+                    AppLocalizations.of(context)!.question(_currentIndex + 1),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -1096,7 +1096,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       return ElevatedButton.icon(
                         onPressed: canAfford ? () => _useHint() : null,
                         icon: const Icon(Icons.lightbulb_outline, size: 18),
-                        label: const Text('Indice (20💎)'),
+                        label:  Text(AppLocalizations.of(context)!.indice),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: canAfford ? Colors.blue : Colors.grey,
                           foregroundColor: Colors.white,
@@ -1117,7 +1117,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       return ElevatedButton.icon(
                         onPressed: canAfford ? () => _skipQuestion() : null,
                         icon: const Icon(Icons.skip_next, size: 18),
-                        label: const Text('Passer (30💎)'),
+                        label:  Text(AppLocalizations.of(context)!.skipCost(30)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: canAfford ? Colors.orange : Colors.grey,
                           foregroundColor: Colors.white,
@@ -1310,11 +1310,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     final bool isMathKid = percentage >= 100.0;
     final bool isOnRightTrack = percentage >= 50.0 && percentage < 100.0;
 
+    // Remplacer tout le bloc conditionnel :
     String titleText;
     if (isCollege) {
-      titleText = isMathKid ? '🎉 Tu es un Expert ! 🎉' : (isOnRightTrack ? '🌟 Bien joué ! 🌟' : '🙂 Courage !');
+      titleText = isMathKid ? AppLocalizations.of(context)!.expertTitle : (isOnRightTrack ? AppLocalizations.of(context)!.goodJobTitle : AppLocalizations.of(context)!.courageTitle);
     } else {
-      titleText = isMathKid ? '🎉 Tu es un Mathkid! 🎉' : (isOnRightTrack ? '🌟 Tu es sur la bonne voie! 🌟' : '🙂 Presque un Mathkid!');
+      titleText = isMathKid ? AppLocalizations.of(context)!.mathkidTitle : (isOnRightTrack ? AppLocalizations.of(context)!.onRightTrackTitle : AppLocalizations.of(context)!.almostMathkidTitle);
     }
 
     return SingleChildScrollView(
@@ -1400,10 +1401,10 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   const SizedBox(height: 12),
                   Text(
                     isMathKid
-                        ? 'Parfait! Tu maîtrises parfaitement! 🎯'
+                        ? AppLocalizations.of(context)!.perfectMastery
                         : isOnRightTrack
-                        ? 'Excellent travail! Continue comme ça! 💪'
-                        : 'N\'hésite pas à demander de l\'aide pour t\'améliorer! 📚',
+                        ? AppLocalizations.of(context)!.excellentWork
+                        : AppLocalizations.of(context)!.askForHelp,
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.black54,
@@ -1456,8 +1457,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       child: ElevatedButton.icon(
                         onPressed: _goToProgress,
                         icon: const Icon(Icons.trending_up, color: Colors.white, size: 20),
-                        label: const Text(
-                          'Voir ma progression',
+                        label:  Text(
+                          AppLocalizations.of(context)!.seeMyProgress,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1483,8 +1484,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       child: ElevatedButton.icon(
                         onPressed: _goToManual,
                         icon: const Icon(Icons.menu_book_rounded, color: Colors.white, size: 20),
-                        label: const Text(
-                          'Consulter le Manuel',
+                        label:  Text(
+                              AppLocalizations.of(context)!.consultManual,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1512,8 +1513,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.home_rounded, color: Colors.white, size: 20),
-                          label: const Text(
-                            'Retour',
+                          label:  Text(
+                            AppLocalizations.of(context)!.returnn,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -1543,8 +1544,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                             });
                           },
                           icon: const Icon(Icons.replay_rounded, color: Colors.white, size: 20),
-                          label: const Text(
-                            'Rejouer',
+                          label:  Text(
+                            AppLocalizations.of(context)!.replay,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 class ProgressChart extends StatelessWidget {
   final Map<String, double> progressData;
@@ -8,7 +9,7 @@ class ProgressChart extends StatelessWidget {
 
   const ProgressChart({
     required this.progressData,
-    this.title = 'Ma progression',
+    this.title = '',
     super.key,
   });
 
@@ -41,7 +42,7 @@ class ProgressChart extends StatelessWidget {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  title,
+                  title.isNotEmpty ? title : AppLocalizations.of(context)!.progressChartTitle,
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -53,9 +54,9 @@ class ProgressChart extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             if (progressData.isEmpty)
-              const Padding(
+               Padding(
                 padding: EdgeInsets.all(20.0),
-                child: Center(child: Text("Aucune donnée pour le moment")),
+                child: Center(child: Text(AppLocalizations.of(context)!.progressNoData)),
               )
             else
               ...progressData.entries.map((entry) {

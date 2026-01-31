@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mathscool/screens/exercise_screen.dart';
 import 'package:mathscool/utils/colors.dart';
-
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../services/sound_service.dart';
 
 class ThemeSelectionScreen extends StatelessWidget {
@@ -66,7 +66,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Choisis ton mode',
+                        AppLocalizations.of(context)!.chooseMode,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -76,7 +76,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Comment veux-tu t\'entraîner ?',
+                        AppLocalizations.of(context)!.howToTrain,
                         style: TextStyle(
                           fontSize: 13,
                           color: AppColors.textLight.withOpacity(0.9),
@@ -97,8 +97,8 @@ class ThemeSelectionScreen extends StatelessWidget {
                 _buildModeOption(
                   context,
                   icon: Icons.star_border_rounded,
-                  label: 'Mode Normal',
-                  subtitle: '20 exercices progressifs',
+                  label: AppLocalizations.of(context)!.normalMode,
+                  subtitle: AppLocalizations.of(context)!.progressiveExercises,
                   gradient: LinearGradient(
                     colors: [AppColors.info, AppColors.secondary],
                   ),
@@ -111,8 +111,8 @@ class ThemeSelectionScreen extends StatelessWidget {
                 _buildModeOption(
                   context,
                   icon: Icons.all_inclusive_rounded,
-                  label: 'Mode Infini',
-                  subtitle: 'Entraînement illimité',
+                  label: AppLocalizations.of(context)!.infiniteMode,
+                  subtitle: AppLocalizations.of(context)!.unlimitedTraining,
                   gradient: LinearGradient(
                     colors: [AppColors.secondary, AppColors.primary],
                   ),
@@ -202,59 +202,59 @@ class ThemeSelectionScreen extends StatelessWidget {
     );
   }
 
-  List<Map<String, dynamic>> _getThemes() {
+  List<Map<String, dynamic>> _getThemes(BuildContext context) {
     if (isCollege) {
       return [
         {
-          'name': 'Nombres Relatifs',
+          'name': AppLocalizations.of(context)!.themeRelativeNumbers,
           'symbolText': '±',
           'color': AppColors.primary
         },
         {
-          'name': 'Fractions',
+          'name': AppLocalizations.of(context)!.themeFractions,
           'symbolText': '½',
           'color': Color(0xFF14B8A6)
         },
         {
-          'name': 'Algèbre',
+          'name': AppLocalizations.of(context)!.themeAlgebra,
           'symbolText': 'x=y',
           'color': Color(0xFFF97316)
         },
         {
-          'name': 'Puissances',
+          'name': AppLocalizations.of(context)!.themePowers,
           'symbolText': 'x²',
           'color': AppColors.secondary
         },
         {
-          'name': 'Théorèmes',
+          'name': AppLocalizations.of(context)!.themeTheorems,
           'icon': Icons.change_history,
           'color': Color(0xFF78350F)
         },
         {
-          'name': 'Statistiques',
+          'name': AppLocalizations.of(context)!.themeStatistics,
           'icon': Icons.bar_chart,
           'color': Color(0xFF475569)
         },
       ];
     } else {
       return [
-        {'name': 'Addition', 'icon': Icons.add, 'color': AppColors.warning},
-        {'name': 'Soustraction', 'icon': Icons.remove, 'color': AppColors.info},
-        {'name': 'Multiplication', 'icon': Icons.close, 'color': AppColors.success},
+        {'name': AppLocalizations.of(context)!.themeAddition, 'icon': Icons.add, 'color': AppColors.warning},
+        {'name': AppLocalizations.of(context)!.themeSubtraction, 'icon': Icons.remove, 'color': AppColors.info},
+        {'name': AppLocalizations.of(context)!.themeMultiplication, 'icon': Icons.close, 'color': AppColors.success},
         {
-          'name': 'Division',
+          'name': AppLocalizations.of(context)!.themeDivision,
           'symbolText': '÷',
           'color': AppColors.secondary
         },
-        {'name': 'Géométrie', 'icon': Icons.square_foot, 'color': AppColors.error},
+        {'name': AppLocalizations.of(context)!.themeGeometry, 'icon': Icons.square_foot, 'color': AppColors.error},
       ];
     }
   }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final currentThemes = _getThemes();
+    final currentThemes = _getThemes(context);
+
 
     return Scaffold(
         body: Container(
@@ -324,7 +324,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Sélectionne un thème',
+                      AppLocalizations.of(context)!.selectTheme,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -399,13 +399,13 @@ class ThemeSelectionScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${_getThemes().length} thèmes disponibles',
+                  AppLocalizations.of(context)!.themesAvailable(_getThemes(context).length),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
                   ),
                 ),
-              ],
+                ],
             ),
           ),
           const SizedBox(width: 48),
@@ -415,7 +415,7 @@ class ThemeSelectionScreen extends StatelessWidget {
   }
 
   Widget _buildThemeCard(BuildContext context, Map<String, dynamic> theme, int index) {
-    final disabledThemesCI = ['Multiplication', 'Division', 'Géométrie'];
+    final disabledThemesCI = [AppLocalizations.of(context)!.themeMultiplication, AppLocalizations.of(context)!.themeDivision, AppLocalizations.of(context)!.themeGeometry];
 
     bool isDisabled = false;
     if (level == 'CI' && disabledThemesCI.contains(theme['name'])) {
@@ -555,7 +555,7 @@ class ThemeSelectionScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Bientôt',
+                          AppLocalizations.of(context)!.comingSoon,
                           style: TextStyle(
                             fontSize: 10,
                             color: AppColors.textLight,

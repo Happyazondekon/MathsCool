@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../models/user_model.dart';
 import '../models/daily_challenge_model.dart';
 import '../models/exercise_model.dart';
@@ -57,17 +58,18 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     '6ème', '5ème', '4ème', '3ème'
   ];
 
-  final List<String> _descriptions = [
-    'Pour les débutants',
-    'Premiers calculs',
-    'Bases de mathématiques',
-    'Niveau intermédiaire',
-    'Niveau avancé',
-    'Expert',
-    'Entrée au collège',
-    'Niveau central',
-    'Approfondissement',
-    'Préparation brevet'
+  // APRÈS
+  List<String> get _descriptions => [
+    AppLocalizations.of(context)!.dailyChallengeForBeginners,
+    AppLocalizations.of(context)!.dailyChallengeFirstCalculations,
+    AppLocalizations.of(context)!.dailyChallengeMathBasics,
+    AppLocalizations.of(context)!.dailyChallengeIntermediateLevel,
+    AppLocalizations.of(context)!.dailyChallengeAdvancedLevel,
+    AppLocalizations.of(context)!.dailyChallengeExpert,
+    AppLocalizations.of(context)!.dailyChallengeCollegeEntry,
+    AppLocalizations.of(context)!.dailyChallengeCentralLevel,
+    AppLocalizations.of(context)!.dailyChallengeDeepening,
+    AppLocalizations.of(context)!.dailyChallengeBrevetPrep,
   ];
 
   @override
@@ -158,7 +160,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                 children: [
                   Icon(Icons.access_time, color: Colors.white),
                   SizedBox(width: 8),
-                  Text('⏰ +5 secondes ajoutées ! (-5 💎)'),
+                  Text(AppLocalizations.of(context)!.dailyChallengeTimeAdded),
                 ],
               ),
               backgroundColor: AppColors.success,
@@ -201,7 +203,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
               ),
               const SizedBox(height: 16),
               Text(
-                "Pas assez de gems ! 💎",
+                AppLocalizations.of(context)!.dailyChallengeNotEnoughGems,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
@@ -211,8 +213,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Il te faut 5 gems pour ajouter 5 secondes.",
+               Text(
+                AppLocalizations.of(context)!.dailyChallengeNeedGems,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
               ),
@@ -223,7 +225,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(
-                        "Annuler",
+                        AppLocalizations.of(context)!.dailyChallengeCancel,
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontFamily: 'ComicNeue',
@@ -250,8 +252,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                           MaterialPageRoute(builder: (_) => const StoreScreen()),
                         );
                       },
-                      child: const Text(
-                        "Boutique 💎",
+                      child:  Text(
+                        AppLocalizations.of(context)!.dailyChallengeStore,
                         style: TextStyle(
                           fontFamily: 'ComicNeue',
                           fontWeight: FontWeight.bold,
@@ -296,7 +298,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
             ),
             const SizedBox(height: 16),
             Text(
-              "Ajouter du temps ? ⏰",
+              AppLocalizations.of(context)!.dailyChallengeAddTime,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 22,
@@ -363,7 +365,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   const Text("💎", style: TextStyle(fontSize: 16)),
                   const SizedBox(width: 4),
                   Text(
-                    "Tes gems: $currentGems",
+                    AppLocalizations.of(context)!.dailyChallengeYourGems(currentGems),
                     style: const TextStyle(
                       fontSize: 14,
                       fontFamily: 'ComicNeue',
@@ -380,7 +382,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     child: Text(
-                      "Annuler",
+                      AppLocalizations.of(context)!.dailyChallengeCancel,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontFamily: 'ComicNeue',
@@ -401,8 +403,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                       ),
                     ),
                     onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text(
-                      "Confirmer ✨",
+                    child:  Text(
+                      AppLocalizations.of(context)!.dailyChallengeConfirm,
                       style: TextStyle(
                         fontFamily: 'ComicNeue',
                         fontWeight: FontWeight.bold,
@@ -447,7 +449,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
               ),
               const SizedBox(height: 16),
               Text(
-                "Temps écoulé ! ⏰",
+                AppLocalizations.of(context)!.dailyChallengeTimeUp,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
@@ -457,8 +459,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Le temps est écoulé pour ce défi.",
+               Text(
+                AppLocalizations.of(context)!.dailyChallengeTimeUpMessage,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
               ),
@@ -476,8 +478,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   Navigator.of(context).pop();
                   _finishChallenge();
                 },
-                child: const Text(
-                  "Voir le résultat",
+                child:  Text(
+                  AppLocalizations.of(context)!.dailyChallengeSeeResult,
                   style: TextStyle(
                     fontFamily: 'ComicNeue',
                     fontWeight: FontWeight.bold,
@@ -579,7 +581,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
       await soundService.playCorrectAnswer();
       setState(() {
         _score++;
-        _feedbackMessage = "Bravo ! 🥳 C'est correct 🎉";
+        _feedbackMessage = AppLocalizations.of(context)!.dailyChallengeGoodAnswer;
         _showFeedback = true;
       });
     } else {
@@ -593,7 +595,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
       }
 
       setState(() {
-        _feedbackMessage = "Oups ! Tu perds une vie 💔";
+        _feedbackMessage = AppLocalizations.of(context)!.dailyChallengeLostLife;
         _showFeedback = true;
       });
     }
@@ -681,7 +683,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
               ),
               const SizedBox(height: 16),
               Text(
-                "Aïe ! Plus de vies 💔",
+                AppLocalizations.of(context)!.dailyChallengeLostLife,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22,
@@ -691,8 +693,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                 ),
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Tu as utilisé toutes tes vies pour le moment.",
+               Text(
+                AppLocalizations.of(context)!.dailyChallengeLostLifeMessage,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, fontFamily: 'ComicNeue'),
               ),
@@ -706,7 +708,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                         Navigator.of(context).pop();
                       },
                       child: Text(
-                        "Quitter",
+                        AppLocalizations.of(context)!.dailyChallengeQuitText,
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontFamily: 'ComicNeue',
@@ -733,8 +735,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                           MaterialPageRoute(builder: (_) => const StoreScreen()),
                         );
                       },
-                      child: const Text(
-                        "Recharger ⚡",
+                      child:  Text(
+                        AppLocalizations.of(context)!.recharge,
                         style: TextStyle(
                           fontFamily: 'ComicNeue',
                           fontWeight: FontWeight.bold,
@@ -955,8 +957,8 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     ),
     ),
     Text(
-    'Question ${_currentIndex + 1}/${_exercises.length}',
-    style: const TextStyle(fontSize: 14, color: Colors.white70),
+      AppLocalizations.of(context)!.dailyChallengeQuestion(_currentIndex + 1, _exercises.length),
+      style: const TextStyle(fontSize: 14, color: Colors.white70),
     ),
     ],
     ),
@@ -1315,7 +1317,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   Lottie.asset('assets/animations/success.json', height: 200),
                   const SizedBox(height: 20),
                   Text(
-                    'Défi déjà complété ! 🎉',
+                    AppLocalizations.of(context)!.dailyChallengeAlreadyCompleted,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -1326,7 +1328,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Reviens demain pour un nouveau défi !',
+                    AppLocalizations.of(context)!.dailyChallengeAlreadyCompletedMessage,
                     style: TextStyle(
                       fontSize: 16,
                       color: AppColors.textLight.withOpacity(0.8),
@@ -1344,7 +1346,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: const Text('Retour', style: TextStyle(fontSize: 18, fontFamily: 'ComicNeue')),
+                    child:  Text(AppLocalizations.of(context)!.dailyChallengeBack, style: TextStyle(fontSize: 18, fontFamily: 'ComicNeue')),
                   ),
                 ],
               ),
@@ -1384,7 +1386,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                 Icon(Icons.error_outline, size: 80, color: AppColors.textLight),
                 const SizedBox(height: 20),
                 Text(
-                  'Aucun défi disponible',
+                  AppLocalizations.of(context)!.dailyChallengeNoData,
                   style: TextStyle(
                     fontSize: 24,
                     color: AppColors.textLight,
@@ -1398,7 +1400,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                     backgroundColor: Colors.white,
                     foregroundColor: AppColors.primary,
                   ),
-                  child: const Text('Retour'),
+                  child:  Text(AppLocalizations.of(context)!.dailyChallengeBack),
                 ),
               ],
             ),
@@ -1486,7 +1488,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
               ),
               Expanded(
                 child: Text(
-                  'Défi Quotidien 🏆',
+                  AppLocalizations.of(context)!.dailyChallengeTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -1524,9 +1526,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                   ),
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
+                 Expanded(
                   child: Text(
-                    'Choisis ton niveau de défi',
+                    AppLocalizations.of(context)!.dailyChallengeSelectLevel,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 13,
@@ -1616,7 +1618,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Collège',
+                      AppLocalizations.of(context)!.dailyChallengeCollege,
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,

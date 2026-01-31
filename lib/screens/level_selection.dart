@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mathscool/screens/theme_selection.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 import '../services/sound_service.dart';
 import '../widgets/theme_selection.dart';
@@ -13,18 +14,20 @@ class LevelSelectionScreen extends StatelessWidget {
     '6ème', '5ème', '4ème', '3ème'
   ];
 
-  final List<String> descriptions = const [
-    'Pour les débutants',
-    'Premiers calculs',
-    'Bases de mathématiques',
-    'Niveau intermédiaire',
-    'Niveau avancé',
-    'Expert',
-    'Entrée au collège',
-    'Niveau central',
-    'Approfondissement',
-    'Préparation brevet'
-  ];
+  List<String> _getDescriptions(BuildContext context) {
+    return [
+      AppLocalizations.of(context)!.levelForBeginners,
+      AppLocalizations.of(context)!.levelFirstCalculations,
+      AppLocalizations.of(context)!.levelMathBasics,
+      AppLocalizations.of(context)!.levelIntermediate,
+      AppLocalizations.of(context)!.levelAdvanced,
+      AppLocalizations.of(context)!.levelExpert,
+      AppLocalizations.of(context)!.levelCollegeEntry,
+      AppLocalizations.of(context)!.levelCentral,
+      AppLocalizations.of(context)!.levelDeepening,
+      AppLocalizations.of(context)!.levelBrevetPrep,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +109,7 @@ class LevelSelectionScreen extends StatelessWidget {
               ),
               Expanded(
                 child: Text(
-                  'Choisis ton niveau',
+                  AppLocalizations.of(context)!.levelSelectionTitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 24,
@@ -146,7 +149,7 @@ class LevelSelectionScreen extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Choisis le niveau qui correspond à ta classe',
+                    AppLocalizations.of(context)!.levelSelectionHint,
                     style: TextStyle(
                       color: AppColors.textLight,
                       fontSize: 13,
@@ -277,7 +280,7 @@ class LevelSelectionScreen extends StatelessWidget {
                       ],
                     ),
                     child: Text(
-                      'Collège',
+                      AppLocalizations.of(context)!.levelCollegeBadge,
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
@@ -333,7 +336,7 @@ class LevelSelectionScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Text(
-                        descriptions[index],
+                        _getDescriptions(context)[index],
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,

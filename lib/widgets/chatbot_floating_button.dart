@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/models/user_model.dart';
 import 'package:mathscool/utils/colors.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 import '../screens/ chatbot_screen.dart';
 import '../screens/store_screen.dart';
@@ -127,7 +128,7 @@ class _ChatbotFloatingButtonState extends State<ChatbotFloatingButton>
               ),
               const SizedBox(height: 20),
               Text(
-                "Limite atteinte ! 🚀",
+                AppLocalizations.of(context)!.chatbotLimitReached,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -138,7 +139,7 @@ class _ChatbotFloatingButtonState extends State<ChatbotFloatingButton>
               ),
               const SizedBox(height: 12),
               Text(
-                "Tu as utilisé tes 3 questions gratuites du jour !",
+                AppLocalizations.of(context)!.chatbotFreeQuestionsUsed,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
@@ -155,7 +156,7 @@ class _ChatbotFloatingButtonState extends State<ChatbotFloatingButton>
                   border: Border.all(color: AppColors.accent, width: 2),
                 ),
                 child: Text(
-                  "Abonne-toi pour poser autant de questions que tu veux à MathKid ! 🚀",
+                  AppLocalizations.of(context)!.chatbotSubscribePrompt,
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -177,7 +178,7 @@ class _ChatbotFloatingButtonState extends State<ChatbotFloatingButton>
                         ),
                       ),
                       child: Text(
-                        "Plus tard",
+                        AppLocalizations.of(context)!.chatbotLater,
                         style: TextStyle(
                           fontFamily: 'ComicNeue',
                           fontSize: 16,
@@ -207,8 +208,8 @@ class _ChatbotFloatingButtonState extends State<ChatbotFloatingButton>
                           MaterialPageRoute(builder: (context) => const StoreScreen()),
                         );
                       },
-                      child: const Text(
-                        "Découvrir ✨",
+                      child:  Text(
+                        AppLocalizations.of(context)!.chatbotDiscover,
                         style: TextStyle(
                           fontFamily: 'ComicNeue',
                           fontSize: 16,

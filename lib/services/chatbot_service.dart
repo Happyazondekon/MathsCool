@@ -56,7 +56,12 @@ class ChatbotService {
   }
 
   // Obtenir une explication
-  Future<String> getExplanation(String question, String level, String userId) async {
+  Future<String>  getExplanation(
+      String question,
+      String level,
+      String userId, {
+        String language = 'fr',  // Paramètre optionnel avec défaut
+      }) async {
     final canUse = await canUseChatbot(userId);
     if (!canUse) {
       throw Exception('Limite de requêtes atteinte. Abonnez-vous pour continuer.');
@@ -67,8 +72,12 @@ class ChatbotService {
     if (!usage.hasActiveSubscription) {
       await useFreeRequest(userId);
     }
-
-    return await _groqService.getMathExplanation(question, level);
+    final groqService = GroqService();
+    return await groqService.getMathExplanation(
+      question,
+      level,
+      language: language,  // Passer la langue à Groq
+    );
   }
 
   // Réinitialiser les requêtes gratuites (quotidien)

@@ -6,7 +6,7 @@ import '../data/static_exercises.dart';
 import 'exercise_generator_service.dart';
 
 /// Service hybride qui combine exercices statiques et générés dynamiquement (IA/Algo)
-/// 🆕 VERSION MULTILINGUE - Supporte français et anglais
+/// 🆕 VERSION MULTILINGUE - Supporte français, anglais, espagnol et chinois
 class HybridExerciseService {
   final ExerciseGeneratorService _generator = ExerciseGeneratorService();
   final Connectivity _connectivity = Connectivity();
@@ -31,27 +31,41 @@ class HybridExerciseService {
     bool forceGenerated = false,
     String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
   }) async {
+    print('🎯 HybridExerciseService.getExercises appelé:');
+    print('   - level: $level');
+    print('   - theme: $theme');
+    print('   - count: $count');
+    print('   - language: $language');
+    print('   - forceGenerated: $forceGenerated');
+
     final hasConnection = await _checkConnection();
+    print('   - hasConnection: $hasConnection');
 
     // 🆕 Pour EN, ES, ZH : forcer la génération IA quand online
     final isAiOnlyLanguage = ['en', 'es', 'zh'].contains(language);
+    print('   - isAiOnlyLanguage: $isAiOnlyLanguage');
+
     final shouldForceGenerated = forceGenerated || (isAiOnlyLanguage && hasConnection);
+    print('   - shouldForceGenerated: $shouldForceGenerated');
 
     if (shouldForceGenerated && hasConnection) {
       // Mode génération pure pour ces langues ou entraînement infini
+      print('🤖 Mode génération IA pure');
       return await _generator.generateExercises(
         level: level,
         theme: theme,
         count: count,
-        language: language, // 🆕 Passer la langue
+        language: language,
       );
     }
 
     if (hasConnection) {
       // STRATÉGIE HYBRIDE : Mélange intelligent (seulement pour FR)
-      return await _getMixedExercises(level, theme, count, language); // 🆕 Passer la langue
+      print('🔄 Mode hybride (FR uniquement)');
+      return await _getMixedExercises(level, theme, count, language);
     } else {
       // FALLBACK : Uniquement statique
+      print('📚 Mode statique (offline)');
       return _getStaticExercises(level, theme, count);
     }
   }
@@ -83,11 +97,16 @@ class HybridExerciseService {
       String level,
       String theme,
       int totalCount,
-      String language, // 🆕 NOUVEAU PARAMÈTRE
+      String language,
       ) async {
     try {
+      print('🔄 Génération d\'exercices mixtes pour $language');
+
       final staticExercises = _getStaticExercises(level, theme, totalCount ~/ 2);
+      print('   - Exercices statiques: ${staticExercises.length}');
+
       final generatedCount = totalCount - staticExercises.length;
+      print('   - Exercices à générer: $generatedCount');
 
       List<Exercise> generatedExercises = [];
       if (generatedCount > 0) {
@@ -95,8 +114,9 @@ class HybridExerciseService {
           level: level,
           theme: theme,
           count: generatedCount,
-          language: language, // 🆕 Passer la langue
+          language: language,
         );
+        print('   - Exercices générés: ${generatedExercises.length}');
       }
 
       // Mélange aléatoire des deux types
@@ -113,6 +133,8 @@ class HybridExerciseService {
 
   /// Récupère les exercices statiques du fichier local
   List<Exercise> _getStaticExercises(String level, String theme, int count) {
+    print('📚 Récupération exercices statiques: level=$level, theme=$theme');
+
     // Typage explicite pour éviter les erreurs de type dynamique
     final List<Exercise> allStatic = staticExercises[level]?[theme] ?? <Exercise>[];
 
@@ -121,11 +143,13 @@ class HybridExerciseService {
       return [];
     }
 
+    print('   - Exercices disponibles: ${allStatic.length}');
+
     // Si on demande plus que disponible, on duplique et mélange
     if (count > allStatic.length) {
       final copies = (count / allStatic.length).ceil();
+      print('   - Duplication nécessaire: $copies copies');
 
-      // Utilisation de List.generate suivie de expand pour aplatir la liste de listes
       final duplicated = List.generate(
         copies,
             (_) => allStatic,
@@ -181,15 +205,19 @@ class HybridExerciseService {
   Future<void> preloadExercises({
     required String level,
     required String theme,
-    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
+    String language = 'fr',
   }) async {
+    print('⏳ Préchargement des exercices: level=$level, theme=$theme, language=$language');
+
     // Charge en arrière-plan sans bloquer l'UI
     await getExercises(
       level: level,
       theme: theme,
       count: 20,
-      language: language, // 🆕 Passer la langue
+      language: language,
     );
+
+    print('✅ Exercices préchargés');
   }
 
   /// Vérifie si des exercices sont disponibles pour ce niveau/thème
@@ -214,7 +242,7 @@ class HybridExerciseService {
     required String level,
     required String theme,
     int batchSize = 20,
-    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
+    String language = 'fr',
   }) async* {
     final isAiOnlyLanguage = ['en', 'es', 'zh'].contains(language);
 
@@ -226,7 +254,7 @@ class HybridExerciseService {
           level: level,
           theme: theme,
           count: batchSize,
-          language: language, // 🆕 Passer la langue
+          language: language,
         );
       } else {
         if (isAiOnlyLanguage) {
@@ -250,7 +278,7 @@ class HybridExerciseService {
     required String theme,
     required int count,
     double staticRatio = 0.5, // 50% par défaut
-    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
+    String language = 'fr',
   }) async {
     final hasConnection = await _checkConnection();
 
@@ -267,7 +295,7 @@ class HybridExerciseService {
       level: level,
       theme: theme,
       count: generatedCount,
-      language: language, // 🆕 Passer la langue
+      language: language,
     );
 
     final mixed = [...staticExs, ...generatedExs];

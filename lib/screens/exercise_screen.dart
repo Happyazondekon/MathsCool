@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:mathscool/services/localization_service.dart';
 
 // Models & Data
 import 'package:mathscool/models/exercise_model.dart';
@@ -251,6 +252,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     setState(() => _isLoadingExercises = true);
 
     try {
+      // 🆕 RÉCUPÉRER LA LANGUE ACTUELLE
+      final localizationService = Provider.of<LocalizationService>(context, listen: false);
+      final currentLanguage = localizationService.currentLocale.languageCode;
+
+      print('🌍 Langue actuelle dans exercise_screen: $currentLanguage');
+
       final hybridService = HybridExerciseService();
 
       final exerciseCount = widget.isInfiniteMode ? 100 : 20;
@@ -260,9 +267,14 @@ class _ExerciseScreenState extends State<ExerciseScreen>
         theme: widget.theme,
         count: exerciseCount,
         forceGenerated: widget.isInfiniteMode,
+        language: currentLanguage, // 🆕 PASSER LA LANGUE
       );
 
-      final stats = await hybridService.getExerciseStats(widget.level, widget.theme);
+      final stats = await hybridService.getExerciseStats(
+        widget.level,
+        widget.theme,
+        language: currentLanguage, // 🆕 PASSER LA LANGUE
+      );
 
       if (mounted) {
         setState(() {

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import 'package:mathscool/services/localization_service.dart';
 import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 import '../models/user_model.dart';
 import '../models/daily_challenge_model.dart';
@@ -527,15 +528,23 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     final user = Provider.of<AppUser?>(context, listen: false);
     if (user == null) return;
 
+    // 🆕 RÉCUPÉRER LA LANGUE ACTUELLE
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    final currentLanguage = localizationService.currentLocale.languageCode;
+
+    print('🌍 Langue actuelle dans daily_challenge: $currentLanguage');
+
     final service = Provider.of<DailyChallengeService>(context, listen: false);
 
     try {
       final challenge = await service.getTodayChallenge(level);
       final exerciseService = HybridExerciseService();
+
       final exercises = await exerciseService.getExercises(
         level: challenge.level,
         theme: challenge.theme,
         count: challenge.totalQuestions,
+        language: currentLanguage, // 🆕 PASSER LA LANGUE
       );
 
       if (mounted) {
@@ -546,7 +555,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
           _startTime = DateTime.now();
         });
         _animationController.forward();
-        _startTimer(); // Démarrer le minuteur
+        _startTimer();
       }
     } catch (e) {
       print('❌ Erreur chargement défi: $e');

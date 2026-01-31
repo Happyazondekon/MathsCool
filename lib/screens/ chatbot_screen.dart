@@ -5,6 +5,7 @@ import 'package:mathscool/models/chatbot_model.dart';
 import 'package:mathscool/screens/store_screen.dart';
 import 'package:mathscool/utils/colors.dart';
 import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
+import 'package:mathscool/services/localization_service.dart';
 
 class ChatbotScreen extends StatefulWidget {
   final String userId;
@@ -77,6 +78,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     final message = _messageController.text.trim();
     if (message.isEmpty || _isLoading) return;
 
+    // 🆕 RÉCUPÉRER LA LANGUE ACTUELLE
+    final localizationService = Provider.of<LocalizationService>(context, listen: false);
+    final currentLanguage = localizationService.currentLocale.languageCode;
+
+    print('🌍 Langue actuelle dans chatbot: $currentLanguage');
+
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: message,
@@ -97,6 +104,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
         message,
         'primaire',
         widget.userId,
+        language: currentLanguage, // 🆕 PASSER LA LANGUE
       );
 
       final aiMessage = ChatMessage(

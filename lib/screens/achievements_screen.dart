@@ -131,7 +131,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                achievement.name,
+                achievement.getLocalizedName(context),
                 style: TextStyle(
                   fontSize: 16,
                   color: AppColors.textPrimary,
@@ -681,7 +681,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                       children: [
                         Expanded(
                           child: Text(
-                            isSecret ? '???' : achievement.name,
+                            isSecret ? '???' : achievement.getLocalizedName(context),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -720,7 +720,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      isSecret ? AppLocalizations.of(context)!.secretAchievementDescription : achievement.description,
+                      isSecret ? AppLocalizations.of(context)!.secretAchievementDescription : achievement.getLocalizedDescription(context),
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,

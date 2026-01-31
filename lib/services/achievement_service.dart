@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import '../models/achievement_model.dart';
-import 'gems_service.dart'; // ✅ IMPORT AJOUTÉ
+import 'gems_service.dart';
 
 class AchievementService extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GemsService _gemsService; // ✅ AJOUTÉ
+  final GemsService _gemsService;
 
   List<Achievement> _allAchievements = [];
   Map<String, UserAchievement> _userAchievements = {};
@@ -13,7 +13,6 @@ class AchievementService extends ChangeNotifier {
   List<Achievement> get allAchievements => _allAchievements;
   Map<String, UserAchievement> get userAchievements => _userAchievements;
 
-  // ✅ CONSTRUCTEUR MODIFIÉ pour injecter GemsService
   AchievementService(this._gemsService) {
     _allAchievements = PredefinedAchievements.getAllAchievements();
   }
@@ -124,7 +123,8 @@ class AchievementService extends ChangeNotifier {
 
         if (isNowCompleted) {
           newlyCompleted.add(achievement);
-          if (kDebugMode) print("🏆 Achievement débloqué: ${achievement.name}");
+          // ✅ MODIFIÉ : Utiliser nameKey au lieu de name pour le debug
+          if (kDebugMode) print("🏆 Achievement débloqué: ${achievement.nameKey} (ID: ${achievement.id})");
         }
       }
 
@@ -140,7 +140,7 @@ class AchievementService extends ChangeNotifier {
     return newlyCompleted;
   }
 
-  /// ✅ MODIFIÉ : Réclamer les récompenses d'un achievement (maintenant en Gems)
+  /// Réclamer les récompenses d'un achievement (maintenant en Gems)
   Future<int> claimAchievement(String userId, String achievementId) async {
     try {
       if (_allAchievements.isEmpty) initialize();
@@ -164,14 +164,14 @@ class AchievementService extends ChangeNotifier {
       await _saveUserAchievements(userId);
       notifyListeners();
 
-      // ✅ DONNER DES GEMS AU LIEU DE VIES
+      // Donner des gems au lieu de vies
       await _gemsService.rewardAchievement(
         userId,
         achievementId,
         achievement.gemsReward,
       );
 
-      return achievement.gemsReward; // ✅ Retourner les gems gagnés
+      return achievement.gemsReward;
 
     } catch (e) {
       if (kDebugMode) print('Erreur réclamation achievement: $e');
@@ -198,7 +198,7 @@ class AchievementService extends ChangeNotifier {
     return unclaimed;
   }
 
-  /// ✅ MODIFIÉ : Obtenir le nombre total de gems non réclamés
+  /// Obtenir le nombre total de gems non réclamés
   int getTotalUnclaimedGems() {
     int total = 0;
     for (var achievement in getUnclaimedAchievements()) {
@@ -207,7 +207,7 @@ class AchievementService extends ChangeNotifier {
     return total;
   }
 
-  /// ✅ BACKWARD COMPATIBILITY : Ancienne méthode qui retournait des vies
+  /// BACKWARD COMPATIBILITY : Ancienne méthode qui retournait des vies
   int getTotalUnclaimedLives() {
     // Retourner 0 car les achievements ne donnent plus de vies
     return 0;
@@ -243,16 +243,17 @@ class AchievementService extends ChangeNotifier {
       if (value.isClaimed) claimed++;
     });
 
-    // ✅ CALCULER LES GEMS TOTAUX GAGNÉS
+    // Calculer les gems totaux gagnés
     int totalGemsEarned = 0;
     _userAchievements.forEach((key, value) {
       if (value.isClaimed) {
         final achievement = _allAchievements.firstWhere(
               (a) => a.id == key,
+          // ✅ MODIFIÉ : Utiliser nameKey et descriptionKey dans le fallback
           orElse: () => Achievement(
             id: '',
-            name: '',
-            description: '',
+            nameKey: '', // ✅ CHANGÉ
+            descriptionKey: '', // ✅ CHANGÉ
             icon: '',
             type: AchievementType.exercisesCompleted,
             targetValue: 0,
@@ -268,7 +269,7 @@ class AchievementService extends ChangeNotifier {
       'completed': completed,
       'claimed': claimed,
       'unclaimed': completed - claimed,
-      'totalGemsEarned': totalGemsEarned, // ✅ CHANGÉ
+      'totalGemsEarned': totalGemsEarned,
       'completionRate': total > 0 ? (completed / total) : 0.0,
     };
   }

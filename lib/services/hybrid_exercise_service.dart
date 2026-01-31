@@ -6,6 +6,7 @@ import '../data/static_exercises.dart';
 import 'exercise_generator_service.dart';
 
 /// Service hybride qui combine exercices statiques et générés dynamiquement (IA/Algo)
+/// 🆕 VERSION MULTILINGUE - Supporte français et anglais
 class HybridExerciseService {
   final ExerciseGeneratorService _generator = ExerciseGeneratorService();
   final Connectivity _connectivity = Connectivity();
@@ -18,29 +19,37 @@ class HybridExerciseService {
   /// Récupère les exercices selon la disponibilité de connexion
   ///
   /// Stratégies :
-  /// - ONLINE: 50% static + 50% generated (mélange pour varier)
-  /// - OFFLINE: 100% static (fallback sécurisé)
+  /// - FR ONLINE: 50% static + 50% generated (mélange pour varier)
+  /// - EN/ES/ZH ONLINE: 100% generated (IA pure pour ces langues)
+  /// - OFFLINE: 100% static (fallback sécurisé pour toutes les langues)
+  ///
+  /// 🆕 PARAMÈTRE language: 'fr', 'en', 'es', 'zh'
   Future<List<Exercise>> getExercises({
     required String level,
     required String theme,
     int count = 20,
     bool forceGenerated = false,
+    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
   }) async {
     final hasConnection = await _checkConnection();
 
-    if (forceGenerated && hasConnection) {
-      // Mode "Entraînement Infini" forcé
-      // MODIFICATION : Ajout de await car la génération est maintenant asynchrone
+    // 🆕 Pour EN, ES, ZH : forcer la génération IA quand online
+    final isAiOnlyLanguage = ['en', 'es', 'zh'].contains(language);
+    final shouldForceGenerated = forceGenerated || (isAiOnlyLanguage && hasConnection);
+
+    if (shouldForceGenerated && hasConnection) {
+      // Mode génération pure pour ces langues ou entraînement infini
       return await _generator.generateExercises(
         level: level,
         theme: theme,
         count: count,
+        language: language, // 🆕 Passer la langue
       );
     }
 
     if (hasConnection) {
-      // STRATÉGIE HYBRIDE : Mélange intelligent
-      return await _getMixedExercises(level, theme, count);
+      // STRATÉGIE HYBRIDE : Mélange intelligent (seulement pour FR)
+      return await _getMixedExercises(level, theme, count, language); // 🆕 Passer la langue
     } else {
       // FALLBACK : Uniquement statique
       return _getStaticExercises(level, theme, count);
@@ -69,10 +78,12 @@ class HybridExerciseService {
   }
 
   /// Stratégie de mélange : 50% static + 50% generated
+  /// 🆕 PARAMÈTRE language ajouté
   Future<List<Exercise>> _getMixedExercises(
       String level,
       String theme,
       int totalCount,
+      String language, // 🆕 NOUVEAU PARAMÈTRE
       ) async {
     try {
       final staticExercises = _getStaticExercises(level, theme, totalCount ~/ 2);
@@ -80,11 +91,11 @@ class HybridExerciseService {
 
       List<Exercise> generatedExercises = [];
       if (generatedCount > 0) {
-        // MODIFICATION : Ajout de await
         generatedExercises = await _generator.generateExercises(
           level: level,
           theme: theme,
           count: generatedCount,
+          language: language, // 🆕 Passer la langue
         );
       }
 
@@ -92,7 +103,7 @@ class HybridExerciseService {
       final mixed = [...staticExercises, ...generatedExercises];
       mixed.shuffle(Random());
 
-      print('✅ Exercices hybrides: ${staticExercises.length} static + ${generatedExercises.length} generated');
+      print('✅ Exercices hybrides ($language): ${staticExercises.length} static + ${generatedExercises.length} generated');
       return mixed;
     } catch (e) {
       print('⚠️ Erreur mélange, fallback vers static: $e');
@@ -140,55 +151,91 @@ class HybridExerciseService {
   }
 
   /// Statistiques pour debug/analytics
-  Future<Map<String, dynamic>> getExerciseStats(String level, String theme) async {
+  /// 🆕 PARAMÈTRE language ajouté
+  Future<Map<String, dynamic>> getExerciseStats(String level, String theme, {String language = 'fr'}) async {
     final hasConnection = await _checkConnection();
     final staticCount = (staticExercises[level]?[theme] ?? []).length;
+    final isAiOnlyLanguage = ['en', 'es', 'zh'].contains(language);
+
+    String recommendedMode;
+    if (!hasConnection) {
+      recommendedMode = 'static';
+    } else if (isAiOnlyLanguage) {
+      recommendedMode = 'ai-only';
+    } else {
+      recommendedMode = 'hybrid';
+    }
 
     return {
       'hasConnection': hasConnection,
       'staticAvailable': staticCount,
-      'canGenerate': hasConnection, // La génération dépend maintenant de la connexion pour l'IA
-      'recommendedMode': hasConnection ? 'hybrid' : 'static',
+      'canGenerate': hasConnection,
+      'recommendedMode': recommendedMode,
+      'language': language,
+      'isAiOnlyLanguage': isAiOnlyLanguage,
     };
   }
 
   /// Précharge les exercices pour une meilleure UX
+  /// 🆕 PARAMÈTRE language ajouté
   Future<void> preloadExercises({
     required String level,
     required String theme,
+    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
   }) async {
     // Charge en arrière-plan sans bloquer l'UI
-    await getExercises(level: level, theme: theme, count: 20);
+    await getExercises(
+      level: level,
+      theme: theme,
+      count: 20,
+      language: language, // 🆕 Passer la langue
+    );
   }
 
   /// Vérifie si des exercices sont disponibles pour ce niveau/thème
-  Future<bool> hasExercisesAvailable(String level, String theme) async {
+  /// 🆕 PARAMÈTRE language ajouté
+  Future<bool> hasExercisesAvailable(String level, String theme, {String language = 'fr'}) async {
     final hasConnection = await _checkConnection();
     final staticCount = (staticExercises[level]?[theme] ?? []).length;
+    final isAiOnlyLanguage = ['en', 'es', 'zh'].contains(language);
 
-    // Disponible si : exercices statiques OU connexion pour génération
-    return staticCount > 0 || hasConnection;
+    if (isAiOnlyLanguage) {
+      // Pour EN/ES/ZH : besoin de connexion pour génération IA
+      return hasConnection;
+    } else {
+      // Pour FR : statiques OU connexion pour hybride
+      return staticCount > 0 || hasConnection;
+    }
   }
 
   /// Mode "Entraînement Infini" : Génération pure en streaming
+  /// 🆕 PARAMÈTRE language ajouté
   Stream<List<Exercise>> infiniteExerciseStream({
     required String level,
     required String theme,
     int batchSize = 20,
+    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
   }) async* {
+    final isAiOnlyLanguage = ['en', 'es', 'zh'].contains(language);
+
     while (true) {
       final hasConnection = await _checkConnection();
 
       if (hasConnection) {
-        // MODIFICATION : Ajout de await pour le stream
         yield await _generator.generateExercises(
           level: level,
           theme: theme,
           count: batchSize,
+          language: language, // 🆕 Passer la langue
         );
       } else {
-        // En mode infini sans connexion, on recycle les statiques
-        yield _getStaticExercises(level, theme, batchSize);
+        if (isAiOnlyLanguage) {
+          // Pour EN/ES/ZH sans connexion : pas d'exercices disponibles
+          yield [];
+        } else {
+          // Pour FR sans connexion : recycler les statiques
+          yield _getStaticExercises(level, theme, batchSize);
+        }
       }
 
       // Attente pour éviter la surcharge (optionnel)
@@ -197,11 +244,13 @@ class HybridExerciseService {
   }
 
   /// Obtenir un mix personnalisé selon les préférences
+  /// 🆕 PARAMÈTRE language ajouté
   Future<List<Exercise>> getCustomMix({
     required String level,
     required String theme,
     required int count,
     double staticRatio = 0.5, // 50% par défaut
+    String language = 'fr', // 🆕 NOUVEAU PARAMÈTRE
   }) async {
     final hasConnection = await _checkConnection();
 
@@ -214,11 +263,11 @@ class HybridExerciseService {
 
     final staticExs = _getStaticExercises(level, theme, staticCount);
 
-    // MODIFICATION : Ajout de await
     final generatedExs = await _generator.generateExercises(
       level: level,
       theme: theme,
       count: generatedCount,
+      language: language, // 🆕 Passer la langue
     );
 
     final mixed = [...staticExs, ...generatedExs];

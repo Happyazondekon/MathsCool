@@ -6,7 +6,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
 import 'app_localizations_fr.dart';
+import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +94,9 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('fr')
+    Locale('es'),
+    Locale('fr'),
+    Locale('zh')
   ];
 
   /// No description provided for @appTitle.
@@ -2740,6 +2744,708 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hint 💡'**
   String get storeHintLabel;
+
+  /// No description provided for @achievementFirstSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'First steps'**
+  String get achievementFirstSteps;
+
+  /// No description provided for @achievementFirstStepsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve your first exercise'**
+  String get achievementFirstStepsDesc;
+
+  /// No description provided for @achievementGettingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting started!'**
+  String get achievementGettingStarted;
+
+  /// No description provided for @achievementGettingStartedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 5 exercises'**
+  String get achievementGettingStartedDesc;
+
+  /// No description provided for @achievementOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'On track'**
+  String get achievementOnTrack;
+
+  /// No description provided for @achievementOnTrackDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 15 exercises'**
+  String get achievementOnTrackDesc;
+
+  /// No description provided for @achievementBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Beginner'**
+  String get achievementBeginner;
+
+  /// No description provided for @achievementBeginnerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 25 exercises'**
+  String get achievementBeginnerDesc;
+
+  /// No description provided for @achievementLearner.
+  ///
+  /// In en, this message translates to:
+  /// **'Learner'**
+  String get achievementLearner;
+
+  /// No description provided for @achievementLearnerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 50 exercises'**
+  String get achievementLearnerDesc;
+
+  /// No description provided for @achievementStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Studious student'**
+  String get achievementStudent;
+
+  /// No description provided for @achievementStudentDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 75 exercises'**
+  String get achievementStudentDesc;
+
+  /// No description provided for @achievementSkilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Skilled'**
+  String get achievementSkilled;
+
+  /// No description provided for @achievementSkilledDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 100 exercises'**
+  String get achievementSkilledDesc;
+
+  /// No description provided for @achievementExpert.
+  ///
+  /// In en, this message translates to:
+  /// **'Expert'**
+  String get achievementExpert;
+
+  /// No description provided for @achievementExpertDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 150 exercises'**
+  String get achievementExpertDesc;
+
+  /// No description provided for @achievementMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Master'**
+  String get achievementMaster;
+
+  /// No description provided for @achievementMasterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 200 exercises'**
+  String get achievementMasterDesc;
+
+  /// No description provided for @achievementChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion'**
+  String get achievementChampion;
+
+  /// No description provided for @achievementChampionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 300 exercises'**
+  String get achievementChampionDesc;
+
+  /// No description provided for @achievementLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'Legend'**
+  String get achievementLegend;
+
+  /// No description provided for @achievementLegendDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 500 exercises'**
+  String get achievementLegendDesc;
+
+  /// No description provided for @achievementPerfectionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfectionist'**
+  String get achievementPerfectionist;
+
+  /// No description provided for @achievementPerfectionistDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get a perfect score'**
+  String get achievementPerfectionistDesc;
+
+  /// No description provided for @achievementFlawlessTrio.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect trio'**
+  String get achievementFlawlessTrio;
+
+  /// No description provided for @achievementFlawlessTrioDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 3 perfect scores'**
+  String get achievementFlawlessTrioDesc;
+
+  /// No description provided for @achievementPerfectFive.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect hand'**
+  String get achievementPerfectFive;
+
+  /// No description provided for @achievementPerfectFiveDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 5 perfect scores'**
+  String get achievementPerfectFiveDesc;
+
+  /// No description provided for @achievementPerfectTen.
+  ///
+  /// In en, this message translates to:
+  /// **'Absolute perfection'**
+  String get achievementPerfectTen;
+
+  /// No description provided for @achievementPerfectTenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 10 perfect scores'**
+  String get achievementPerfectTenDesc;
+
+  /// No description provided for @achievementPerfectMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect master'**
+  String get achievementPerfectMaster;
+
+  /// No description provided for @achievementPerfectMasterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Get 20 perfect scores'**
+  String get achievementPerfectMasterDesc;
+
+  /// No description provided for @achievementDailyPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily player'**
+  String get achievementDailyPlayer;
+
+  /// No description provided for @achievementDailyPlayerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 3 days in a row'**
+  String get achievementDailyPlayerDesc;
+
+  /// No description provided for @achievementCommitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Committed'**
+  String get achievementCommitted;
+
+  /// No description provided for @achievementCommittedDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 5 days in a row'**
+  String get achievementCommittedDesc;
+
+  /// No description provided for @achievementWeeklyWarrior.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly warrior'**
+  String get achievementWeeklyWarrior;
+
+  /// No description provided for @achievementWeeklyWarriorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 7 days in a row'**
+  String get achievementWeeklyWarriorDesc;
+
+  /// No description provided for @achievementTwoWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'Fortnight fighter'**
+  String get achievementTwoWeeks;
+
+  /// No description provided for @achievementTwoWeeksDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 14 days in a row'**
+  String get achievementTwoWeeksDesc;
+
+  /// No description provided for @achievementMonthlyMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly master'**
+  String get achievementMonthlyMaster;
+
+  /// No description provided for @achievementMonthlyMasterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play 30 days in a row'**
+  String get achievementMonthlyMasterDesc;
+
+  /// No description provided for @achievementInfiniteBeginner.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite beginner'**
+  String get achievementInfiniteBeginner;
+
+  /// No description provided for @achievementInfiniteBeginnerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 25 infinite mode exercises'**
+  String get achievementInfiniteBeginnerDesc;
+
+  /// No description provided for @achievementInfiniteExplorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite explorer'**
+  String get achievementInfiniteExplorer;
+
+  /// No description provided for @achievementInfiniteExplorerDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 50 infinite mode exercises'**
+  String get achievementInfiniteExplorerDesc;
+
+  /// No description provided for @achievementInfiniteWarrior.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite warrior'**
+  String get achievementInfiniteWarrior;
+
+  /// No description provided for @achievementInfiniteWarriorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 100 infinite mode exercises'**
+  String get achievementInfiniteWarriorDesc;
+
+  /// No description provided for @achievementInfiniteMaster.
+  ///
+  /// In en, this message translates to:
+  /// **'Master of infinity'**
+  String get achievementInfiniteMaster;
+
+  /// No description provided for @achievementInfiniteMasterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 200 infinite mode exercises'**
+  String get achievementInfiniteMasterDesc;
+
+  /// No description provided for @achievementNightOwl.
+  ///
+  /// In en, this message translates to:
+  /// **'Night owl'**
+  String get achievementNightOwl;
+
+  /// No description provided for @achievementNightOwlDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play between midnight and 6 AM'**
+  String get achievementNightOwlDesc;
+
+  /// No description provided for @achievementEarlyBird.
+  ///
+  /// In en, this message translates to:
+  /// **'Early bird'**
+  String get achievementEarlyBird;
+
+  /// No description provided for @achievementEarlyBirdDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play between 5 AM and 7 AM'**
+  String get achievementEarlyBirdDesc;
+
+  /// No description provided for @achievementWeekendWarrior.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekend warrior'**
+  String get achievementWeekendWarrior;
+
+  /// No description provided for @achievementWeekendWarriorDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Play every weekend for a month'**
+  String get achievementWeekendWarriorDesc;
+
+  /// No description provided for @achievementLuckySeven.
+  ///
+  /// In en, this message translates to:
+  /// **'Lucky seven'**
+  String get achievementLuckySeven;
+
+  /// No description provided for @achievementLuckySevenDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Solve 777 exercises'**
+  String get achievementLuckySevenDesc;
+
+  /// No description provided for @notifMotivational1.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to make some mathematical magic! ✨'**
+  String get notifMotivational1;
+
+  /// No description provided for @notifMotivational2.
+  ///
+  /// In en, this message translates to:
+  /// **'Your number friends are waiting for you! 🔢'**
+  String get notifMotivational2;
+
+  /// No description provided for @notifMotivational3.
+  ///
+  /// In en, this message translates to:
+  /// **'Come discover new math challenges! 🎯'**
+  String get notifMotivational3;
+
+  /// No description provided for @notifMotivational4.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s time to become a math superhero! 🦸‍♂️'**
+  String get notifMotivational4;
+
+  /// No description provided for @notifMotivational5.
+  ///
+  /// In en, this message translates to:
+  /// **'The equations are calling! Ready to play? 🎮'**
+  String get notifMotivational5;
+
+  /// No description provided for @notifMotivational6.
+  ///
+  /// In en, this message translates to:
+  /// **'Transform yourself into a math genius! 🧠'**
+  String get notifMotivational6;
+
+  /// No description provided for @notifMotivational7.
+  ///
+  /// In en, this message translates to:
+  /// **'A new math adventure awaits you! 🌟'**
+  String get notifMotivational7;
+
+  /// No description provided for @notifMotivational8.
+  ///
+  /// In en, this message translates to:
+  /// **'Come show your math talents! 💪'**
+  String get notifMotivational8;
+
+  /// No description provided for @notifMotivational9.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go for a fun math session! 🎉'**
+  String get notifMotivational9;
+
+  /// No description provided for @notifMotivational10.
+  ///
+  /// In en, this message translates to:
+  /// **'Your neurons want to calculate! 🧮'**
+  String get notifMotivational10;
+
+  /// No description provided for @notifMotivational11.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers have prepared surprises for you! 🎁'**
+  String get notifMotivational11;
+
+  /// No description provided for @notifMotivational12.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to solve math mysteries? 🔍'**
+  String get notifMotivational12;
+
+  /// No description provided for @notifMotivational13.
+  ///
+  /// In en, this message translates to:
+  /// **'Time to make your brain shine! ✨'**
+  String get notifMotivational13;
+
+  /// No description provided for @notifMotivational14.
+  ///
+  /// In en, this message translates to:
+  /// **'Come collect new achievements! 🏆'**
+  String get notifMotivational14;
+
+  /// No description provided for @notifMotivational15.
+  ///
+  /// In en, this message translates to:
+  /// **'A dose of math to start well! ☀️'**
+  String get notifMotivational15;
+
+  /// No description provided for @notifMotivational16.
+  ///
+  /// In en, this message translates to:
+  /// **'A new lesson awaits you! 🌟'**
+  String get notifMotivational16;
+
+  /// No description provided for @notifMotivational17.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready for your learning session? 💫'**
+  String get notifMotivational17;
+
+  /// No description provided for @notifAchievement1.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Psst... A new trophy might be waiting for you!'**
+  String get notifAchievement1;
+
+  /// No description provided for @notifAchievement2.
+  ///
+  /// In en, this message translates to:
+  /// **'🥇 Come unlock your next Expert badge!'**
+  String get notifAchievement2;
+
+  /// No description provided for @notifAchievement3.
+  ///
+  /// In en, this message translates to:
+  /// **'🚀 You\'re close to the goal! Come progress in your achievements.'**
+  String get notifAchievement3;
+
+  /// No description provided for @notifAchievement4.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 Keep the pace! New rewards are available.'**
+  String get notifAchievement4;
+
+  /// No description provided for @notifAchievement5.
+  ///
+  /// In en, this message translates to:
+  /// **'👑 Become the King of the category today!'**
+  String get notifAchievement5;
+
+  /// No description provided for @notifAchievement6.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 Objective in sight: Come complete your missions!'**
+  String get notifAchievement6;
+
+  /// No description provided for @notifAchievement7.
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 Your badges feel lonely... Come earn more!'**
+  String get notifAchievement7;
+
+  /// No description provided for @notifAchievement8.
+  ///
+  /// In en, this message translates to:
+  /// **'💪 Show us your talents and earn lives!'**
+  String get notifAchievement8;
+
+  /// No description provided for @notifDailyChallenge1.
+  ///
+  /// In en, this message translates to:
+  /// **'⏰ Today\'s challenge expires soon! Don\'t miss it!'**
+  String get notifDailyChallenge1;
+
+  /// No description provided for @notifDailyChallenge2.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 A crispy challenge awaits you today!'**
+  String get notifDailyChallenge2;
+
+  /// No description provided for @notifDailyChallenge3.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 Your daily challenge is ready! Come conquer it!'**
+  String get notifDailyChallenge3;
+
+  /// No description provided for @notifDailyChallenge4.
+  ///
+  /// In en, this message translates to:
+  /// **'⭐ Earn stars with today\'s challenge!'**
+  String get notifDailyChallenge4;
+
+  /// No description provided for @notifDailyChallenge5.
+  ///
+  /// In en, this message translates to:
+  /// **'🚀 Today\'s challenge will boost your ranking!'**
+  String get notifDailyChallenge5;
+
+  /// No description provided for @notifDailyChallenge6.
+  ///
+  /// In en, this message translates to:
+  /// **'💎 A unique challenge for you today! Go!'**
+  String get notifDailyChallenge6;
+
+  /// No description provided for @notifDailyChallenge7.
+  ///
+  /// In en, this message translates to:
+  /// **'🎪 Today\'s challenge is here! Your turn to play!'**
+  String get notifDailyChallenge7;
+
+  /// No description provided for @notifDailyChallenge8.
+  ///
+  /// In en, this message translates to:
+  /// **'⚡ Flash challenge: Show what you\'re worth today!'**
+  String get notifDailyChallenge8;
+
+  /// No description provided for @notifDailyChallenge9.
+  ///
+  /// In en, this message translates to:
+  /// **'🎁 Today\'s gift: A super challenge just for you!'**
+  String get notifDailyChallenge9;
+
+  /// No description provided for @notifDailyChallenge10.
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 Complete the challenge and shine on the leaderboard!'**
+  String get notifDailyChallenge10;
+
+  /// No description provided for @notifLeaderboard1.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Don\'t let {name} beat your record!'**
+  String notifLeaderboard1(Object name);
+
+  /// No description provided for @notifLeaderboard2.
+  ///
+  /// In en, this message translates to:
+  /// **'👑 {name} is ahead of you! Catch up!'**
+  String notifLeaderboard2(Object name);
+
+  /// No description provided for @notifLeaderboard3.
+  ///
+  /// In en, this message translates to:
+  /// **'⚔️ Duel at the top with {name}! Who will be #1?'**
+  String notifLeaderboard3(Object name);
+
+  /// No description provided for @notifLeaderboard4.
+  ///
+  /// In en, this message translates to:
+  /// **'🥇 {name} got a perfect score! Your turn to do better!'**
+  String notifLeaderboard4(Object name);
+
+  /// No description provided for @notifLeaderboard5.
+  ///
+  /// In en, this message translates to:
+  /// **'📈 {name} is climbing fast! Defend your position!'**
+  String notifLeaderboard5(Object name);
+
+  /// No description provided for @notifLeaderboard6.
+  ///
+  /// In en, this message translates to:
+  /// **'💪 {name} is just ahead of you! Surpass them!'**
+  String notifLeaderboard6(Object name);
+
+  /// No description provided for @notifLeaderboard7.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 {name} is aiming for the podium, and you?'**
+  String notifLeaderboard7(Object name);
+
+  /// No description provided for @notifLeaderboard8.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 {name} earned 3 stars! Match their score!'**
+  String notifLeaderboard8(Object name);
+
+  /// No description provided for @notifLeaderboard9.
+  ///
+  /// In en, this message translates to:
+  /// **'⭐ {name} shines on the leaderboard! Show your talent!'**
+  String notifLeaderboard9(Object name);
+
+  /// No description provided for @notifLeaderboard10.
+  ///
+  /// In en, this message translates to:
+  /// **'🚀 {name} is launched! Don\'t get left behind!'**
+  String notifLeaderboard10(Object name);
+
+  /// No description provided for @notifChannelAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Trophy Reminders'**
+  String get notifChannelAchievements;
+
+  /// No description provided for @notifChannelAchievementsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders to unlock achievements and badges'**
+  String get notifChannelAchievementsDesc;
+
+  /// No description provided for @notifChannelDailyChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Challenge'**
+  String get notifChannelDailyChallenge;
+
+  /// No description provided for @notifChannelDailyChallengeDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders for the daily challenge'**
+  String get notifChannelDailyChallengeDesc;
+
+  /// No description provided for @notifChannelLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get notifChannelLeaderboard;
+
+  /// No description provided for @notifChannelLeaderboardDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders to climb the leaderboard'**
+  String get notifChannelLeaderboardDesc;
+
+  /// No description provided for @notifChannelLives.
+  ///
+  /// In en, this message translates to:
+  /// **'Lives Refilled'**
+  String get notifChannelLives;
+
+  /// No description provided for @notifChannelLivesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications when lives are full'**
+  String get notifChannelLivesDesc;
+
+  /// No description provided for @notifChannelImmediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediate notifications'**
+  String get notifChannelImmediate;
+
+  /// No description provided for @notifTitleAchievements.
+  ///
+  /// In en, this message translates to:
+  /// **'New achievements available! 🏆'**
+  String get notifTitleAchievements;
+
+  /// No description provided for @notifTitleDailyChallenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Challenge available! 🎯'**
+  String get notifTitleDailyChallenge;
+
+  /// No description provided for @notifTitleLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Climb the leaderboard! 🏅'**
+  String get notifTitleLeaderboard;
+
+  /// No description provided for @notifTitleLivesRefilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Lives at max! ❤️'**
+  String get notifTitleLivesRefilled;
+
+  /// No description provided for @notifBodyLivesRefilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Hey {name}, your lives are refilled! Come play! 🎮'**
+  String notifBodyLivesRefilled(Object name);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
@@ -2751,7 +3457,7 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'fr'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es', 'fr', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -2763,7 +3469,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
     case 'en': return AppLocalizationsEn();
+    case 'es': return AppLocalizationsEs();
     case 'fr': return AppLocalizationsFr();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(

@@ -54,7 +54,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                 _buildHeader(context, l10n),
                 const SizedBox(height: 30),
                 Expanded(
-                  child: Padding(
+                  child: SingleChildScrollView( // 🆕 Ajout du scroll pour 4 langues
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +67,10 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 10),
+
+
+                        // 🇫🇷 FRANÇAIS
                         _buildLanguageOption(
                           context,
                           'Français',
@@ -76,6 +79,8 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                           '🇫🇷',
                         ),
                         const SizedBox(height: 20),
+
+                        // 🇬🇧 ANGLAIS
                         _buildLanguageOption(
                           context,
                           'English',
@@ -83,6 +88,95 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                           localizationService.isEnglish(),
                           '🇬🇧',
                         ),
+                        const SizedBox(height: 20),
+
+                        // 🇪🇸 ESPAGNOL 🆕 NOUVEAU
+                        _buildLanguageOption(
+                          context,
+                          'Español',
+                          'es',
+                          localizationService.isSpanish(),
+                          '🇪🇸',
+                        ),
+                        const SizedBox(height: 20),
+
+                        // 🇨🇳 CHINOIS
+                        _buildLanguageOption(
+                          context,
+                          '中文',
+                          'zh',
+                          localizationService.isChinese(),
+                          '🇨🇳',
+                        ),
+                        const SizedBox(height: 20),
+
+                        // 🆕 SECTION LANGUES À VENIR
+
+
+                        // 🆕 LANGUES À VENIR
+                        _buildComingSoonLanguage(
+                          context,
+                          'Deutsch',
+                          '🇩🇪',
+                          'Bald verfügbar', // "Coming Soon" en allemand
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          'Italiano',
+                          '🇮🇹',
+                          'Presto disponibile', // "Coming Soon" en italien
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          'Português',
+                          '🇵🇹',
+                          'Em breve', // "Coming Soon" en portugais
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          'العربية',
+                          '🇸🇦',
+                          'قريباً', // "Coming Soon" en arabe
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          'हिन्दी',
+                          '🇮🇳',
+                          'जल्द आ रहा है', // "Coming Soon" en hindi
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          '日本語',
+                          '🇯🇵',
+                          '近日公開', // "Coming Soon" en japonais
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          '한국어',
+                          '🇰🇷',
+                          '곧 출시', // "Coming Soon" en coréen
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildComingSoonLanguage(
+                          context,
+                          'Русский',
+                          '🇷🇺',
+                          'Скоро', // "Coming Soon" en russe
+                        ),
+                        const SizedBox(height: 40), // Espace en bas
                       ],
                     ),
                   ),
@@ -129,7 +223,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
                   ),
                 ),
                 Text(
-                  AppLocalizations.of(context)!.chooseYourLanguage,
+                  l10n.chooseYourLanguage,
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.textSecondary,
@@ -144,7 +238,13 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
     );
   }
 
-  Widget _buildLanguageOption(BuildContext context, String languageName, String languageCode, bool isSelected, String flag) {
+  Widget _buildLanguageOption(
+      BuildContext context,
+      String languageName,
+      String languageCode,
+      bool isSelected,
+      String flag,
+      ) {
     final l10n = AppLocalizations.of(context)!;
 
     return GestureDetector(
@@ -157,7 +257,7 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
         // Show confirmation
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${l10n.language} ${languageName.toLowerCase()} ${l10n.save.toLowerCase()}'),
+            content: Text('${l10n.language} $languageName ${l10n.save.toLowerCase()}'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -241,6 +341,87 @@ class _LanguageSettingsScreenState extends State<LanguageSettingsScreen> {
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildComingSoonLanguage(
+      BuildContext context,
+      String languageName,
+      String flag,
+      String comingSoonText,
+      ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.15),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Center(
+              child: Text(
+                flag,
+                style: const TextStyle(fontSize: 28),
+              ),
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  languageName,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    comingSoonText,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.lock_outline,
+              color: Colors.white.withOpacity(0.5),
+              size: 20,
+            ),
+          ),
+        ],
       ),
     );
   }

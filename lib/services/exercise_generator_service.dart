@@ -9,6 +9,11 @@ class ExerciseGeneratorService {
   final Random _random = Random();
 
 
+  // Méthode pour sélectionner la clé selon la langue
+  String _getApiKey(String language) {
+    return (language == 'es' || language == 'zh') ? _apiKeyEsZh : _apiKeyFrEn;
+  }
+
   // Cache pour optimiser les performances
   final Map<String, List<Exercise>> _cache = {};
   static const int _cacheMaxSize = 100;
@@ -19,8 +24,9 @@ class ExerciseGeneratorService {
     required String theme,
     int count = 20,
     bool useAI = true,
+    String language = 'fr', // 🆕 PARAMÈTRE LANGUE
   }) async {
-    final cacheKey = '$level-$theme-$count';
+    final cacheKey = '$level-$theme-$count-$language'; // 🆕 Inclure la langue dans la clé
 
     // Vérifier le cache
     if (_cache.containsKey(cacheKey) && _cache[cacheKey]!.length >= count) {
@@ -32,10 +38,10 @@ class ExerciseGeneratorService {
 
       if (useAI && count > 10) {
         // Utiliser l'IA pour les grandes séries
-        exercises = await _generateWithAI(level, theme, count);
+        exercises = await _generateWithAI(level, theme, count, language); // 🆕 Passer la langue
       } else {
         // Génération locale pour les petites séries
-        exercises = _generateLocally(level, theme, count);
+        exercises = _generateLocally(level, theme, count, language); // 🆕 Passer la langue
       }
 
       // Mettre en cache
@@ -44,19 +50,19 @@ class ExerciseGeneratorService {
       return exercises;
     } catch (e) {
       print('⚠️ Erreur génération AI, fallback local: $e');
-      return _generateLocally(level, theme, count);
+      return _generateLocally(level, theme, count, language); // 🆕 Passer la langue
     }
   }
 
   /// Génération avec l'API Groq (IA)
-  Future<List<Exercise>> _generateWithAI(String level, String theme, int count) async {
+  Future<List<Exercise>> _generateWithAI(String level, String theme, int count, String language) async {
     try {
-      final prompt = _buildPrompt(level, theme, count);
+      final prompt = _buildPrompt(level, theme, count, language); // 🆕 Passer la langue
 
       final response = await http.post(
         Uri.parse(_baseUrl),
         headers: {
-          'Authorization': 'Bearer $_apiKey',
+          'Authorization': 'Bearer ${_getApiKey(language)}',
           'Content-Type': 'application/json',
         },
         body: json.encode({
@@ -64,7 +70,10 @@ class ExerciseGeneratorService {
           'messages': [
             {
               'role': 'system',
-              'content': 'Tu es un expert en pédagogie mathématique. Tu génères des exercices adaptés au niveau scolaire français.'
+              // 🆕 SYSTEM PROMPT ADAPTÉ À LA LANGUE
+              'content': language == 'en'
+                  ? 'You are a math education expert. You generate exercises adapted to school levels.'
+                  : 'Tu es un expert en pédagogie mathématique. Tu génères des exercices adaptés au niveau scolaire.'
             },
             {
               'role': 'user',
@@ -90,8 +99,95 @@ class ExerciseGeneratorService {
   }
 
   /// Construit le prompt pour l'IA
-  String _buildPrompt(String level, String theme, int count) {
-    return '''
+  String _buildPrompt(String level, String theme, int count, String language) {
+    // 🆕 PROMPT MULTILINGUE
+    if (language == 'en') {
+      return '''
+Generate exactly $count math exercises for level "$level" on the theme "$theme".
+
+REQUIRED FORMAT (strict JSON):
+[
+  {
+    "question": "Clear math question",
+    "options": ["Answer A", "Answer B", "Answer C", "Answer D"],
+    "correctAnswer": 0
+  }
+]
+
+STRICT RULES:
+1. Exactly 4 answer options per question
+2. correctAnswer is the INDEX (0, 1, 2 or 3) of the correct answer
+3. Questions adapted to level $level
+4. Use realistic numerical values
+5. Mix the positions of the correct answer
+6. Make wrong answers plausible
+7. For exponents, use the format: x^2, 3^4, etc.
+8. No complicated special symbols
+
+Specific theme: $theme
+Level: $level
+
+Return only the JSON, without additional text.
+''';
+    } else if (language == 'es') {
+      return '''
+Genera exactamente $count ejercicios de matemáticas para el nivel "$level" en el tema "$theme".
+
+FORMATO REQUERIDO (JSON estricto):
+[
+  {
+    "question": "Pregunta matemática clara",
+    "options": ["Respuesta A", "Respuesta B", "Respuesta C", "Respuesta D"],
+    "correctAnswer": 0
+  }
+]
+
+REGLAS ESTRICTAS:
+1. Exactamente 4 opciones de respuesta por pregunta
+2. correctAnswer es el ÍNDICE (0, 1, 2 o 3) de la respuesta correcta
+3. Preguntas adaptadas al nivel $level
+4. Usa valores numéricos realistas
+5. Mezcla las posiciones de la respuesta correcta
+6. Haz que las respuestas incorrectas sean plausibles
+7. Para exponentes, usa el formato: x^2, 3^4, etc.
+8. Sin símbolos especiales complicados
+
+Tema específico: $theme
+Nivel: $level
+
+Devuelve solo el JSON, sin texto adicional.
+''';
+    } else if (language == 'zh') {
+      return '''
+为级别 "$level" 的主题 "$theme" 生成正好 $count 个数学练习。
+
+必需格式（严格 JSON）：
+[
+  {
+    "question": "清晰的数学问题",
+    "options": ["答案 A", "答案 B", "答案 C", "答案 D"],
+    "correctAnswer": 0
+  }
+]
+
+严格规则：
+1. 每个问题正好 4 个答案选项
+2. correctAnswer 是正确答案的索引（0、1、2 或 3）
+3. 问题适应级别 $level
+4. 使用现实的数值
+5. 混合正确答案的位置
+6. 使错误答案看似合理
+7. 对于指数，使用格式：x^2, 3^4 等
+8. 没有复杂的特殊符号
+
+具体主题：$theme
+级别：$level
+
+只返回 JSON，没有额外文本。
+''';
+    } else {
+      // Par défaut français
+      return '''
 Génère exactement $count exercices de mathématiques pour le niveau "$level" sur le thème "$theme".
 
 FORMAT OBLIGATOIRE (JSON strict):
@@ -118,6 +214,7 @@ Niveau: $level
 
 Retourne uniquement le JSON, sans texte additionnel.
 ''';
+    }
   }
 
   /// Parse la réponse de l'IA
@@ -150,42 +247,84 @@ Retourne uniquement le JSON, sans texte additionnel.
   }
 
   /// Génération locale (fallback et petites séries)
-  List<Exercise> _generateLocally(String level, String theme, int count) {
-    switch (theme.toLowerCase()) {
+  List<Exercise> _generateLocally(String level, String theme, int count, String language) {
+    // 🆕 Normaliser le thème pour supporter les deux langues
+    final normalizedTheme = _normalizeTheme(theme, language);
+
+    switch (normalizedTheme) {
     // === PRIMAIRE ===
       case 'addition':
-        return _generateAdditionExercises(level, count);
-      case 'soustraction':
-        return _generateSubtractionExercises(level, count);
+        return _generateAdditionExercises(level, count, language);
+      case 'subtraction':
+        return _generateSubtractionExercises(level, count, language);
       case 'multiplication':
-        return _generateMultiplicationExercises(level, count);
+        return _generateMultiplicationExercises(level, count, language);
       case 'division':
-        return _generateDivisionExercises(level, count);
-      case 'géométrie':
-        return _generateGeometryExercises(level, count);
+        return _generateDivisionExercises(level, count, language);
+      case 'geometry':
+        return _generateGeometryExercises(level, count, language);
 
     // === COLLÈGE ===
-      case 'nombres relatifs':
-        return _generateRelativeNumbersExercises(level, count);
+      case 'relative_numbers':
+        return _generateRelativeNumbersExercises(level, count, language);
       case 'fractions':
-        return _generateFractionsExercises(level, count);
-      case 'algèbre':
-        return _generateAlgebraExercises(level, count);
-      case 'puissances':
-        return _generatePowerExercises(level, count);
-      case 'théorèmes':
-        return _generateTheoremExercises(level, count);
-      case 'statistiques':
-        return _generateStatisticsExercises(level, count);
+        return _generateFractionsExercises(level, count, language);
+      case 'algebra':
+        return _generateAlgebraExercises(level, count, language);
+      case 'powers':
+        return _generatePowerExercises(level, count, language);
+      case 'theorems':
+        return _generateTheoremExercises(level, count, language);
+      case 'statistics':
+        return _generateStatisticsExercises(level, count, language);
 
       default:
-        return _generateAdditionExercises(level, count);
+        return _generateAdditionExercises(level, count, language);
     }
+  }
+
+  // 🆕 FONCTION POUR NORMALISER LES NOMS DE THÈMES
+  String _normalizeTheme(String theme, String language) {
+    final themeLower = theme.toLowerCase();
+
+    // Map français → anglais normalisé
+    final frenchMap = {
+      'addition': 'addition',
+      'soustraction': 'subtraction',
+      'multiplication': 'multiplication',
+      'division': 'division',
+      'géométrie': 'geometry',
+      'nombres relatifs': 'relative_numbers',
+      'fractions': 'fractions',
+      'algèbre': 'algebra',
+      'puissances': 'powers',
+      'théorèmes': 'theorems',
+      'statistiques': 'statistics',
+    };
+
+    // Map anglais → normalisé
+    final englishMap = {
+      'addition': 'addition',
+      'subtraction': 'subtraction',
+      'multiplication': 'multiplication',
+      'division': 'division',
+      'geometry': 'geometry',
+      'relative numbers': 'relative_numbers',
+      'fractions': 'fractions',
+      'algebra': 'algebra',
+      'powers': 'powers',
+      'theorems': 'theorems',
+      'statistics': 'statistics',
+    };
+
+    return language == 'en'
+        ? (englishMap[themeLower] ?? 'addition')
+        : (frenchMap[themeLower] ?? 'addition');
   }
 
   // ========== PRIMAIRE ==========
 
-  List<Exercise> _generateAdditionExercises(String level, int count) {
+  List<Exercise> _generateAdditionExercises(String level, int count, String language) {
     final range = _getRangeForLevel(level);
     List<Exercise> exercises = [];
 
@@ -214,7 +353,7 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateSubtractionExercises(String level, int count) {
+  List<Exercise> _generateSubtractionExercises(String level, int count, String language) {
     final range = _getRangeForLevel(level);
     List<Exercise> exercises = [];
 
@@ -243,7 +382,7 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateMultiplicationExercises(String level, int count) {
+  List<Exercise> _generateMultiplicationExercises(String level, int count, String language) {
     final maxFactor = _getMultiplicationRange(level);
     List<Exercise> exercises = [];
 
@@ -272,13 +411,13 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateDivisionExercises(String level, int count) {
-    final maxDivisor = _getMultiplicationRange(level);
+  List<Exercise> _generateDivisionExercises(String level, int count, String language) {
+    final range = _getRangeForLevel(level);
     List<Exercise> exercises = [];
 
     for (int i = 0; i < count; i++) {
-      final divisor = _random.nextInt(maxDivisor - 1) + 2;
-      final quotient = _random.nextInt(maxDivisor) + 1;
+      final divisor = _random.nextInt(min(range ~/ 2, 12)) + 2;
+      final quotient = _random.nextInt(min(range ~/ divisor, 20)) + 1;
       final dividend = divisor * quotient;
       final correctAnswer = quotient;
 
@@ -302,19 +441,44 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateGeometryExercises(String level, int count) {
-    final geometryQuestions = [
-      {'q': 'Combien de côtés a un triangle ?', 'a': '3', 'w': ['4', '5', '2']},
-      {'q': 'Combien d\'angles droits a un carré ?', 'a': '4', 'w': ['3', '2', '5']},
-      {'q': 'Combien de faces a un cube ?', 'a': '6', 'w': ['8', '12', '4']},
-      {'q': 'Un rectangle a combien de côtés ?', 'a': '4', 'w': ['3', '5', '6']},
-      {'q': 'Combien de sommets a un hexagone ?', 'a': '6', 'w': ['5', '7', '8']},
-      {'q': 'Un cercle a combien de côtés ?', 'a': '0', 'w': ['1', '2', 'Infini']},
-      {'q': 'Combien d\'arêtes a un cube ?', 'a': '12', 'w': ['6', '8', '10']},
-      {'q': 'Un pentagone a combien de côtés ?', 'a': '5', 'w': ['4', '6', '7']},
+  List<Exercise> _generateGeometryExercises(String level, int count, String language) {
+    List<Exercise> exercises = [];
+
+    // 🆕 Questions bilingues
+    final geometryQuestions = language == 'en' ? [
+      {
+        'q': 'How many sides does a triangle have?',
+        'a': '3',
+        'w': ['4', '5', '6']
+      },
+      {
+        'q': 'How many sides does a square have?',
+        'a': '4',
+        'w': ['3', '5', '6']
+      },
+      {
+        'q': 'How many angles does a rectangle have?',
+        'a': '4',
+        'w': ['3', '5', '2']
+      },
+    ] : [
+      {
+        'q': 'Combien de côtés a un triangle ?',
+        'a': '3',
+        'w': ['4', '5', '6']
+      },
+      {
+        'q': 'Combien de côtés a un carré ?',
+        'a': '4',
+        'w': ['3', '5', '6']
+      },
+      {
+        'q': 'Combien d\'angles a un rectangle ?',
+        'a': '4',
+        'w': ['3', '5', '2']
+      },
     ];
 
-    List<Exercise> exercises = [];
     for (int i = 0; i < count; i++) {
       final q = geometryQuestions[_random.nextInt(geometryQuestions.length)];
       final answer = q['a'] as String;
@@ -322,12 +486,11 @@ Retourne uniquement le JSON, sans texte additionnel.
 
       final allOptions = [answer, ...wrong];
       allOptions.shuffle(_random);
-      final correctIndex = allOptions.indexOf(answer);
 
       exercises.add(Exercise(
         question: q['q'] as String,
         options: allOptions,
-        correctAnswer: correctIndex,
+        correctAnswer: allOptions.indexOf(answer),
       ));
     }
 
@@ -336,127 +499,137 @@ Retourne uniquement le JSON, sans texte additionnel.
 
   // ========== COLLÈGE ==========
 
-  List<Exercise> _generateRelativeNumbersExercises(String level, int count) {
+  List<Exercise> _generateRelativeNumbersExercises(String level, int count, String language) {
     List<Exercise> exercises = [];
 
     for (int i = 0; i < count; i++) {
-      final a = _random.nextInt(30) - 15; // -15 à 14
-      final b = _random.nextInt(30) - 15;
-      final operation = _random.nextInt(2); // 0: addition, 1: soustraction
+      final a = _random.nextInt(20) - 10;
+      final b = _random.nextInt(20) - 10;
+      final type = _random.nextInt(2);
 
-      int correctAnswer;
-      String operator;
+      if (type == 0) {
+        final correctAnswer = a + b;
+        final wrongAnswers = _generatePlausibleWrongAnswers(
+          correctAnswer,
+          min: correctAnswer - 5,
+          max: correctAnswer + 5,
+        );
 
-      if (operation == 0) {
-        correctAnswer = a + b;
-        operator = '+';
+        final allOptions = [correctAnswer.toString(), ...wrongAnswers];
+        allOptions.shuffle(_random);
+
+        exercises.add(Exercise(
+          question: '($a) + ($b) = ?',
+          options: allOptions,
+          correctAnswer: allOptions.indexOf(correctAnswer.toString()),
+        ));
       } else {
-        correctAnswer = a - b;
-        operator = '-';
+        final correctAnswer = a - b;
+        final wrongAnswers = _generatePlausibleWrongAnswers(
+          correctAnswer,
+          min: correctAnswer - 5,
+          max: correctAnswer + 5,
+        );
+
+        final allOptions = [correctAnswer.toString(), ...wrongAnswers];
+        allOptions.shuffle(_random);
+
+        exercises.add(Exercise(
+          question: '($a) - ($b) = ?',
+          options: allOptions,
+          correctAnswer: allOptions.indexOf(correctAnswer.toString()),
+        ));
       }
-
-      final aStr = a < 0 ? '($a)' : '$a';
-      final bStr = b < 0 ? '($b)' : '$b';
-
-      final wrongAnswers = _generatePlausibleWrongAnswers(
-        correctAnswer,
-        min: correctAnswer - 8,
-        max: correctAnswer + 8,
-      );
-
-      final allOptions = [correctAnswer.toString(), ...wrongAnswers];
-      allOptions.shuffle(_random);
-      final correctIndex = allOptions.indexOf(correctAnswer.toString());
-
-      exercises.add(Exercise(
-        question: '$aStr $operator $bStr = ?',
-        options: allOptions,
-        correctAnswer: correctIndex,
-      ));
     }
 
     return exercises;
   }
 
-  List<Exercise> _generateFractionsExercises(String level, int count) {
+  List<Exercise> _generateFractionsExercises(String level, int count, String language) {
     List<Exercise> exercises = [];
 
     for (int i = 0; i < count; i++) {
       final type = _random.nextInt(3);
 
       if (type == 0) {
-        // Simplification
-        final num = _random.nextInt(12) + 2;
-        final den = _random.nextInt(12) + 3;
-        final gcd = _gcd(num, den);
-        final simpNum = num ~/ gcd;
-        final simpDen = den ~/ gcd;
+        final num1 = _random.nextInt(9) + 1;
+        final den1 = _random.nextInt(9) + 2;
+        final num2 = _random.nextInt(9) + 1;
+        final den2 = den1;
 
-        final correctAnswer = simpDen == 1 ? '$simpNum' : '$simpNum/$simpDen';
+        final sumNum = num1 + num2;
+        final gcd = _gcd(sumNum, den1);
+        final simplifiedNum = sumNum ~/ gcd;
+        final simplifiedDen = den1 ~/ gcd;
+
+        final correctAnswer = simplifiedDen == 1
+            ? simplifiedNum.toString()
+            : '$simplifiedNum/$simplifiedDen';
+
         final wrongAnswers = [
-          '$num/$den',
-          '${simpNum + 1}/$simpDen',
-          '$simpNum/${simpDen + 1}',
-        ]..removeWhere((w) => w == correctAnswer);
+          '$sumNum/$den1',
+          '${num1 + num2 + 1}/$den1',
+          '${num1 + num2 - 1}/$den1',
+        ];
 
-        final allOptions = [correctAnswer, ...wrongAnswers.take(3)];
+        final allOptions = [correctAnswer, ...wrongAnswers];
         allOptions.shuffle(_random);
 
         exercises.add(Exercise(
-          question: 'Simplifie: $num/$den',
+          question: '$num1/$den1 + $num2/$den2 = ?',
           options: allOptions,
           correctAnswer: allOptions.indexOf(correctAnswer),
         ));
       } else if (type == 1) {
-        // Addition de fractions (même dénominateur)
-        final den = _random.nextInt(8) + 2;
-        final num1 = _random.nextInt(den);
-        final num2 = _random.nextInt(den);
-        final sumNum = num1 + num2;
-        final gcd = _gcd(sumNum, den);
-        final simpNum = sumNum ~/ gcd;
-        final simpDen = den ~/ gcd;
+        final num = _random.nextInt(8) + 1;
+        final den = _random.nextInt(8) + num + 1;
+        final gcd = _gcd(num, den);
+        final simplifiedNum = num ~/ gcd;
+        final simplifiedDen = den ~/ gcd;
 
-        final correctAnswer = simpDen == 1 ? '$simpNum' : '$simpNum/$simpDen';
+        final correctAnswer = simplifiedDen == 1
+            ? simplifiedNum.toString()
+            : '$simplifiedNum/$simplifiedDen';
+
         final wrongAnswers = [
-          '$sumNum/$den',
-          '${num1 + num2}/${den * 2}',
-          '${simpNum + 1}/$simpDen',
-        ]..removeWhere((w) => w == correctAnswer);
+          '$num/$den',
+          '${num ~/ 2}/${den ~/ 2}',
+          '${num + 1}/${den + 1}',
+        ];
 
-        final allOptions = [correctAnswer, ...wrongAnswers.take(3)];
+        final allOptions = [correctAnswer, ...wrongAnswers];
         allOptions.shuffle(_random);
 
+        final questionText = language == 'en'
+            ? 'Simplify $num/$den'
+            : 'Simplifie $num/$den';
+
         exercises.add(Exercise(
-          question: '$num1/$den + $num2/$den = ?',
+          question: questionText,
           options: allOptions,
           correctAnswer: allOptions.indexOf(correctAnswer),
         ));
       } else {
-        // Multiplication de fractions
-        final num1 = _random.nextInt(5) + 1;
-        final den1 = _random.nextInt(5) + 2;
-        final num2 = _random.nextInt(5) + 1;
-        final den2 = _random.nextInt(5) + 2;
+        final num = _random.nextInt(5) + 1;
+        final den = _random.nextInt(5) + 2;
+        final mult = _random.nextInt(5) + 2;
 
-        final resNum = num1 * num2;
-        final resDen = den1 * den2;
-        final gcd = _gcd(resNum, resDen);
-        final simpNum = resNum ~/ gcd;
-        final simpDen = resDen ~/ gcd;
+        final resultNum = num * mult;
+        final resultDen = den;
 
-        final correctAnswer = simpDen == 1 ? '$simpNum' : '$simpNum/$simpDen';
+        final correctAnswer = '$resultNum/$resultDen';
+
         final wrongAnswers = [
-          '$resNum/$resDen',
-          '${simpNum + 1}/$simpDen',
-          '${num1 * den2}/${den1 * num2}',
-        ]..removeWhere((w) => w == correctAnswer);
+          '${num * mult}/${den * mult}',
+          '${num + mult}/$den',
+          '$resultNum/${den * mult}',
+        ];
 
-        final allOptions = [correctAnswer, ...wrongAnswers.take(3)];
+        final allOptions = [correctAnswer, ...wrongAnswers];
         allOptions.shuffle(_random);
 
         exercises.add(Exercise(
-          question: '$num1/$den1 × $num2/$den2 = ?',
+          question: '$num/$den × $mult = ?',
           options: allOptions,
           correctAnswer: allOptions.indexOf(correctAnswer),
         ));
@@ -466,18 +639,35 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateAlgebraExercises(String level, int count) {
+  List<Exercise> _generateAlgebraExercises(String level, int count, String language) {
     List<Exercise> exercises = [];
 
     for (int i = 0; i < count; i++) {
-      final type = _random.nextInt(2);
+      final type = _random.nextInt(3);
 
       if (type == 0) {
-        // Équations simples: ax + b = c
-        final x = _random.nextInt(10) + 1;
+        final a = _random.nextInt(10) + 1;
+        final b = _random.nextInt(20) + 1;
+        final correctAnswer = b - a;
+
+        final wrongAnswers = _generatePlausibleWrongAnswers(
+          correctAnswer,
+          min: max(0, correctAnswer - 5),
+          max: correctAnswer + 5,
+        );
+
+        final allOptions = [correctAnswer.toString(), ...wrongAnswers];
+        allOptions.shuffle(_random);
+
+        exercises.add(Exercise(
+          question: 'x + $a = $b, x = ?',
+          options: allOptions,
+          correctAnswer: allOptions.indexOf(correctAnswer.toString()),
+        ));
+      } else if (type == 1) {
         final a = _random.nextInt(5) + 2;
-        final b = _random.nextInt(15) + 1;
-        final c = a * x + b;
+        final x = _random.nextInt(10) + 1;
+        final b = a * x;
 
         final wrongAnswers = _generatePlausibleWrongAnswers(
           x,
@@ -489,29 +679,28 @@ Retourne uniquement le JSON, sans texte additionnel.
         allOptions.shuffle(_random);
 
         exercises.add(Exercise(
-          question: 'Résous: ${a}x + $b = $c',
+          question: '${a}x = $b, x = ?',
           options: allOptions,
           correctAnswer: allOptions.indexOf(x.toString()),
         ));
       } else {
-        // Développement: a(x + b)
-        final a = _random.nextInt(5) + 2;
+        final a = _random.nextInt(10) + 1;
         final b = _random.nextInt(10) + 1;
+        final c = a + b;
 
-        final correctAnswer = '${a}x + ${a * b}';
-        final wrongAnswers = [
-          '${a}x + $b',
-          '${a + 1}x + ${a * b}',
-          '${a}x + ${a * b + 1}',
-        ];
+        final wrongAnswers = _generatePlausibleWrongAnswers(
+          b,
+          min: max(0, b - 5),
+          max: b + 5,
+        );
 
-        final allOptions = [correctAnswer, ...wrongAnswers];
+        final allOptions = [b.toString(), ...wrongAnswers];
         allOptions.shuffle(_random);
 
         exercises.add(Exercise(
-          question: 'Développe: $a(x + $b)',
+          question: '$a + x = $c, x = ?',
           options: allOptions,
-          correctAnswer: allOptions.indexOf(correctAnswer),
+          correctAnswer: allOptions.indexOf(b.toString()),
         ));
       }
     }
@@ -519,22 +708,21 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generatePowerExercises(String level, int count) {
+  List<Exercise> _generatePowerExercises(String level, int count, String language) {
     List<Exercise> exercises = [];
 
     for (int i = 0; i < count; i++) {
       final type = _random.nextInt(3);
 
       if (type == 0) {
-        // Calcul simple: a^b
         final base = _random.nextInt(5) + 2;
-        final exp = _random.nextInt(3) + 2;
+        final exp = _random.nextInt(4) + 1;
         final correctAnswer = pow(base, exp).toInt();
 
         final wrongAnswers = _generatePlausibleWrongAnswers(
           correctAnswer,
           min: max(1, correctAnswer - 10),
-          max: correctAnswer + 20,
+          max: correctAnswer + 10,
         );
 
         final allOptions = [correctAnswer.toString(), ...wrongAnswers];
@@ -546,7 +734,6 @@ Retourne uniquement le JSON, sans texte additionnel.
           correctAnswer: allOptions.indexOf(correctAnswer.toString()),
         ));
       } else if (type == 1) {
-        // Multiplication: a^m × a^n = a^(m+n)
         final base = _random.nextInt(4) + 2;
         final exp1 = _random.nextInt(4) + 1;
         final exp2 = _random.nextInt(4) + 1;
@@ -555,7 +742,7 @@ Retourne uniquement le JSON, sans texte additionnel.
         final wrongAnswers = [
           (exp1 * exp2).toString(),
           (exp1 + exp2 + 1).toString(),
-          (exp1 - exp2).toString(),
+          (exp1 - exp2).abs().toString(),
         ];
 
         final allOptions = ['$base^$correctAnswer', ...wrongAnswers.map((e) => '$base^$e')];
@@ -567,7 +754,6 @@ Retourne uniquement le JSON, sans texte additionnel.
           correctAnswer: allOptions.indexOf('$base^$correctAnswer'),
         ));
       } else {
-        // Puissance de puissance: (a^m)^n = a^(m×n)
         final base = _random.nextInt(3) + 2;
         final exp1 = _random.nextInt(3) + 2;
         final exp2 = _random.nextInt(3) + 2;
@@ -593,8 +779,30 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateTheoremExercises(String level, int count) {
-    final theoremQuestions = [
+  List<Exercise> _generateTheoremExercises(String level, int count, String language) {
+    // 🆕 Questions bilingues
+    final theoremQuestions = language == 'en' ? [
+      {
+        'q': 'In a right triangle, which theorem allows you to calculate the hypotenuse?',
+        'a': 'Pythagoras',
+        'w': ['Thales', 'Euclid', 'Fermat']
+      },
+      {
+        'q': 'The sum of the angles in a triangle equals?',
+        'a': '180°',
+        'w': ['360°', '90°', '270°']
+      },
+      {
+        'q': 'In triangle ABC right-angled at A, AB² + AC² = ?',
+        'a': 'BC²',
+        'w': ['AB × AC', '2BC', 'BC']
+      },
+      {
+        'q': 'A triangle with a 90° angle is a triangle?',
+        'a': 'Right',
+        'w': ['Equilateral', 'Isosceles', 'Scalene']
+      },
+    ] : [
       {
         'q': 'Dans un triangle rectangle, quel théorème permet de calculer l\'hypoténuse ?',
         'a': 'Pythagore',
@@ -614,16 +822,6 @@ Retourne uniquement le JSON, sans texte additionnel.
         'q': 'Un triangle avec un angle de 90° est un triangle ?',
         'a': 'Rectangle',
         'w': ['Équilatéral', 'Isocèle', 'Scalène']
-      },
-      {
-        'q': 'Si deux droites sont parallèles à une troisième, elles sont ?',
-        'a': 'Parallèles entre elles',
-        'w': ['Perpendiculaires', 'Sécantes', 'Confondues']
-      },
-      {
-        'q': 'Le théorème de Thalès concerne des droites ?',
-        'a': 'Parallèles',
-        'w': ['Perpendiculaires', 'Sécantes', 'Confondues']
       },
     ];
 
@@ -646,14 +844,13 @@ Retourne uniquement le JSON, sans texte additionnel.
     return exercises;
   }
 
-  List<Exercise> _generateStatisticsExercises(String level, int count) {
+  List<Exercise> _generateStatisticsExercises(String level, int count, String language) {
     List<Exercise> exercises = [];
 
     for (int i = 0; i < count; i++) {
       final type = _random.nextInt(3);
 
       if (type == 0) {
-        // Calcul de moyenne
         final values = List.generate(4, (_) => _random.nextInt(20) + 1);
         final sum = values.reduce((a, b) => a + b);
         final mean = (sum / values.length);
@@ -668,13 +865,16 @@ Retourne uniquement le JSON, sans texte additionnel.
         final allOptions = [correctAnswer, ...wrongAnswers];
         allOptions.shuffle(_random);
 
+        final questionText = language == 'en'
+            ? 'Mean of ${values.join(', ')} ?'
+            : 'Moyenne de ${values.join(', ')} ?';
+
         exercises.add(Exercise(
-          question: 'Moyenne de ${values.join(', ')} ?',
+          question: questionText,
           options: allOptions,
           correctAnswer: allOptions.indexOf(correctAnswer),
         ));
       } else if (type == 1) {
-        // Médiane
         final values = List.generate(5, (_) => _random.nextInt(30) + 1)..sort();
         final median = values[2];
 
@@ -687,13 +887,16 @@ Retourne uniquement le JSON, sans texte additionnel.
         final allOptions = [median.toString(), ...wrongAnswers];
         allOptions.shuffle(_random);
 
+        final questionText = language == 'en'
+            ? 'Median of ${values.join(', ')} ?'
+            : 'Médiane de ${values.join(', ')} ?';
+
         exercises.add(Exercise(
-          question: 'Médiane de ${values.join(', ')} ?',
+          question: questionText,
           options: allOptions,
           correctAnswer: allOptions.indexOf(median.toString()),
         ));
       } else {
-        // Étendue
         final values = List.generate(5, (_) => _random.nextInt(30) + 1);
         final min = values.reduce((a, b) => a < b ? a : b);
         final max = values.reduce((a, b) => a > b ? a : b);
@@ -708,8 +911,12 @@ Retourne uniquement le JSON, sans texte additionnel.
         final allOptions = [range.toString(), ...wrongAnswers];
         allOptions.shuffle(_random);
 
+        final questionText = language == 'en'
+            ? 'Range of ${values.join(', ')} ?'
+            : 'Étendue de ${values.join(', ')} ?';
+
         exercises.add(Exercise(
-          question: 'Étendue de ${values.join(', ')} ?',
+          question: questionText,
           options: allOptions,
           correctAnswer: allOptions.indexOf(range.toString()),
         ));

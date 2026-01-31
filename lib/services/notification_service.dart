@@ -1,10 +1,14 @@
 import 'dart:ui';
+import 'package:flutter/material.dart'; // ✅ AJOUTÉ
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart'; // ✅ AJOUTÉ
+import 'package:firebase_messaging/firebase_messaging.dart'; // 🆕 AJOUTÉ POUR FIREBASE MESSAGING
+import 'fcm_topics.dart'; // 🆕 AJOUTÉ POUR LA CONFIGURATION DES TOPICS
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -13,6 +17,9 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
+
+  // 🆕 Firebase Messaging
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   static const String _notificationEnabledKey = 'notifications_enabled';
   static const String _customNotificationsKey = 'custom_notifications';
@@ -27,74 +34,86 @@ class NotificationService {
   static const int _leaderboardReminderId2 = 9004;
   static const int _leaderboardReminderId3 = 9005;
 
-  // Messages motivationnels classiques
-  final List<String> _motivationalMessages = [
-    "Il est temps de faire des mathématiques magiques ! ✨",
-    "Tes amis les chiffres t'attendent ! 🔢",
-    "Viens découvrir de nouveaux défis mathématiques ! 🎯",
-    "C'est l'heure de devenir un super héros des maths ! 🦸‍♂️",
-    "Les équations t'appellent ! Prêt(e) à jouer ? 🎮",
-    "Transforme-toi en génie des mathématiques ! 🧠",
-    "Une nouvelle aventure mathématique t'attend ! 🌟",
-    "Viens montrer tes talents de mathématicien ! 💪",
-    "C'est parti pour une session de maths amusante ! 🎉",
-    "Tes neurones ont envie de calculer ! 🧮",
-    "Les nombres ont préparé des surprises pour toi ! 🎁",
-    "Prêt(e) à résoudre des mystères mathématiques ? 🔍",
-    "Il est temps de faire briller ton cerveau ! ✨",
-    "Viens collectionner de nouveaux succès ! 🏆",
-    "Une dose de maths pour bien commencer ! ☀️",
-    "Une nouvelle leçon t'attend ! 🌟",
-    "Prêt(e) pour ta session d'apprentissage ? 💫"
-  ];
-
-  // Messages spécifiques pour les Achievements
-  final List<String> _achievementMessages = [
-    "🏆 Psst... Un nouveau trophée t'attend peut-être !",
-    "🥇 Viens débloquer ton prochain badge Expert !",
-    "🚀 Tu es proche du but ! Viens progresser dans tes succès.",
-    "🔥 Garde le rythme ! De nouvelles récompenses sont disponibles.",
-    "👑 Deviens le Roi de la catégorie aujourd'hui !",
-    "🎯 Objectif en vue : Viens compléter tes missions !",
-    "🌟 Tes badges se sentent seuls... Viens en gagner d'autres !",
-    "💪 Montre-nous tes talents et gagne des vies !",
-  ];
-
-  // Messages pour les défis quotidiens
-  final List<String> _dailyChallengeMessages = [
-    "⏰ Le défi du jour expire bientôt ! Ne le rate pas !",
-    "🎯 Un défi croustillant t'attend aujourd'hui !",
-    "🔥 Ton défi quotidien est prêt ! Viens le conquérir !",
-    "⭐ Gagne des étoiles avec le défi d'aujourd'hui !",
-    "🚀 Le défi du jour va booster ton classement !",
-    "💎 Un défi unique pour toi aujourd'hui ! Go !",
-    "🎪 Le défi du jour est arrivé ! À toi de jouer !",
-    "⚡ Flash défi : Montre ce que tu vaux aujourd'hui !",
-    "🎁 Cadeau du jour : Un super défi rien que pour toi !",
-    "🌟 Termine le défi et illumine le classement !",
-  ];
-
-  // Messages compétitifs pour les classements
-  final List<String> _leaderboardMessages = [
-    "🏆 Ne laisse pas {name} battre ton record !",
-    "👑 {name} te dépasse au classement ! Rattrape-le !",
-    "⚔️ Duel au sommet avec {name} ! Qui sera n°1 ?",
-    "🥇 {name} a fait un sans-faute ! À toi de faire mieux !",
-    "📈 {name} grimpe vite ! Défends ta position !",
-    "💪 {name} est juste devant toi ! Surpasse-le !",
-    "🎯 {name} vise le podium, et toi ?",
-    "🔥 {name} a gagné 3 étoiles ! Égalise son score !",
-    "⭐ {name} brille au classement ! Montre ton talent !",
-    "🚀 {name} est lancé ! Ne te laisse pas distancer !",
-  ];
-
-  // Noms aléatoires pour les messages compétitifs
+  // ✅ MODIFIÉ : Les listes hardcodées sont remplacées par des méthodes
+  // Noms aléatoires pour les messages compétitifs (inchangés - noms universels)
   final List<String> _randomCompetitorNames = [
     "Emma", "Lucas", "Chloé", "Nathan", "Léa", "Tom",
     "Inès", "Happy", "Jade", "Arthur", "Mékis", "Louis",
     "Zoé", "Ethan", "Lina", "Mathis", "Sarah", "Noah",
     "Camille", "Gabriel", "Lily", "Delali", "Alice", "Adam"
   ];
+
+  // ✅ NOUVEAU : Méthodes pour obtenir les messages traduits
+  List<String> _getMotivationalMessages(AppLocalizations l10n) {
+    return [
+      l10n.notifMotivational1,
+      l10n.notifMotivational2,
+      l10n.notifMotivational3,
+      l10n.notifMotivational4,
+      l10n.notifMotivational5,
+      l10n.notifMotivational6,
+      l10n.notifMotivational7,
+      l10n.notifMotivational8,
+      l10n.notifMotivational9,
+      l10n.notifMotivational10,
+      l10n.notifMotivational11,
+      l10n.notifMotivational12,
+      l10n.notifMotivational13,
+      l10n.notifMotivational14,
+      l10n.notifMotivational15,
+      l10n.notifMotivational16,
+      l10n.notifMotivational17,
+    ];
+  }
+
+  List<String> _getAchievementMessages(AppLocalizations l10n) {
+    return [
+      l10n.notifAchievement1,
+      l10n.notifAchievement2,
+      l10n.notifAchievement3,
+      l10n.notifAchievement4,
+      l10n.notifAchievement5,
+      l10n.notifAchievement6,
+      l10n.notifAchievement7,
+      l10n.notifAchievement8,
+    ];
+  }
+
+  List<String> _getDailyChallengeMessages(AppLocalizations l10n) {
+    return [
+      l10n.notifDailyChallenge1,
+      l10n.notifDailyChallenge2,
+      l10n.notifDailyChallenge3,
+      l10n.notifDailyChallenge4,
+      l10n.notifDailyChallenge5,
+      l10n.notifDailyChallenge6,
+      l10n.notifDailyChallenge7,
+      l10n.notifDailyChallenge8,
+      l10n.notifDailyChallenge9,
+      l10n.notifDailyChallenge10,
+    ];
+  }
+
+  List<String> _getLeaderboardMessages(AppLocalizations l10n) {
+    final generators = [
+      l10n.notifLeaderboard1,
+      l10n.notifLeaderboard2,
+      l10n.notifLeaderboard3,
+      l10n.notifLeaderboard4,
+      l10n.notifLeaderboard5,
+      l10n.notifLeaderboard6,
+      l10n.notifLeaderboard7,
+      l10n.notifLeaderboard8,
+      l10n.notifLeaderboard9,
+      l10n.notifLeaderboard10,
+    ];
+
+    return List.generate(
+      generators.length,
+          (index) => generators[index](_randomCompetitorNames[index]),
+    );
+  }
+
 
   /// Initialisation du service de notifications
   Future<void> initialize() async {
@@ -128,6 +147,9 @@ class NotificationService {
       // Demander les permissions
       await _requestPermissions();
 
+      // 🆕 Initialiser Firebase Messaging
+      await _initializeFirebaseMessaging();
+
       print('Service de notifications initialisé avec succès');
     } catch (e) {
       print('Erreur lors de l\'initialisation du service de notifications: $e');
@@ -157,6 +179,150 @@ class NotificationService {
     }
   }
 
+  /// 🆕 Initialiser Firebase Messaging
+  Future<void> _initializeFirebaseMessaging() async {
+    try {
+      // Demander la permission pour les notifications push
+      NotificationSettings settings = await _firebaseMessaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+
+      print('Firebase Messaging permission status: ${settings.authorizationStatus}');
+
+      // Obtenir le token FCM
+      String? token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        print('FCM Token: $token');
+        // Sauvegarder le token pour l'utiliser plus tard
+        await _saveFCMToken(token);
+      }
+
+      // Gérer les messages en arrière-plan
+      FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+      // Gérer les messages au premier plan
+      FirebaseMessaging.onMessage.listen(_onMessage);
+
+      // Gérer l'ouverture de l'app via notification
+      FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+
+      // Vérifier si l'app a été ouverte via une notification
+      RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+      if (initialMessage != null) {
+        _handleMessage(initialMessage);
+      }
+
+      print('Firebase Messaging initialisé avec succès');
+    } catch (e) {
+      print('Erreur lors de l\'initialisation de Firebase Messaging: $e');
+    }
+  }
+
+  /// 🆕 Gestionnaire de messages en arrière-plan
+  static Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+    print('Message reçu en arrière-plan: ${message.messageId}');
+    // Ici, vous pouvez afficher une notification locale si nécessaire
+  }
+
+  /// 🆕 Gestionnaire de messages au premier plan
+  void _onMessage(RemoteMessage message) {
+    print('Message reçu au premier plan: ${message.messageId}');
+
+    // Afficher une notification locale pour les messages reçus au premier plan
+    if (message.notification != null) {
+      _showLocalNotificationFromFCM(message);
+    }
+  }
+
+  /// 🆕 Gestionnaire d'ouverture d'app via notification
+  void _onMessageOpenedApp(RemoteMessage message) {
+    print('App ouverte via notification: ${message.messageId}');
+    _handleMessage(message);
+  }
+
+  /// 🆕 Afficher une notification locale depuis FCM
+  Future<void> _showLocalNotificationFromFCM(RemoteMessage message) async {
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      'fcm_channel',
+      'Firebase Messages',
+      channelDescription: 'Notifications from Firebase Cloud Messaging',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+
+    const NotificationDetails details = NotificationDetails(
+      android: androidDetails,
+      iOS: DarwinNotificationDetails(),
+    );
+
+    await _flutterLocalNotificationsPlugin.show(
+      message.hashCode, // ID unique
+      message.notification?.title ?? 'MathsCool',
+      message.notification?.body ?? 'Nouvelle notification',
+      details,
+      payload: message.data.toString(),
+    );
+  }
+
+  /// 🆕 Gérer le message (navigation, actions, etc.)
+  void _handleMessage(RemoteMessage message) {
+    print('Handling message: ${message.data}');
+
+    // Ici, vous pouvez implémenter la logique de navigation ou d'actions
+    // basée sur les données du message
+    if (message.data.containsKey('screen')) {
+      final screen = message.data['screen'];
+      print('Naviguer vers l\'écran: $screen');
+      // Implémenter la navigation selon vos besoins
+    }
+  }
+
+  /// 🆕 Sauvegarder le token FCM
+  Future<void> _saveFCMToken(String token) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('fcm_token', token);
+      print('FCM Token sauvegardé');
+    } catch (e) {
+      print('Erreur sauvegarde FCM Token: $e');
+    }
+  }
+
+  /// 🆕 Récupérer le token FCM sauvegardé
+  Future<String?> getFCMToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('fcm_token');
+    } catch (e) {
+      print('Erreur récupération FCM Token: $e');
+      return null;
+    }
+  }
+
+  /// 🆕 S'abonner à un topic pour les campagnes ciblées
+  Future<void> subscribeToTopic(String topic) async {
+    try {
+      await _firebaseMessaging.subscribeToTopic(topic);
+      print('Abonné au topic: $topic');
+    } catch (e) {
+      print('Erreur abonnement topic: $e');
+    }
+  }
+
+  /// 🆕 Se désabonner d'un topic
+  Future<void> unsubscribeFromTopic(String topic) async {
+    try {
+      await _firebaseMessaging.unsubscribeFromTopic(topic);
+      print('Désabonné du topic: $topic');
+    } catch (e) {
+      print('Erreur désabonnement topic: $e');
+    }
+  }
+
   void _onNotificationTapped(NotificationResponse notificationResponse) {
     print('Notification tapped: ${notificationResponse.payload}');
   }
@@ -183,32 +349,42 @@ class NotificationService {
 
   // ========== MÉTHODES POUR OBTENIR DES MESSAGES ALÉATOIRES ==========
 
-  String _getRandomAchievementMessage() {
+  // ✅ MODIFIÉ : Accepte maintenant BuildContext pour les traductions
+  String _getRandomAchievementMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final messages = _getAchievementMessages(l10n);
     final random = Random();
-    return _achievementMessages[random.nextInt(_achievementMessages.length)];
+    return messages[random.nextInt(messages.length)];
   }
 
-  String _getRandomDailyChallengeMessage() {
+  String _getRandomDailyChallengeMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final messages = _getDailyChallengeMessages(l10n);
     final random = Random();
-    return _dailyChallengeMessages[random.nextInt(_dailyChallengeMessages.length)];
+    return messages[random.nextInt(messages.length)];
   }
 
-  String _getRandomLeaderboardMessage() {
+  String _getRandomLeaderboardMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final messages = _getLeaderboardMessages(l10n);
     final random = Random();
     final name = _randomCompetitorNames[random.nextInt(_randomCompetitorNames.length)];
-    final message = _leaderboardMessages[random.nextInt(_leaderboardMessages.length)];
+    final message = messages[random.nextInt(messages.length)];
     return message.replaceAll('{name}', name);
   }
 
-  String _getRandomMotivationalMessage() {
+  String _getRandomMotivationalMessage(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final messages = _getMotivationalMessages(l10n);
     final random = Random();
-    return _motivationalMessages[random.nextInt(_motivationalMessages.length)];
+    return messages[random.nextInt(messages.length)];
   }
 
   // ========== NOTIFICATIONS AUTOMATIQUES (ACHIEVEMENTS, DÉFIS, CLASSEMENTS) ==========
 
   /// Programmer un rappel quotidien pour les achievements (17h30)
-  Future<bool> scheduleDailyAchievementReminder() async {
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<bool> scheduleDailyAchievementReminder(BuildContext context) async {
     try {
       if (!await areNotificationsEnabled() || !await _hasRequiredPermissions()) {
         return false;
@@ -230,10 +406,13 @@ class NotificationService {
       final deviceTimeZone = _getDeviceTimeZone();
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      // ✅ MODIFIÉ : Utilisation de l10n pour les textes
+      final l10n = AppLocalizations.of(context)!;
+
+      final androidDetails = AndroidNotificationDetails(
         'mathscool_achievements',
-        'Rappels de Trophées',
-        channelDescription: 'Rappels pour débloquer les succès et badges',
+        l10n.notifChannelAchievements,
+        channelDescription: l10n.notifChannelAchievementsDesc,
         importance: Importance.defaultImportance,
         priority: Priority.defaultPriority,
         icon: 'baseline_calculate_white_36',
@@ -250,15 +429,15 @@ class NotificationService {
         presentSound: true,
       );
 
-      const NotificationDetails platformDetails = NotificationDetails(
+      final NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       );
 
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         _achievementReminderId,
-        "Nouveaux succès disponibles ! 🏆",
-        _getRandomAchievementMessage(),
+        l10n.notifTitleAchievements, // ✅ MODIFIÉ
+        _getRandomAchievementMessage(context), // ✅ MODIFIÉ
         scheduledDate,
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -278,7 +457,8 @@ class NotificationService {
   }
 
   /// Programmer un rappel quotidien pour le défi du jour (18h00)
-  Future<bool> scheduleDailyChallengeReminder() async {
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<bool> scheduleDailyChallengeReminder(BuildContext context) async {
     try {
       print('🟡 DEBUG: Début de scheduleDailyChallengeReminder');
 
@@ -305,10 +485,13 @@ class NotificationService {
       final deviceTimeZone = _getDeviceTimeZone();
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      // ✅ MODIFIÉ : Utilisation de l10n
+      final l10n = AppLocalizations.of(context)!;
+
+      final androidDetails = AndroidNotificationDetails(
         'mathscool_daily_challenge',
-        'Défi Quotidien',
-        channelDescription: 'Rappels pour le défi du jour',
+        l10n.notifChannelDailyChallenge,
+        channelDescription: l10n.notifChannelDailyChallengeDesc,
         importance: Importance.high,
         priority: Priority.high,
         icon: 'baseline_calculate_white_36',
@@ -325,15 +508,15 @@ class NotificationService {
         presentSound: true,
       );
 
-      const NotificationDetails platformDetails = NotificationDetails(
+      final NotificationDetails platformDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       );
 
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         _dailyChallengeReminderId,
-        "Défi Quotidien disponible ! 🎯",
-        _getRandomDailyChallengeMessage(),
+        l10n.notifTitleDailyChallenge, // ✅ MODIFIÉ
+        _getRandomDailyChallengeMessage(context), // ✅ MODIFIÉ
         scheduledDate,
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -353,7 +536,8 @@ class NotificationService {
   }
 
   /// Programmer plusieurs rappels quotidiens pour le classement (11h, 15h, 19h)
-  Future<Map<String, bool>> scheduleLeaderboardReminders() async {
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<Map<String, bool>> scheduleLeaderboardReminders(BuildContext context) async {
     Map<String, bool> results = {};
 
     try {
@@ -382,6 +566,9 @@ class NotificationService {
 
       print('📅 DEBUG: Programmation des rappels de classement - Heure actuelle: $now');
 
+      // ✅ MODIFIÉ : Obtenir l10n une seule fois
+      final l10n = AppLocalizations.of(context)!;
+
       for (final schedule in schedules) {
         try {
           var scheduledDateTime = DateTime(
@@ -398,10 +585,11 @@ class NotificationService {
 
           final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
-          const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+          // ✅ MODIFIÉ : Utilisation de l10n
+          final androidDetails = AndroidNotificationDetails(
             'mathscool_leaderboard',
-            'Classements',
-            channelDescription: 'Rappels compétitifs pour le classement',
+            l10n.notifChannelLeaderboard,
+            channelDescription: l10n.notifChannelLeaderboardDesc,
             importance: Importance.high,
             priority: Priority.high,
             icon: 'baseline_calculate_white_36',
@@ -418,15 +606,15 @@ class NotificationService {
             presentSound: true,
           );
 
-          const NotificationDetails platformDetails = NotificationDetails(
+          final NotificationDetails platformDetails = NotificationDetails(
             android: androidDetails,
             iOS: iosDetails,
           );
 
           await _flutterLocalNotificationsPlugin.zonedSchedule(
             schedule['id'] as int,
-            "Classement MathsCool 🏆",
-            _getRandomLeaderboardMessage(),
+            l10n.notifTitleLeaderboard, // ✅ MODIFIÉ
+            _getRandomLeaderboardMessage(context), // ✅ MODIFIÉ
             scheduledDate,
             platformDetails,
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -456,7 +644,11 @@ class NotificationService {
   }
 
   /// Programmer toutes les notifications automatiques en une seule fois
-  Future<Map<String, dynamic>> scheduleAllAutomaticReminders(String userName) async {
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<Map<String, dynamic>> scheduleAllAutomaticReminders(
+      BuildContext context,
+      String userName
+      ) async {
     print('🚀 DEBUG: Début de scheduleAllAutomaticReminders pour $userName');
 
     try {
@@ -481,17 +673,17 @@ class NotificationService {
 
       // 1. Achievements
       print('   1. Achievements...');
-      final achievementResult = await scheduleDailyAchievementReminder();
+      final achievementResult = await scheduleDailyAchievementReminder(context); // ✅ MODIFIÉ
       print('      → $achievementResult');
 
       // 2. Daily Challenge
       print('   2. Daily Challenge...');
-      final dailyChallengeResult = await scheduleDailyChallengeReminder();
+      final dailyChallengeResult = await scheduleDailyChallengeReminder(context); // ✅ MODIFIÉ
       print('      → $dailyChallengeResult');
 
       // 3. Leaderboard
       print('   3. Leaderboard...');
-      final leaderboardResults = await scheduleLeaderboardReminders();
+      final leaderboardResults = await scheduleLeaderboardReminders(context); // ✅ MODIFIÉ
       print('      → $leaderboardResults');
 
       print('\n✅ DEBUG: Toutes les notifications ont été programmées');
@@ -540,7 +732,9 @@ class NotificationService {
   // ========== NOTIFICATIONS PERSONNALISÉES ==========
 
   /// Programmer une notification personnalisée
+  /// ✅ MODIFIÉ : Accepte BuildContext
   Future<bool> scheduleCustomNotification({
+    required BuildContext context,
     required String userName,
     required int hour,
     required int minute,
@@ -568,55 +762,59 @@ class NotificationService {
 
       final deviceTimeZone = _getDeviceTimeZone();
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
-      final message = customMessage ?? _getRandomMotivationalMessage();
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      // ✅ MODIFIÉ : Utilisation de l10n
+      final l10n = AppLocalizations.of(context)!;
+
+      final androidDetails = AndroidNotificationDetails(
         'mathscool_custom',
-        'Sessions personnalisées',
-        channelDescription: 'Notifications pour les sessions personnalisées',
+        l10n.notifChannelImmediate, // ✅ MODIFIÉ
         importance: Importance.high,
         priority: Priority.high,
         icon: 'baseline_calculate_white_36',
-        color: Color(0xFFE6E6FA),
+        color: Color(0xFF34A853),
         enableLights: true,
         enableVibration: true,
         playSound: true,
       );
 
-      const NotificationDetails platformDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: DarwinNotificationDetails(),
-      );
-
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         id,
-        "Hey $userName! 📚",
-        message,
+        "MathsCool 🎓",
+        customMessage ?? _getRandomMotivationalMessage(context), // ✅ MODIFIÉ
         scheduledDate,
-        platformDetails,
+        NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: isRepeating ? DateTimeComponents.time : null,
-        payload: 'mathscool_custom_session',
+        payload: 'mathscool_custom',
       );
 
-      await _saveCustomNotification(id, hour, minute, isRepeating, customMessage);
-      return true;
+      // Sauvegarder les détails de la notification personnalisée
+      await _saveCustomNotification(
+        id: id,
+        hour: hour,
+        minute: minute,
+        isRepeating: isRepeating,
+        message: customMessage ?? '',
+      );
 
+      return true;
     } catch (e) {
-      print('Erreur programmation custom: $e');
+      print('Erreur programmation notification personnalisée: $e');
       return false;
     }
   }
 
-  Future<void> _saveCustomNotification(
-      int id,
-      int hour,
-      int minute,
-      bool isRepeating,
-      String? message,
-      ) async {
+  /// Sauvegarder les détails d'une notification personnalisée
+  Future<void> _saveCustomNotification({
+    required int id,
+    required int hour,
+    required int minute,
+    required bool isRepeating,
+    required String message,
+  }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final customNotifications = prefs.getStringList(_customNotificationsKey) ?? [];
@@ -626,77 +824,87 @@ class NotificationService {
         'hour': hour.toString(),
         'minute': minute.toString(),
         'isRepeating': isRepeating.toString(),
+        'message': message,
         'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-        if (message != null) 'message': message,
       };
 
-      customNotifications.add(_encodeNotification(notificationData));
+      final encoded = notificationData.entries
+          .map((e) => '${e.key}:${e.value}')
+          .join('|');
+
+      customNotifications.add(encoded);
       await prefs.setStringList(_customNotificationsKey, customNotifications);
     } catch (e) {
-      print('Erreur sauvegarde: $e');
+      print('Erreur sauvegarde notification: $e');
     }
   }
 
-  String _encodeNotification(Map<String, String> data) {
-    return data.entries.map((e) => '${e.key}:${e.value.replaceAll(':', '|')}').join(',');
-  }
-
-  Map<String, String> _decodeNotification(String encoded) {
-    try {
-      final pairs = encoded.split(',');
-      return Map.fromEntries(
-        pairs.map((pair) {
-          final parts = pair.split(':');
-          if (parts.length >= 2) {
-            final key = parts[0];
-            final value = parts.sublist(1).join(':').replaceAll('|', ':');
-            return MapEntry(key, value);
-          }
-          return MapEntry('', '');
-        }).where((entry) => entry.key.isNotEmpty),
-      );
-    } catch (e) {
-      return {};
-    }
-  }
-
+  /// Récupérer toutes les notifications personnalisées sauvegardées
   Future<List<Map<String, String>>> getCustomNotifications() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final encoded = prefs.getStringList(_customNotificationsKey) ?? [];
-      return encoded.map((e) => _decodeNotification(e)).where((map) => map.isNotEmpty).toList();
+      final customNotifications = prefs.getStringList(_customNotificationsKey) ?? [];
+
+      return customNotifications.map((encoded) {
+        return _decodeNotification(encoded);
+      }).toList();
     } catch (e) {
       return [];
     }
   }
 
-  Future<bool> removeCustomNotification(int id) async {
+  Map<String, String> _decodeNotification(String encoded) {
+    final Map<String, String> data = {};
+    final pairs = encoded.split('|');
+
+    for (final pair in pairs) {
+      final keyValue = pair.split(':');
+      if (keyValue.length == 2) {
+        data[keyValue[0]] = keyValue[1];
+      }
+    }
+
+    return data;
+  }
+
+  /// Annuler et supprimer une notification personnalisée
+  Future<void> removeCustomNotification(int id) async {
     try {
+      await cancelNotification(id);
+
       final prefs = await SharedPreferences.getInstance();
-      final notifications = prefs.getStringList(_customNotificationsKey) ?? [];
-      notifications.removeWhere((encoded) {
+      final customNotifications = prefs.getStringList(_customNotificationsKey) ?? [];
+
+      customNotifications.removeWhere((encoded) {
         final data = _decodeNotification(encoded);
         return data['id'] == id.toString();
       });
-      await prefs.setStringList(_customNotificationsKey, notifications);
-      await _flutterLocalNotificationsPlugin.cancel(id);
-      return true;
+
+      await prefs.setStringList(_customNotificationsKey, customNotifications);
     } catch (e) {
-      return false;
+      print('Erreur suppression notification: $e');
     }
   }
 
-  Future<int> restoreCustomNotifications(String userName) async {
+  /// Restaurer toutes les notifications personnalisées après un redémarrage
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<int> restoreCustomNotifications(BuildContext context, String userName) async {
     try {
       final notifications = await getCustomNotifications();
       int restoredCount = 0;
+
       for (final notification in notifications) {
         try {
+          final id = int.parse(notification['id'] ?? '0');
+          final hour = int.parse(notification['hour'] ?? '0');
+          final minute = int.parse(notification['minute'] ?? '0');
+
           final success = await scheduleCustomNotification(
+            context: context, // ✅ MODIFIÉ
             userName: userName,
-            hour: int.parse(notification['hour'] ?? '0'),
-            minute: int.parse(notification['minute'] ?? '0'),
-            id: int.parse(notification['id'] ?? '0'),
+            hour: hour,
+            minute: minute,
+            id: id,
             isRepeating: notification['isRepeating'] == 'true',
             customMessage: notification['message'],
           );
@@ -713,8 +921,8 @@ class NotificationService {
 
   // ========== NOTIFICATIONS DE VIES ==========
 
-  /// Programmer une notification quand les vies sont rechargées
   Future<bool> scheduleLivesRefilledNotification({
+    BuildContext? context,
     required String userName,
     required Duration timeRemaining,
   }) async {
@@ -728,10 +936,18 @@ class NotificationService {
       final deviceTimeZone = _getDeviceTimeZone();
       final scheduledDate = tz.TZDateTime.from(scheduledDateTime, deviceTimeZone);
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      // ✅ MODIFIÉ : Utilisation de l10n ou défaut
+      final l10n = context != null ? AppLocalizations.of(context)! : null;
+
+      final title = l10n?.notifTitleLivesRefilled ?? 'Lives Refilled!';
+      final body = l10n?.notifBodyLivesRefilled(userName) ?? 'Your lives have been refilled, $userName! Ready to play?';
+      final channelName = l10n?.notifChannelLives ?? 'Lives';
+      final channelDesc = l10n?.notifChannelLivesDesc ?? 'Notifications about lives refill';
+
+      final androidDetails = AndroidNotificationDetails(
         'mathscool_lives',
-        'Vies Rechargées',
-        channelDescription: 'Notifications quand les vies sont complètes',
+        channelName,
+        channelDescription: channelDesc,
         importance: Importance.high,
         priority: Priority.high,
         icon: 'baseline_calculate_white_36',
@@ -743,10 +959,10 @@ class NotificationService {
 
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         _livesRefillNotificationId,
-        "Vies au max ! ❤️",
-        "Hey $userName, tes vies sont rechargées ! Viens jouer ! 🎮",
+        title,
+        body,
         scheduledDate,
-        const NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
+        NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
         UILocalNotificationDateInterpretation.absoluteTime,
@@ -809,7 +1025,9 @@ class NotificationService {
 
   // ========== NOTIFICATIONS IMMÉDIATES ==========
 
+  /// ✅ MODIFIÉ : Accepte BuildContext optionnel
   Future<bool> sendImmediateNotification({
+    BuildContext? context,
     required String userName,
     required String title,
     required String message,
@@ -819,9 +1037,15 @@ class NotificationService {
       if (!await areNotificationsEnabled()) return false;
 
       final notificationId = id ?? Random().nextInt(10000);
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+
+      // Si context est fourni, on peut utiliser les traductions
+      final channelName = context != null
+          ? AppLocalizations.of(context)!.notifChannelImmediate
+          : 'Notifications immédiates';
+
+      final androidDetails = AndroidNotificationDetails(
         'mathscool_immediate',
-        'Notifications immédiates',
+        channelName,
         importance: Importance.high,
         priority: Priority.high,
         icon: 'baseline_calculate_white_36',
@@ -832,7 +1056,7 @@ class NotificationService {
         notificationId,
         title,
         message,
-        const NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
+        NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails()),
         payload: 'mathscool_immediate',
       );
 
@@ -927,22 +1151,23 @@ class NotificationService {
   }
 
   /// Méthode de test pour vérifier chaque type de notification
-  Future<void> testAllNotifications() async {
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<void> testAllNotifications(BuildContext context) async {
     print('🧪 DEBUG: Test de toutes les notifications');
 
     // Test 1: Achievements
     print('\n1. Test Achievements:');
-    final achievementResult = await scheduleDailyAchievementReminder();
+    final achievementResult = await scheduleDailyAchievementReminder(context);
     print('   Résultat: $achievementResult');
 
     // Test 2: Daily Challenge
     print('\n2. Test Daily Challenge:');
-    final dailyResult = await scheduleDailyChallengeReminder();
+    final dailyResult = await scheduleDailyChallengeReminder(context);
     print('   Résultat: $dailyResult');
 
     // Test 3: Leaderboard
     print('\n3. Test Leaderboard:');
-    final leaderboardResult = await scheduleLeaderboardReminders();
+    final leaderboardResult = await scheduleLeaderboardReminders(context);
     print('   Résultat: $leaderboardResult');
 
     // Vérification des permissions
@@ -954,7 +1179,11 @@ class NotificationService {
   }
 
   /// Reprogrammer toutes les notifications (utile pour débogage)
-  Future<Map<String, dynamic>> rescheduleAllNotifications(String userName) async {
+  /// ✅ MODIFIÉ : Accepte BuildContext
+  Future<Map<String, dynamic>> rescheduleAllNotifications(
+      BuildContext context,
+      String userName
+      ) async {
     try {
       print('🔄 DEBUG: Reprogrammation de toutes les notifications');
 
@@ -965,7 +1194,7 @@ class NotificationService {
       await Future.delayed(Duration(milliseconds: 500));
 
       // Reprogrammer toutes les notifications
-      return await scheduleAllAutomaticReminders(userName);
+      return await scheduleAllAutomaticReminders(context, userName);
     } catch (e) {
       print('❌ Erreur lors de la reprogrammation : $e');
       return {
@@ -973,6 +1202,95 @@ class NotificationService {
         'dailyChallenge': false,
         'leaderboard': {},
       };
+    }
+  }
+
+  // ========== CAMPAGNES ET NOTIFICATIONS CIBLÉES ==========
+
+  /// S'abonner aux topics selon le profil utilisateur
+  Future<void> subscribeToUserTopics(String userId, String level, String language) async {
+    try {
+      // Topics de base
+      await subscribeToTopic(FCMTopics.allUsers);
+      await subscribeToTopic(FCMTopics.getLevelTopic(level));
+      await subscribeToTopic(FCMTopics.getLanguageTopic(language));
+
+      // Topics spécifiques selon l'utilisateur
+      if (userId.isNotEmpty) {
+        await subscribeToTopic('user_$userId');
+      }
+
+      print('Abonné aux topics utilisateur: ${FCMTopics.allUsers}, ${FCMTopics.getLevelTopic(level)}, ${FCMTopics.getLanguageTopic(language)}, user_$userId');
+    } catch (e) {
+      print('Erreur abonnement topics utilisateur: $e');
+    }
+  }
+
+  /// Se désabonner de tous les topics utilisateur
+  Future<void> unsubscribeFromAllTopics() async {
+    try {
+      // Note: Firebase ne permet pas de récupérer la liste des topics,
+      // donc on se désabonne des topics courants connus
+      await unsubscribeFromTopic('all_users');
+      // Les autres topics seront gérés dynamiquement
+      print('Désabonné de tous les topics');
+    } catch (e) {
+      print('Erreur désabonnement topics: $e');
+    }
+  }
+
+  /// Envoyer une notification de test FCM (pour débogage)
+  Future<void> sendTestFCMNotification() async {
+    try {
+      String? token = await getFCMToken();
+      if (token != null) {
+        print('Token FCM pour test: $token');
+        // Ici, vous pouvez implémenter l'envoi de test via votre serveur
+      } else {
+        print('Aucun token FCM disponible');
+      }
+    } catch (e) {
+      print('Erreur envoi notification test FCM: $e');
+    }
+  }
+
+  /// S'abonner aux topics premium (pour utilisateurs payants)
+  Future<void> subscribeToPremiumTopics() async {
+    try {
+      await subscribeToTopic(FCMTopics.premiumUsers);
+      print('Abonné aux topics premium');
+    } catch (e) {
+      print('Erreur abonnement topics premium: $e');
+    }
+  }
+
+  /// Se désabonner des topics premium
+  Future<void> unsubscribeFromPremiumTopics() async {
+    try {
+      await unsubscribeFromTopic(FCMTopics.premiumUsers);
+      print('Désabonné des topics premium');
+    } catch (e) {
+      print('Erreur désabonnement topics premium: $e');
+    }
+  }
+
+  /// S'abonner à une campagne saisonnière
+  Future<void> subscribeToCampaign(String campaignTopic) async {
+    try {
+      await subscribeToTopic(campaignTopic);
+      print('Abonné à la campagne: $campaignTopic');
+    } catch (e) {
+      print('Erreur abonnement campagne: $e');
+    }
+  }
+
+  /// Se désabonner d'une campagne saisonnière
+  Future<void> unsubscribeFromCampaign(String campaignTopic) async {
+    try {
+      await unsubscribeFromTopic(campaignTopic);
+      print('Désabonné de la campagne: $campaignTopic');
+    } catch (e) {
+      print('Erreur désabonnement campagne: $e');
     }
   }
 }

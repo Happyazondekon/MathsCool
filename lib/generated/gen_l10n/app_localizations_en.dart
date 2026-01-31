@@ -1404,4 +1404,377 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get storeHintLabel => 'Hint 💡';
+
+  @override
+  String get achievementFirstSteps => 'First steps';
+
+  @override
+  String get achievementFirstStepsDesc => 'Solve your first exercise';
+
+  @override
+  String get achievementGettingStarted => 'Getting started!';
+
+  @override
+  String get achievementGettingStartedDesc => 'Solve 5 exercises';
+
+  @override
+  String get achievementOnTrack => 'On track';
+
+  @override
+  String get achievementOnTrackDesc => 'Solve 15 exercises';
+
+  @override
+  String get achievementBeginner => 'Beginner';
+
+  @override
+  String get achievementBeginnerDesc => 'Solve 25 exercises';
+
+  @override
+  String get achievementLearner => 'Learner';
+
+  @override
+  String get achievementLearnerDesc => 'Solve 50 exercises';
+
+  @override
+  String get achievementStudent => 'Studious student';
+
+  @override
+  String get achievementStudentDesc => 'Solve 75 exercises';
+
+  @override
+  String get achievementSkilled => 'Skilled';
+
+  @override
+  String get achievementSkilledDesc => 'Solve 100 exercises';
+
+  @override
+  String get achievementExpert => 'Expert';
+
+  @override
+  String get achievementExpertDesc => 'Solve 150 exercises';
+
+  @override
+  String get achievementMaster => 'Master';
+
+  @override
+  String get achievementMasterDesc => 'Solve 200 exercises';
+
+  @override
+  String get achievementChampion => 'Champion';
+
+  @override
+  String get achievementChampionDesc => 'Solve 300 exercises';
+
+  @override
+  String get achievementLegend => 'Legend';
+
+  @override
+  String get achievementLegendDesc => 'Solve 500 exercises';
+
+  @override
+  String get achievementPerfectionist => 'Perfectionist';
+
+  @override
+  String get achievementPerfectionistDesc => 'Get a perfect score';
+
+  @override
+  String get achievementFlawlessTrio => 'Perfect trio';
+
+  @override
+  String get achievementFlawlessTrioDesc => 'Get 3 perfect scores';
+
+  @override
+  String get achievementPerfectFive => 'Perfect hand';
+
+  @override
+  String get achievementPerfectFiveDesc => 'Get 5 perfect scores';
+
+  @override
+  String get achievementPerfectTen => 'Absolute perfection';
+
+  @override
+  String get achievementPerfectTenDesc => 'Get 10 perfect scores';
+
+  @override
+  String get achievementPerfectMaster => 'Perfect master';
+
+  @override
+  String get achievementPerfectMasterDesc => 'Get 20 perfect scores';
+
+  @override
+  String get achievementDailyPlayer => 'Daily player';
+
+  @override
+  String get achievementDailyPlayerDesc => 'Play 3 days in a row';
+
+  @override
+  String get achievementCommitted => 'Committed';
+
+  @override
+  String get achievementCommittedDesc => 'Play 5 days in a row';
+
+  @override
+  String get achievementWeeklyWarrior => 'Weekly warrior';
+
+  @override
+  String get achievementWeeklyWarriorDesc => 'Play 7 days in a row';
+
+  @override
+  String get achievementTwoWeeks => 'Fortnight fighter';
+
+  @override
+  String get achievementTwoWeeksDesc => 'Play 14 days in a row';
+
+  @override
+  String get achievementMonthlyMaster => 'Monthly master';
+
+  @override
+  String get achievementMonthlyMasterDesc => 'Play 30 days in a row';
+
+  @override
+  String get achievementInfiniteBeginner => 'Infinite beginner';
+
+  @override
+  String get achievementInfiniteBeginnerDesc => 'Solve 25 infinite mode exercises';
+
+  @override
+  String get achievementInfiniteExplorer => 'Infinite explorer';
+
+  @override
+  String get achievementInfiniteExplorerDesc => 'Solve 50 infinite mode exercises';
+
+  @override
+  String get achievementInfiniteWarrior => 'Infinite warrior';
+
+  @override
+  String get achievementInfiniteWarriorDesc => 'Solve 100 infinite mode exercises';
+
+  @override
+  String get achievementInfiniteMaster => 'Master of infinity';
+
+  @override
+  String get achievementInfiniteMasterDesc => 'Solve 200 infinite mode exercises';
+
+  @override
+  String get achievementNightOwl => 'Night owl';
+
+  @override
+  String get achievementNightOwlDesc => 'Play between midnight and 6 AM';
+
+  @override
+  String get achievementEarlyBird => 'Early bird';
+
+  @override
+  String get achievementEarlyBirdDesc => 'Play between 5 AM and 7 AM';
+
+  @override
+  String get achievementWeekendWarrior => 'Weekend warrior';
+
+  @override
+  String get achievementWeekendWarriorDesc => 'Play every weekend for a month';
+
+  @override
+  String get achievementLuckySeven => 'Lucky seven';
+
+  @override
+  String get achievementLuckySevenDesc => 'Solve 777 exercises';
+
+  @override
+  String get notifMotivational1 => 'Time to make some mathematical magic! ✨';
+
+  @override
+  String get notifMotivational2 => 'Your number friends are waiting for you! 🔢';
+
+  @override
+  String get notifMotivational3 => 'Come discover new math challenges! 🎯';
+
+  @override
+  String get notifMotivational4 => 'It\'s time to become a math superhero! 🦸‍♂️';
+
+  @override
+  String get notifMotivational5 => 'The equations are calling! Ready to play? 🎮';
+
+  @override
+  String get notifMotivational6 => 'Transform yourself into a math genius! 🧠';
+
+  @override
+  String get notifMotivational7 => 'A new math adventure awaits you! 🌟';
+
+  @override
+  String get notifMotivational8 => 'Come show your math talents! 💪';
+
+  @override
+  String get notifMotivational9 => 'Let\'s go for a fun math session! 🎉';
+
+  @override
+  String get notifMotivational10 => 'Your neurons want to calculate! 🧮';
+
+  @override
+  String get notifMotivational11 => 'Numbers have prepared surprises for you! 🎁';
+
+  @override
+  String get notifMotivational12 => 'Ready to solve math mysteries? 🔍';
+
+  @override
+  String get notifMotivational13 => 'Time to make your brain shine! ✨';
+
+  @override
+  String get notifMotivational14 => 'Come collect new achievements! 🏆';
+
+  @override
+  String get notifMotivational15 => 'A dose of math to start well! ☀️';
+
+  @override
+  String get notifMotivational16 => 'A new lesson awaits you! 🌟';
+
+  @override
+  String get notifMotivational17 => 'Ready for your learning session? 💫';
+
+  @override
+  String get notifAchievement1 => '🏆 Psst... A new trophy might be waiting for you!';
+
+  @override
+  String get notifAchievement2 => '🥇 Come unlock your next Expert badge!';
+
+  @override
+  String get notifAchievement3 => '🚀 You\'re close to the goal! Come progress in your achievements.';
+
+  @override
+  String get notifAchievement4 => '🔥 Keep the pace! New rewards are available.';
+
+  @override
+  String get notifAchievement5 => '👑 Become the King of the category today!';
+
+  @override
+  String get notifAchievement6 => '🎯 Objective in sight: Come complete your missions!';
+
+  @override
+  String get notifAchievement7 => '🌟 Your badges feel lonely... Come earn more!';
+
+  @override
+  String get notifAchievement8 => '💪 Show us your talents and earn lives!';
+
+  @override
+  String get notifDailyChallenge1 => '⏰ Today\'s challenge expires soon! Don\'t miss it!';
+
+  @override
+  String get notifDailyChallenge2 => '🎯 A crispy challenge awaits you today!';
+
+  @override
+  String get notifDailyChallenge3 => '🔥 Your daily challenge is ready! Come conquer it!';
+
+  @override
+  String get notifDailyChallenge4 => '⭐ Earn stars with today\'s challenge!';
+
+  @override
+  String get notifDailyChallenge5 => '🚀 Today\'s challenge will boost your ranking!';
+
+  @override
+  String get notifDailyChallenge6 => '💎 A unique challenge for you today! Go!';
+
+  @override
+  String get notifDailyChallenge7 => '🎪 Today\'s challenge is here! Your turn to play!';
+
+  @override
+  String get notifDailyChallenge8 => '⚡ Flash challenge: Show what you\'re worth today!';
+
+  @override
+  String get notifDailyChallenge9 => '🎁 Today\'s gift: A super challenge just for you!';
+
+  @override
+  String get notifDailyChallenge10 => '🌟 Complete the challenge and shine on the leaderboard!';
+
+  @override
+  String notifLeaderboard1(Object name) {
+    return '🏆 Don\'t let $name beat your record!';
+  }
+
+  @override
+  String notifLeaderboard2(Object name) {
+    return '👑 $name is ahead of you! Catch up!';
+  }
+
+  @override
+  String notifLeaderboard3(Object name) {
+    return '⚔️ Duel at the top with $name! Who will be #1?';
+  }
+
+  @override
+  String notifLeaderboard4(Object name) {
+    return '🥇 $name got a perfect score! Your turn to do better!';
+  }
+
+  @override
+  String notifLeaderboard5(Object name) {
+    return '📈 $name is climbing fast! Defend your position!';
+  }
+
+  @override
+  String notifLeaderboard6(Object name) {
+    return '💪 $name is just ahead of you! Surpass them!';
+  }
+
+  @override
+  String notifLeaderboard7(Object name) {
+    return '🎯 $name is aiming for the podium, and you?';
+  }
+
+  @override
+  String notifLeaderboard8(Object name) {
+    return '🔥 $name earned 3 stars! Match their score!';
+  }
+
+  @override
+  String notifLeaderboard9(Object name) {
+    return '⭐ $name shines on the leaderboard! Show your talent!';
+  }
+
+  @override
+  String notifLeaderboard10(Object name) {
+    return '🚀 $name is launched! Don\'t get left behind!';
+  }
+
+  @override
+  String get notifChannelAchievements => 'Trophy Reminders';
+
+  @override
+  String get notifChannelAchievementsDesc => 'Reminders to unlock achievements and badges';
+
+  @override
+  String get notifChannelDailyChallenge => 'Daily Challenge';
+
+  @override
+  String get notifChannelDailyChallengeDesc => 'Reminders for the daily challenge';
+
+  @override
+  String get notifChannelLeaderboard => 'Leaderboard';
+
+  @override
+  String get notifChannelLeaderboardDesc => 'Reminders to climb the leaderboard';
+
+  @override
+  String get notifChannelLives => 'Lives Refilled';
+
+  @override
+  String get notifChannelLivesDesc => 'Notifications when lives are full';
+
+  @override
+  String get notifChannelImmediate => 'Immediate notifications';
+
+  @override
+  String get notifTitleAchievements => 'New achievements available! 🏆';
+
+  @override
+  String get notifTitleDailyChallenge => 'Daily Challenge available! 🎯';
+
+  @override
+  String get notifTitleLeaderboard => 'Climb the leaderboard! 🏅';
+
+  @override
+  String get notifTitleLivesRefilled => 'Lives at max! ❤️';
+
+  @override
+  String notifBodyLivesRefilled(Object name) {
+    return 'Hey $name, your lives are refilled! Come play! 🎮';
+  }
 }

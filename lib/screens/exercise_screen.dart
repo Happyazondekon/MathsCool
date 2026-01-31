@@ -438,7 +438,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${achievement.name} (+${achievement.gemsReward} 💎)', // ✅ CHANGÉ : gemsReward au lieu de livesReward
+                      '${achievement.getLocalizedName(context)} (+${achievement.gemsReward} 💎)', // ✅ CHANGÉ : gemsReward au lieu de livesReward
                       style: const TextStyle(fontSize: 12),
                     ),
                   ],

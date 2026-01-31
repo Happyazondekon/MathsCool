@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
 enum AchievementType {
   exercisesCompleted,
@@ -22,20 +24,20 @@ enum AchievementDifficulty {
 
 class Achievement {
   final String id;
-  final String name;
-  final String description;
+  final String nameKey; // ✅ Clé de traduction au lieu du nom directement
+  final String descriptionKey; // ✅ Clé de traduction au lieu de la description directement
   final String icon;
   final AchievementType type;
   final int targetValue;
-  final int gemsReward; // ✅ CHANGÉ : gems au lieu de vies
-  final AchievementDifficulty difficulty; // ✅ NOUVEAU
+  final int gemsReward;
+  final AchievementDifficulty difficulty;
   final String? requiredLevel;
   final bool isSecret;
 
   Achievement({
     required this.id,
-    required this.name,
-    required this.description,
+    required this.nameKey,
+    required this.descriptionKey,
     required this.icon,
     required this.type,
     required this.targetValue,
@@ -45,14 +47,91 @@ class Achievement {
     this.isSecret = false,
   });
 
-  // ✅ Helper pour backward compatibility (si certains endroits utilisent encore livesReward)
-  int get livesReward => 0; // Les achievements ne donnent plus de vies
+  // ✅ Méthode pour obtenir le nom traduit
+  String getLocalizedName(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Utilisation de la réflexion dynamique pour accéder à la clé
+    switch (nameKey) {
+      case 'achievementFirstSteps': return l10n.achievementFirstSteps;
+      case 'achievementGettingStarted': return l10n.achievementGettingStarted;
+      case 'achievementOnTrack': return l10n.achievementOnTrack;
+      case 'achievementBeginner': return l10n.achievementBeginner;
+      case 'achievementLearner': return l10n.achievementLearner;
+      case 'achievementStudent': return l10n.achievementStudent;
+      case 'achievementSkilled': return l10n.achievementSkilled;
+      case 'achievementExpert': return l10n.achievementExpert;
+      case 'achievementMaster': return l10n.achievementMaster;
+      case 'achievementChampion': return l10n.achievementChampion;
+      case 'achievementLegend': return l10n.achievementLegend;
+      case 'achievementPerfectionist': return l10n.achievementPerfectionist;
+      case 'achievementFlawlessTrio': return l10n.achievementFlawlessTrio;
+      case 'achievementPerfectFive': return l10n.achievementPerfectFive;
+      case 'achievementPerfectTen': return l10n.achievementPerfectTen;
+      case 'achievementPerfectMaster': return l10n.achievementPerfectMaster;
+      case 'achievementDailyPlayer': return l10n.achievementDailyPlayer;
+      case 'achievementCommitted': return l10n.achievementCommitted;
+      case 'achievementWeeklyWarrior': return l10n.achievementWeeklyWarrior;
+      case 'achievementTwoWeeks': return l10n.achievementTwoWeeks;
+      case 'achievementMonthlyMaster': return l10n.achievementMonthlyMaster;
+      case 'achievementInfiniteBeginner': return l10n.achievementInfiniteBeginner;
+      case 'achievementInfiniteExplorer': return l10n.achievementInfiniteExplorer;
+      case 'achievementInfiniteWarrior': return l10n.achievementInfiniteWarrior;
+      case 'achievementInfiniteMaster': return l10n.achievementInfiniteMaster;
+      case 'achievementNightOwl': return l10n.achievementNightOwl;
+      case 'achievementEarlyBird': return l10n.achievementEarlyBird;
+      case 'achievementWeekendWarrior': return l10n.achievementWeekendWarrior;
+      case 'achievementLuckySeven': return l10n.achievementLuckySeven;
+      default: return nameKey;
+    }
+  }
+
+  // ✅ Méthode pour obtenir la description traduite
+  String getLocalizedDescription(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (descriptionKey) {
+      case 'achievementFirstStepsDesc': return l10n.achievementFirstStepsDesc;
+      case 'achievementGettingStartedDesc': return l10n.achievementGettingStartedDesc;
+      case 'achievementOnTrackDesc': return l10n.achievementOnTrackDesc;
+      case 'achievementBeginnerDesc': return l10n.achievementBeginnerDesc;
+      case 'achievementLearnerDesc': return l10n.achievementLearnerDesc;
+      case 'achievementStudentDesc': return l10n.achievementStudentDesc;
+      case 'achievementSkilledDesc': return l10n.achievementSkilledDesc;
+      case 'achievementExpertDesc': return l10n.achievementExpertDesc;
+      case 'achievementMasterDesc': return l10n.achievementMasterDesc;
+      case 'achievementChampionDesc': return l10n.achievementChampionDesc;
+      case 'achievementLegendDesc': return l10n.achievementLegendDesc;
+      case 'achievementPerfectionistDesc': return l10n.achievementPerfectionistDesc;
+      case 'achievementFlawlessTrioDesc': return l10n.achievementFlawlessTrioDesc;
+      case 'achievementPerfectFiveDesc': return l10n.achievementPerfectFiveDesc;
+      case 'achievementPerfectTenDesc': return l10n.achievementPerfectTenDesc;
+      case 'achievementPerfectMasterDesc': return l10n.achievementPerfectMasterDesc;
+      case 'achievementDailyPlayerDesc': return l10n.achievementDailyPlayerDesc;
+      case 'achievementCommittedDesc': return l10n.achievementCommittedDesc;
+      case 'achievementWeeklyWarriorDesc': return l10n.achievementWeeklyWarriorDesc;
+      case 'achievementTwoWeeksDesc': return l10n.achievementTwoWeeksDesc;
+      case 'achievementMonthlyMasterDesc': return l10n.achievementMonthlyMasterDesc;
+      case 'achievementInfiniteBeginnerDesc': return l10n.achievementInfiniteBeginnerDesc;
+      case 'achievementInfiniteExplorerDesc': return l10n.achievementInfiniteExplorerDesc;
+      case 'achievementInfiniteWarriorDesc': return l10n.achievementInfiniteWarriorDesc;
+      case 'achievementInfiniteMasterDesc': return l10n.achievementInfiniteMasterDesc;
+      case 'achievementNightOwlDesc': return l10n.achievementNightOwlDesc;
+      case 'achievementEarlyBirdDesc': return l10n.achievementEarlyBirdDesc;
+      case 'achievementWeekendWarriorDesc': return l10n.achievementWeekendWarriorDesc;
+      case 'achievementLuckySevenDesc': return l10n.achievementLuckySevenDesc;
+      default: return descriptionKey;
+    }
+  }
+
+  // ✅ Helper pour backward compatibility
+  int get livesReward => 0;
 
   Map<String, dynamic> toFirestore() {
     return {
       'id': id,
-      'name': name,
-      'description': description,
+      'nameKey': nameKey,
+      'descriptionKey': descriptionKey,
       'icon': icon,
       'type': type.toString(),
       'targetValue': targetValue,
@@ -66,14 +145,14 @@ class Achievement {
   factory Achievement.fromFirestore(Map<String, dynamic> data) {
     return Achievement(
       id: data['id'] as String,
-      name: data['name'] as String,
-      description: data['description'] as String,
+      nameKey: data['nameKey'] as String,
+      descriptionKey: data['descriptionKey'] as String,
       icon: data['icon'] as String,
       type: AchievementType.values.firstWhere(
             (e) => e.toString() == data['type'],
       ),
       targetValue: data['targetValue'] as int,
-      gemsReward: data['gemsReward'] as int? ?? 10, // Défaut 10 gems
+      gemsReward: data['gemsReward'] as int? ?? 10,
       difficulty: AchievementDifficulty.values.firstWhere(
             (e) => e.toString() == (data['difficulty'] ?? 'AchievementDifficulty.easy'),
         orElse: () => AchievementDifficulty.easy,
@@ -142,8 +221,8 @@ class PredefinedAchievements {
       // 🎯 SÉRIE : PREMIERS PAS (Easy - 10 gems)
       Achievement(
         id: 'first_steps',
-        name: 'Premiers pas',
-        description: 'Résous ton premier exercice',
+        nameKey: 'achievementFirstSteps',
+        descriptionKey: 'achievementFirstStepsDesc',
         icon: '👶',
         type: AchievementType.exercisesCompleted,
         targetValue: 1,
@@ -152,8 +231,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'getting_started',
-        name: 'En route !',
-        description: 'Résous 5 exercices',
+        nameKey: 'achievementGettingStarted',
+        descriptionKey: 'achievementGettingStartedDesc',
         icon: '🚀',
         type: AchievementType.exercisesCompleted,
         targetValue: 5,
@@ -162,8 +241,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'on_track',
-        name: 'Sur la bonne voie',
-        description: 'Résous 15 exercices',
+        nameKey: 'achievementOnTrack',
+        descriptionKey: 'achievementOnTrackDesc',
         icon: '🛤️',
         type: AchievementType.exercisesCompleted,
         targetValue: 15,
@@ -174,8 +253,8 @@ class PredefinedAchievements {
       // 📚 SÉRIE : APPRENTISSAGE (Medium - 20 gems)
       Achievement(
         id: 'beginner',
-        name: 'Apprenti',
-        description: 'Résous 25 exercices',
+        nameKey: 'achievementBeginner',
+        descriptionKey: 'achievementBeginnerDesc',
         icon: '📚',
         type: AchievementType.exercisesCompleted,
         targetValue: 25,
@@ -184,8 +263,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'learner',
-        name: 'Apprenant',
-        description: 'Résous 50 exercices',
+        nameKey: 'achievementLearner',
+        descriptionKey: 'achievementLearnerDesc',
         icon: '📖',
         type: AchievementType.exercisesCompleted,
         targetValue: 50,
@@ -194,8 +273,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'student',
-        name: 'Élève studieux',
-        description: 'Résous 75 exercices',
+        nameKey: 'achievementStudent',
+        descriptionKey: 'achievementStudentDesc',
         icon: '🎓',
         type: AchievementType.exercisesCompleted,
         targetValue: 75,
@@ -206,8 +285,8 @@ class PredefinedAchievements {
       // 🏆 SÉRIE : MAÎTRISE (Hard - 30 gems)
       Achievement(
         id: 'skilled',
-        name: 'Compétent',
-        description: 'Résous 100 exercices',
+        nameKey: 'achievementSkilled',
+        descriptionKey: 'achievementSkilledDesc',
         icon: '🎖️',
         type: AchievementType.exercisesCompleted,
         targetValue: 100,
@@ -216,8 +295,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'expert',
-        name: 'Expert',
-        description: 'Résous 150 exercices',
+        nameKey: 'achievementExpert',
+        descriptionKey: 'achievementExpertDesc',
         icon: '🥇',
         type: AchievementType.exercisesCompleted,
         targetValue: 150,
@@ -226,8 +305,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'master',
-        name: 'Maître',
-        description: 'Résous 200 exercices',
+        nameKey: 'achievementMaster',
+        descriptionKey: 'achievementMasterDesc',
         icon: '👑',
         type: AchievementType.exercisesCompleted,
         targetValue: 200,
@@ -236,8 +315,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'champion',
-        name: 'Champion',
-        description: 'Résous 300 exercices',
+        nameKey: 'achievementChampion',
+        descriptionKey: 'achievementChampionDesc',
         icon: '🏆',
         type: AchievementType.exercisesCompleted,
         targetValue: 300,
@@ -246,20 +325,20 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'legend',
-        name: 'Légende',
-        description: 'Résous 500 exercices',
+        nameKey: 'achievementLegend',
+        descriptionKey: 'achievementLegendDesc',
         icon: '⭐',
         type: AchievementType.exercisesCompleted,
         targetValue: 500,
-        gemsReward: 50, // ✅ BONUS pour accomplissement majeur
+        gemsReward: 50,
         difficulty: AchievementDifficulty.hard,
       ),
 
       // ✨ SÉRIE : PERFECTION (Easy/Medium)
       Achievement(
         id: 'perfectionist',
-        name: 'Perfectionniste',
-        description: 'Obtiens un score parfait',
+        nameKey: 'achievementPerfectionist',
+        descriptionKey: 'achievementPerfectionistDesc',
         icon: '✨',
         type: AchievementType.perfectScore,
         targetValue: 1,
@@ -268,8 +347,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'flawless_trio',
-        name: 'Trio parfait',
-        description: 'Obtiens 3 scores parfaits',
+        nameKey: 'achievementFlawlessTrio',
+        descriptionKey: 'achievementFlawlessTrioDesc',
         icon: '💎',
         type: AchievementType.perfectScore,
         targetValue: 3,
@@ -278,8 +357,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'perfect_five',
-        name: 'Main parfaite',
-        description: 'Obtiens 5 scores parfaits',
+        nameKey: 'achievementPerfectFive',
+        descriptionKey: 'achievementPerfectFiveDesc',
         icon: '🌟',
         type: AchievementType.perfectScore,
         targetValue: 5,
@@ -288,8 +367,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'perfect_ten',
-        name: 'Perfection absolue',
-        description: 'Obtiens 10 scores parfaits',
+        nameKey: 'achievementPerfectTen',
+        descriptionKey: 'achievementPerfectTenDesc',
         icon: '💫',
         type: AchievementType.perfectScore,
         targetValue: 10,
@@ -298,8 +377,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'perfect_master',
-        name: 'Maître parfait',
-        description: 'Obtiens 20 scores parfaits',
+        nameKey: 'achievementPerfectMaster',
+        descriptionKey: 'achievementPerfectMasterDesc',
         icon: '🎯',
         type: AchievementType.perfectScore,
         targetValue: 20,
@@ -310,18 +389,18 @@ class PredefinedAchievements {
       // 🔥 SÉRIE : STREAK (Easy/Medium/Hard)
       Achievement(
         id: 'daily_player',
-        name: 'Joueur quotidien',
-        description: 'Joue 3 jours d\'affilée',
+        nameKey: 'achievementDailyPlayer',
+        descriptionKey: 'achievementDailyPlayerDesc',
         icon: '📅',
         type: AchievementType.streak,
         targetValue: 3,
-        gemsReward: 15, // ✅ BONUS car streak = engagement
+        gemsReward: 15,
         difficulty: AchievementDifficulty.easy,
       ),
       Achievement(
         id: 'committed',
-        name: 'Engagé',
-        description: 'Joue 5 jours d\'affilée',
+        nameKey: 'achievementCommitted',
+        descriptionKey: 'achievementCommittedDesc',
         icon: '🔥',
         type: AchievementType.streak,
         targetValue: 5,
@@ -330,18 +409,18 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'weekly_warrior',
-        name: 'Guerrier hebdomadaire',
-        description: 'Joue 7 jours d\'affilée',
+        nameKey: 'achievementWeeklyWarrior',
+        descriptionKey: 'achievementWeeklyWarriorDesc',
         icon: '⚔️',
         type: AchievementType.streak,
         targetValue: 7,
-        gemsReward: 50, // ✅ GROS BONUS pour 1 semaine
+        gemsReward: 50,
         difficulty: AchievementDifficulty.medium,
       ),
       Achievement(
         id: 'two_weeks',
-        name: 'Fortnight fighter',
-        description: 'Joue 14 jours d\'affilée',
+        nameKey: 'achievementTwoWeeks',
+        descriptionKey: 'achievementTwoWeeksDesc',
         icon: '💪',
         type: AchievementType.streak,
         targetValue: 14,
@@ -350,20 +429,20 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'monthly_master',
-        name: 'Maître mensuel',
-        description: 'Joue 30 jours d\'affilée',
+        nameKey: 'achievementMonthlyMaster',
+        descriptionKey: 'achievementMonthlyMasterDesc',
         icon: '🌙',
         type: AchievementType.streak,
         targetValue: 30,
-        gemsReward: 100, // ✅ MEGA BONUS pour 1 mois
+        gemsReward: 100,
         difficulty: AchievementDifficulty.hard,
       ),
 
       // ♾️ SÉRIE : MODE INFINI (Medium/Hard)
       Achievement(
         id: 'infinite_beginner',
-        name: 'Infini débutant',
-        description: 'Résous 25 exercices en mode infini',
+        nameKey: 'achievementInfiniteBeginner',
+        descriptionKey: 'achievementInfiniteBeginnerDesc',
         icon: '♾️',
         type: AchievementType.infiniteMode,
         targetValue: 25,
@@ -372,8 +451,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'infinite_explorer',
-        name: 'Explorateur infini',
-        description: 'Résous 50 exercices en mode infini',
+        nameKey: 'achievementInfiniteExplorer',
+        descriptionKey: 'achievementInfiniteExplorerDesc',
         icon: '🌌',
         type: AchievementType.infiniteMode,
         targetValue: 50,
@@ -382,8 +461,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'infinite_warrior',
-        name: 'Guerrier infini',
-        description: 'Résous 100 exercices en mode infini',
+        nameKey: 'achievementInfiniteWarrior',
+        descriptionKey: 'achievementInfiniteWarriorDesc',
         icon: '⚡',
         type: AchievementType.infiniteMode,
         targetValue: 100,
@@ -392,8 +471,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'infinite_master',
-        name: 'Maître de l\'infini',
-        description: 'Résous 200 exercices en mode infini',
+        nameKey: 'achievementInfiniteMaster',
+        descriptionKey: 'achievementInfiniteMasterDesc',
         icon: '🎆',
         type: AchievementType.infiniteMode,
         targetValue: 200,
@@ -404,8 +483,8 @@ class PredefinedAchievements {
       // 🌙 SÉRIE : ACHIEVEMENTS SECRETS (Medium/Hard)
       Achievement(
         id: 'night_owl',
-        name: 'Oiseau de nuit',
-        description: 'Joue entre minuit et 6h du matin',
+        nameKey: 'achievementNightOwl',
+        descriptionKey: 'achievementNightOwlDesc',
         icon: '🦉',
         type: AchievementType.exercisesCompleted,
         targetValue: 10,
@@ -415,8 +494,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'early_bird',
-        name: 'Lève-tôt',
-        description: 'Joue entre 5h et 7h du matin',
+        nameKey: 'achievementEarlyBird',
+        descriptionKey: 'achievementEarlyBirdDesc',
         icon: '🦅',
         type: AchievementType.exercisesCompleted,
         targetValue: 10,
@@ -426,8 +505,8 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'weekend_warrior',
-        name: 'Guerrier du week-end',
-        description: 'Joue tous les week-ends pendant un mois',
+        nameKey: 'achievementWeekendWarrior',
+        descriptionKey: 'achievementWeekendWarriorDesc',
         icon: '🎮',
         type: AchievementType.exercisesCompleted,
         targetValue: 20,
@@ -437,12 +516,12 @@ class PredefinedAchievements {
       ),
       Achievement(
         id: 'lucky_seven',
-        name: 'Sept chanceux',
-        description: 'Résous 777 exercices',
+        nameKey: 'achievementLuckySeven',
+        descriptionKey: 'achievementLuckySevenDesc',
         icon: '🍀',
         type: AchievementType.exercisesCompleted,
         targetValue: 777,
-        gemsReward: 77, // ✅ Easter egg thématique
+        gemsReward: 77,
         difficulty: AchievementDifficulty.hard,
         isSecret: true,
       ),

@@ -353,6 +353,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
       final id = hour * 100 + minute;
 
       await _notificationService.scheduleCustomNotification(
+        context: context,
         userName: widget.userName,
         hour: hour,
         minute: minute,

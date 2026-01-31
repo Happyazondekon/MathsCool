@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mathscool/services/chatbot_service.dart';
 import 'package:mathscool/services/sound_service.dart';
 import 'package:mathscool/services/username_service.dart';
 import 'package:provider/provider.dart';
 import 'package:mathscool/auth/auth_service.dart';
 import 'package:mathscool/models/user_model.dart';
+import 'package:mathscool/models/user_progress_model.dart';
 import 'package:mathscool/screens/home_screen.dart';
 import 'package:mathscool/auth/screens/login_screen.dart';
 import 'package:mathscool/auth/screens/register_screen.dart';
@@ -30,11 +32,21 @@ import 'package:mathscool/screens/update_required_screen.dart';
 import 'package:mathscool/services/localization_service.dart';
 import 'package:mathscool/generated/gen_l10n/app_localizations.dart';
 
+// 🆕 Gestionnaire de messages FCM en arrière-plan
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Assurer que Firebase est initialisé
+  await Firebase.initializeApp();
+  print('Message FCM reçu en arrière-plan: ${message.messageId}');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialiser Firebase
   await Firebase.initializeApp();
+
+  // 🆕 Initialiser Firebase Messaging
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   // Initialiser le service audio
   await SoundService().initialize();
@@ -162,6 +174,8 @@ class _MathsCoolAppState extends State<MathsCoolApp> with WidgetsBindingObserver
       supportedLocales: const [
         Locale('en'), // English
         Locale('fr'), // French
+        Locale('es'), //Spain
+        Locale('zh'), //Chinese
       ],
       home: widget.showUpdateScreen
           ? const UpdateRequiredScreen()
@@ -211,9 +225,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     final notificationService = Provider.of<NotificationService>(context, listen: false);
     final gemsService = Provider.of<GemsService>(context, listen: false);
 
-    // ✅ DÉCONNEXION : Arrêter le listener des gems
+    // ✅ DÉCONNEXION : Arrêter le listener des gems et se désabonner des topics FCM
     if (user == null) {
       gemsService.stopListening();
+      notificationService.unsubscribeFromAllTopics();
 
       if (_isForgotPasswordScreen) {
         return ForgotPasswordScreen(
@@ -251,6 +266,8 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final gemsService = Provider.of<GemsService>(context, listen: false);
       final achievementService = Provider.of<AchievementService>(context, listen: false);
+      final progressService = Provider.of<ProgressService>(context, listen: false);
+      final localizationService = Provider.of<LocalizationService>(context, listen: false);
 
       // 1. Charger les Gems (démarre automatiquement le listener en temps réel)
       await gemsService.loadGems(user.uid);
@@ -260,7 +277,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
       await achievementService.loadUserAchievements(user.uid);
 
       // 3. Programmer les notifications
-      await _scheduleNotificationsForUser(user, notificationService);
+      await _scheduleNotificationsForUser(user, notificationService, context);
+
+      // 🆕 4. S'abonner aux topics FCM pour les campagnes ciblées
+      final userProgress = await progressService.getUserProgress(user.uid);
+      final userLevel = _determineCurrentLevel(userProgress);
+      final userLanguage = localizationService.currentLocale.languageCode;
+      await notificationService.subscribeToUserTopics(user.uid, userLevel, userLanguage);
 
       print('✅ Données utilisateur initialisées avec succès');
     } catch (e) {
@@ -268,15 +291,15 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
   }
 
-  Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService) async {
+  Future<void> _scheduleNotificationsForUser(AppUser user, NotificationService notificationService, BuildContext context) async {
     try {
       final userName = user.displayName ?? 'MathKid';
 
       // 1. Restaurer les notifications personnalisées existantes
-      await notificationService.restoreCustomNotifications(userName);
+      await notificationService.restoreCustomNotifications(context, userName);
 
       // 2. Programmer TOUTES les notifications automatiques en une seule fois
-      final results = await notificationService.scheduleAllAutomaticReminders(userName);
+      final results = await notificationService.scheduleAllAutomaticReminders(context, userName);
 
       // 3. Log des résultats
       print('📱 Notifications programmées pour $userName');
@@ -287,5 +310,25 @@ class _AuthWrapperState extends State<AuthWrapper> {
     } catch (e) {
       print('❌ Erreur lors de la programmation des notifications: $e');
     }
+  }
+
+  /// 🆕 Déterminer le niveau actuel basé sur la progression
+  String _determineCurrentLevel(UserProgress? progress) {
+    if (progress == null || progress.progressByGrade.isEmpty) {
+      return 'CI'; // Niveau par défaut
+    }
+
+    // Trouver le niveau avec la progression la plus élevée
+    String currentLevel = 'CI';
+    double maxProgress = 0.0;
+
+    progress.progressByGrade.forEach((level, prog) {
+      if (prog > maxProgress) {
+        maxProgress = prog;
+        currentLevel = level;
+      }
+    });
+
+    return currentLevel;
   }
 }

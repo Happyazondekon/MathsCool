@@ -669,6 +669,36 @@ class AppLocalizationsEs extends AppLocalizations {
   String get levelCollegeBadge => 'Instituto';
 
   @override
+  String get levelCI => 'CI';
+
+  @override
+  String get levelCP => 'CP';
+
+  @override
+  String get levelCE1 => 'CE1';
+
+  @override
+  String get levelCE2 => 'CE2';
+
+  @override
+  String get levelCM1 => 'CM1';
+
+  @override
+  String get levelCM2 => 'CM2';
+
+  @override
+  String get level6eme => '6º ESO';
+
+  @override
+  String get level5eme => '5º ESO';
+
+  @override
+  String get level4eme => '4º ESO';
+
+  @override
+  String get level3eme => '3º ESO';
+
+  @override
   String get generatingInfinite => 'Generando infinito...';
 
   @override

@@ -53,11 +53,46 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
 
   late AnimationController _animationController;
 
-  // Liste des niveaux
-  final List<String> _levels = [
+  // Liste des niveaux (gardée en français car logique interne)
+  static const List<String> levels = [
     'CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2',
     '6ème', '5ème', '4ème', '3ème'
   ];
+
+  String getLevelDisplayName(BuildContext context, String level) {
+    final loc = AppLocalizations.of(context)!;
+    switch (level) {
+      case 'CI': return loc.levelCI;
+      case 'CP': return loc.levelCP;
+      case 'CE1': return loc.levelCE1;
+      case 'CE2': return loc.levelCE2;
+      case 'CM1': return loc.levelCM1;
+      case 'CM2': return loc.levelCM2;
+      case '6ème': return loc.level6eme;
+      case '5ème': return loc.level5eme;
+      case '4ème': return loc.level4eme;
+      case '3ème': return loc.level3eme;
+      default: return level;
+    }
+  }
+
+  String getThemeDisplayName(BuildContext context, String theme) {
+    final loc = AppLocalizations.of(context)!;
+    switch (theme.toLowerCase()) {
+      case 'addition': return loc.themeAddition;
+      case 'soustraction': return loc.themeSubtraction;
+      case 'multiplication': return loc.themeMultiplication;
+      case 'division': return loc.themeDivision;
+      case 'géométrie': return loc.themeGeometry;
+      case 'nombres relatifs': return loc.themeRelativeNumbers;
+      case 'fractions': return loc.themeFractions;
+      case 'algèbre': return loc.themeAlgebra;
+      case 'puissances': return loc.themePowers;
+      case 'théorèmes': return loc.themeTheorems;
+      case 'statistiques': return loc.themeStatistics;
+      default: return theme;
+    }
+  }
 
   // APRÈS
   List<String> get _descriptions => [
@@ -957,7 +992,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
     child: Column(
     children: [
     Text(
-    '${_challenge!.theme} - ${_challenge!.level}',
+    '${getThemeDisplayName(context, _challenge!.theme)} - ${getLevelDisplayName(context, _challenge!.level)}',
     style: const TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
@@ -1457,7 +1492,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                         mainAxisSpacing: 16,
                         childAspectRatio: 0.85,
                       ),
-                      itemCount: _levels.length,
+                      itemCount: levels.length,
                       itemBuilder: (context, index) {
                         return _buildLevelCard(index);
                       },
@@ -1597,7 +1632,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
         );
       },
       child: GestureDetector(
-        onTap: () => _loadChallengeWithLevel(_levels[index]),
+        onTap: () => _loadChallengeWithLevel(levels[index]),
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -1662,7 +1697,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> with Single
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      _levels[index],
+                      getLevelDisplayName(context, levels[index]),
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,

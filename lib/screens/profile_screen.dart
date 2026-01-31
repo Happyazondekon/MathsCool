@@ -54,6 +54,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     '6ème', '5ème', '4ème', '3ème'
   ];
 
+  String getLevelDisplayName(BuildContext context, String level) {
+    final loc = AppLocalizations.of(context)!;
+    switch (level) {
+      case 'CI': return loc.levelCI;
+      case 'CP': return loc.levelCP;
+      case 'CE1': return loc.levelCE1;
+      case 'CE2': return loc.levelCE2;
+      case 'CM1': return loc.levelCM1;
+      case 'CM2': return loc.levelCM2;
+      case '6ème': return loc.level6eme;
+      case '5ème': return loc.level5eme;
+      case '4ème': return loc.level4eme;
+      case '3ème': return loc.level3eme;
+      default: return level;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -775,7 +792,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: _inputDecoration(AppLocalizations.of(context)!.profileClass, Icons.school_outlined),
                   items: _levels.map((level) => DropdownMenuItem(
                     value: level,
-                    child: Text(level),
+                    child: Text(getLevelDisplayName(context, level)),
                   )).toList(),
                   onChanged: (val) => setState(() => _selectedLevel = val),
                 ),

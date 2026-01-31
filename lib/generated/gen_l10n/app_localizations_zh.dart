@@ -669,7 +669,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get levelCollegeBadge => '初中';
 
   @override
-  String get generatingInfinite => '生成无限练习中...';
+  String get levelCI => 'CI';
+
+  @override
+  String get levelCP => 'CP';
+
+  @override
+  String get levelCE1 => 'CE1';
+
+  @override
+  String get levelCE2 => 'CE2';
+
+  @override
+  String get levelCM1 => 'CM1';
+
+  @override
+  String get levelCM2 => 'CM2';
+
+  @override
+  String get level6eme => '六年级';
+
+  @override
+  String get level5eme => '五年级';
+
+  @override
+  String get level4eme => '四年级';
+
+  @override
+  String get level3eme => '三年级';
+
+  @override
+  String get generatingInfinite => '正在生成无限模式...';
 
   @override
   String get preparingExercises => '准备练习中...';

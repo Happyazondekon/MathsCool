@@ -14,6 +14,23 @@ class LevelSelectionScreen extends StatelessWidget {
     '6ème', '5ème', '4ème', '3ème'
   ];
 
+  String getLevelDisplayName(BuildContext context, String level) {
+    final loc = AppLocalizations.of(context)!;
+    switch (level) {
+      case 'CI': return loc.levelCI;
+      case 'CP': return loc.levelCP;
+      case 'CE1': return loc.levelCE1;
+      case 'CE2': return loc.levelCE2;
+      case 'CM1': return loc.levelCM1;
+      case 'CM2': return loc.levelCM2;
+      case '6ème': return loc.level6eme;
+      case '5ème': return loc.level5eme;
+      case '4ème': return loc.level4eme;
+      case '3ème': return loc.level3eme;
+      default: return level;
+    }
+  }
+
   List<String> _getDescriptions(BuildContext context) {
     return [
       AppLocalizations.of(context)!.levelForBeginners,
@@ -317,7 +334,7 @@ class LevelSelectionScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      levels[index],
+                      getLevelDisplayName(context, levels[index]),
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,

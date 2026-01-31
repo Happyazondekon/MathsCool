@@ -62,7 +62,45 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   bool _isLoadingExercises = true;
   String? _connectionStatus;
 
-  bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(widget.level);
+  // Liste des niveaux collège (gardée en français car logique interne)
+  static const List<String> collegeLevels = ['6ème', '5ème', '4ème', '3ème'];
+
+  bool get isCollege => collegeLevels.contains(widget.level);
+
+  String getLevelDisplayName(BuildContext context, String level) {
+    final loc = AppLocalizations.of(context)!;
+    switch (level) {
+      case 'CI': return loc.levelCI;
+      case 'CP': return loc.levelCP;
+      case 'CE1': return loc.levelCE1;
+      case 'CE2': return loc.levelCE2;
+      case 'CM1': return loc.levelCM1;
+      case 'CM2': return loc.levelCM2;
+      case '6ème': return loc.level6eme;
+      case '5ème': return loc.level5eme;
+      case '4ème': return loc.level4eme;
+      case '3ème': return loc.level3eme;
+      default: return level;
+    }
+  }
+
+  String getThemeDisplayName(BuildContext context, String theme) {
+    final loc = AppLocalizations.of(context)!;
+    switch (theme.toLowerCase()) {
+      case 'addition': return loc.themeAddition;
+      case 'soustraction': return loc.themeSubtraction;
+      case 'multiplication': return loc.themeMultiplication;
+      case 'division': return loc.themeDivision;
+      case 'géométrie': return loc.themeGeometry;
+      case 'nombres relatifs': return loc.themeRelativeNumbers;
+      case 'fractions': return loc.themeFractions;
+      case 'algèbre': return loc.themeAlgebra;
+      case 'puissances': return loc.themePowers;
+      case 'théorèmes': return loc.themeTheorems;
+      case 'statistiques': return loc.themeStatistics;
+      default: return theme;
+    }
+  }
 
   @override
   void initState() {
@@ -907,7 +945,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  widget.theme,
+                  getThemeDisplayName(context, widget.theme),
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 20,
@@ -924,7 +962,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   ),
                 ),
                 Text(
-                  '${widget.level} • $_score/${_exercises.length}',
+                  '${getLevelDisplayName(context, widget.level)} • $_score/${_exercises.length}',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,

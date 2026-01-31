@@ -1359,6 +1359,66 @@ abstract class AppLocalizations {
   /// **'Middle school'**
   String get levelCollegeBadge;
 
+  /// No description provided for @levelCI.
+  ///
+  /// In en, this message translates to:
+  /// **'CI'**
+  String get levelCI;
+
+  /// No description provided for @levelCP.
+  ///
+  /// In en, this message translates to:
+  /// **'CP'**
+  String get levelCP;
+
+  /// No description provided for @levelCE1.
+  ///
+  /// In en, this message translates to:
+  /// **'CE1'**
+  String get levelCE1;
+
+  /// No description provided for @levelCE2.
+  ///
+  /// In en, this message translates to:
+  /// **'CE2'**
+  String get levelCE2;
+
+  /// No description provided for @levelCM1.
+  ///
+  /// In en, this message translates to:
+  /// **'CM1'**
+  String get levelCM1;
+
+  /// No description provided for @levelCM2.
+  ///
+  /// In en, this message translates to:
+  /// **'CM2'**
+  String get levelCM2;
+
+  /// No description provided for @level6eme.
+  ///
+  /// In en, this message translates to:
+  /// **'6th grade'**
+  String get level6eme;
+
+  /// No description provided for @level5eme.
+  ///
+  /// In en, this message translates to:
+  /// **'5th grade'**
+  String get level5eme;
+
+  /// No description provided for @level4eme.
+  ///
+  /// In en, this message translates to:
+  /// **'4th grade'**
+  String get level4eme;
+
+  /// No description provided for @level3eme.
+  ///
+  /// In en, this message translates to:
+  /// **'3rd grade'**
+  String get level3eme;
+
   /// No description provided for @generatingInfinite.
   ///
   /// In en, this message translates to:

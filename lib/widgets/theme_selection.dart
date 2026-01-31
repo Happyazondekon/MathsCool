@@ -9,7 +9,27 @@ class ThemeSelectionScreen extends StatelessWidget {
 
   const ThemeSelectionScreen({super.key, required this.level});
 
-  bool get isCollege => ['6ème', '5ème', '4ème', '3ème'].contains(level);
+  // Liste des niveaux collège (gardée en français car logique interne)
+  static const List<String> collegeLevels = ['6ème', '5ème', '4ème', '3ème'];
+
+  bool get isCollege => collegeLevels.contains(level);
+
+  String getLevelDisplayName(BuildContext context, String level) {
+    final loc = AppLocalizations.of(context)!;
+    switch (level) {
+      case 'CI': return loc.levelCI;
+      case 'CP': return loc.levelCP;
+      case 'CE1': return loc.levelCE1;
+      case 'CE2': return loc.levelCE2;
+      case 'CM1': return loc.levelCM1;
+      case 'CM2': return loc.levelCM2;
+      case '6ème': return loc.level6eme;
+      case '5ème': return loc.level5eme;
+      case '4ème': return loc.level4eme;
+      case '3ème': return loc.level3eme;
+      default: return level;
+    }
+  }
 
   void _startExercises(BuildContext context, String theme, {required bool isInfinite}) {
     SoundService().playStartChallenge();
@@ -390,7 +410,7 @@ class ThemeSelectionScreen extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  level,
+                  getLevelDisplayName(context, level),
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,

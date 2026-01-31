@@ -15,6 +15,24 @@ class ThemeBadge extends StatelessWidget {
     required this.progress,
   }) : super(key: key);
 
+  String getThemeDisplayName(BuildContext context, String theme) {
+    final loc = AppLocalizations.of(context)!;
+    switch (theme.toLowerCase()) {
+      case 'addition': return loc.themeAddition;
+      case 'soustraction': return loc.themeSubtraction;
+      case 'multiplication': return loc.themeMultiplication;
+      case 'division': return loc.themeDivision;
+      case 'géométrie': return loc.themeGeometry;
+      case 'nombres relatifs': return loc.themeRelativeNumbers;
+      case 'fractions': return loc.themeFractions;
+      case 'algèbre': return loc.themeAlgebra;
+      case 'puissances': return loc.themePowers;
+      case 'théorèmes': return loc.themeTheorems;
+      case 'statistiques': return loc.themeStatistics;
+      default: return theme;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeColors = _getBadgeThemeColors(theme);
@@ -192,7 +210,7 @@ class ThemeBadge extends StatelessWidget {
             ),
           ),
           child: Text(
-            theme,
+            getThemeDisplayName(context, theme),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: obtained ? themeColors['dark'] : Colors.grey.shade600,

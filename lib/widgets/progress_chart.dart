@@ -13,6 +13,47 @@ class ProgressChart extends StatelessWidget {
     super.key,
   });
 
+  // Liste complète des niveaux (Primaire + Collège)
+  static const List<String> levels = [
+    'ci', 'cp', 'ce1', 'ce2', 'cm1', 'cm2',
+    '6ème', '5ème', '4ème', '3ème'
+  ];
+
+  String getLevelDisplayName(BuildContext context, String level) {
+    final loc = AppLocalizations.of(context)!;
+    switch (level.toLowerCase()) {
+      case 'ci': return loc.levelCI;
+      case 'cp': return loc.levelCP;
+      case 'ce1': return loc.levelCE1;
+      case 'ce2': return loc.levelCE2;
+      case 'cm1': return loc.levelCM1;
+      case 'cm2': return loc.levelCM2;
+      case '6ème': return loc.level6eme;
+      case '5ème': return loc.level5eme;
+      case '4ème': return loc.level4eme;
+      case '3ème': return loc.level3eme;
+      default: return level;
+    }
+  }
+
+  String getThemeDisplayName(BuildContext context, String category) {
+    final loc = AppLocalizations.of(context)!;
+    switch (category.toLowerCase()) {
+      case 'addition': return loc.themeAddition;
+      case 'soustraction': return loc.themeSubtraction;
+      case 'multiplication': return loc.themeMultiplication;
+      case 'division': return loc.themeDivision;
+      case 'géométrie': return loc.themeGeometry;
+      case 'nombres relatifs': return loc.themeRelativeNumbers;
+      case 'fractions': return loc.themeFractions;
+      case 'algèbre': return loc.themeAlgebra;
+      case 'puissances': return loc.themePowers;
+      case 'théorèmes': return loc.themeTheorems;
+      case 'statistiques': return loc.themeStatistics;
+      default: return category;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -70,12 +111,12 @@ class ProgressChart extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              _getIconOrBadge(entry.key, entry.value),
+                              _getIconOrBadge(context, entry.key, entry.value),
                               const SizedBox(width: 8),
                               SizedBox(
                                 width: 120, // Limite la largeur pour éviter l'overflow
                                 child: Text(
-                                  entry.key,
+                                  levels.contains(entry.key.toLowerCase()) ? getLevelDisplayName(context, entry.key.toUpperCase()) : getThemeDisplayName(context, entry.key),
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
@@ -180,19 +221,13 @@ class ProgressChart extends StatelessWidget {
     return [Colors.green[300]!, Colors.green[500]!];
   }
 
-  Widget _getIconOrBadge(String category, double value) {
-    // Liste complète des niveaux (Primaire + Collège)
-    const levels = [
-      'ci', 'cp', 'ce1', 'ce2', 'cm1', 'cm2',
-      '6ème', '5ème', '4ème', '3ème'
-    ];
-
+  Widget _getIconOrBadge(BuildContext context, String category, double value) {
     if (levels.contains(category.toLowerCase())) {
       return CircleAvatar(
         radius: 14, // Légèrement plus grand pour contenir "6ème"
         backgroundColor: _getProgressColor(value).withOpacity(0.2),
         child: Text(
-          category.toUpperCase(),
+          getLevelDisplayName(context, category.toUpperCase()),
           style: TextStyle(
             fontSize: 9, // Police plus petite pour les textes longs
             fontWeight: FontWeight.bold,
